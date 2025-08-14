@@ -157,4 +157,8 @@ logs/
 # Cache
 .cache/
 .cache-*/
+<<<<<<< HEAD
 CMakeCache.bin
+=======
+CMakeCache.bin
+>>>>>>> 1f7be99 (First push of project files)
