@@ -39,3 +39,122 @@
 
 # debug information files
 *.dwo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Visual Studio user-specific
+.vscode/
+.vs/
+*.code-workspace
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+
+# Visual Studio build outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+ipch/
+*.ipdb
+*.iobj
+*.pdb
+*.idb
+*.ilk
+*.trg
+*.tlog
+*.lastbuildstate
+*.log
+*.cache
+*.obj
+*.pch
+*.exp
+*.lib
+*.exe
+*.dll
+*.app
+*.com
+*.out
+*.appx
+*.appxbundle
+*.msi
+*.msm
+*.msp
+
+# CMake
+CMakeFiles/
+CMakeScripts/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+Testing/
+compile_commands.json
+CMakeUserPresets.json
+CMakeUserPresets.json.user
+CMakeSettings.json
+CMakePresets.json.user
+_generated/
+
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
+# Common build dirs (keep your sources clean)
+build/
+build-/
+out/
+out-/
+dist/
+bin/
+lib/
+
+# Generators and toolchains
+Makefile
+Makefile.*
+*.make
+*.ninja
+*.vcxproj.user
+*.vcxproj.filters
+.vcxproj..user
+*.props
+*.opensdf
+*.sdf
+*.tlog/
+*.metaproj
+
+# Packages and archives
+*.zip
+*.7z
+*.tar
+*.gz
+*.tgz
+*.bz2
+
+# Crash, profiling, coverage
+*.dmp
+*.stackdump
+*.gcda
+*.gcno
+*.gcov
+*.profraw
+*.profdata
+
+# IDE miscellany
+*.swp
+*.swo
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+.cache-*/
+CMakeCache.bin
