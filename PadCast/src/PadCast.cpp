@@ -16,7 +16,7 @@ int main()
     raylib::Window window(
         mainConfig.getInitWinWidth(), 
         mainConfig.getInitWinHeight(),
-        "SNES Gamepad Display");
+        "PadCast");
     window.SetTargetFPS(mainConfig.getFPS());
 
     GamepadDisplay display{ mainConfig };

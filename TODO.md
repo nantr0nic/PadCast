@@ -1,10 +1,12 @@
 # To Do...
 ### Short term:
 Short term goals are aimed to be achieved in the current state of only supporting SNES (or any/just a D-pad / 6 button gamepad).
-> - [X] Resolution saves between open/close
-> - [ ] Resolution menu
-> - [X] Use .ini file for configuration
-- [ ] Stop log window from opening
+- [X] Resolution saves between open/close
+- [ ] Resolution menu
+- [X] Use .ini file for configuration
+
+ - [ ] Stop log window from opening
+>	- [ ] on Windows  [ ] on Linux
 - [X] Option for changing FPS (60 / 30)
 > It is now changeable through the .ini, but of course I'd like to make it a menu option as well :)
 - [ ] !!! Get it to NOT be flagged as a trojan! !!!
