@@ -53,6 +53,10 @@ Thumbs.db
 *.userossc
 *.sln.docstates
 
+# Visual Studio specific
+RC*
+*.res
+
 # Visual Studio build outputs
 [Bb]in/
 [Oo]bj/
@@ -157,8 +161,3 @@ logs/
 # Cache
 .cache/
 .cache-*/
-<<<<<<< HEAD
-CMakeCache.bin
-=======
-CMakeCache.bin
->>>>>>> 1f7be99 (First push of project files)

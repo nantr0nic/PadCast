@@ -8,6 +8,32 @@ add_executable (PadCast
     "src/winmain_proxy.cpp"
 )
 
+# MSVC-specific optimizations to reduce false positives
+if(MSVC)
+    target_compile_options(PadCast PRIVATE 
+        /GL          # Whole program optimization
+        /guard:cf    # Control Flow Guard (security feature)
+        /Gy          # Enable function-level linking
+    )
+    target_link_options(PadCast PRIVATE 
+        /LTCG        # Link-time code generation
+        /GUARD:CF    # Control Flow Guard for linking
+        /OPT:REF     # Eliminate unreferenced functions and data
+        /OPT:ICF     # Identical COMDAT folding
+    )
+    
+    # Use dynamic runtime library
+    set_property(TARGET PadCast PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+    )
+    
+    # Add version resource
+    target_sources(PadCast PRIVATE
+        app.manifest
+        version.rc
+    )
+endif()
+
 # Suppress Log window for non-debug builds
 set_target_properties(PadCast PROPERTIES
     WIN32_EXECUTABLE $<NOT:$<CONFIG:Debug>>
@@ -43,4 +69,3 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources/
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/config)
 
-# TODO: Add tests and install targets if needed.
