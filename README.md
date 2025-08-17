@@ -1,7 +1,7 @@
 # PadCast
 ### A simple gamepad display that shows controller activity. Geared towards streamers.
 ---
-![PadCast v0.01](screenshots/padcast-v001.gif)
+![PadCast v0.02](screenshots/padcast-current.gif)
 
 Work in progress! So far supports (any?) controller that matches the configuration
 you see in the image above.

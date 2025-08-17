@@ -5,24 +5,26 @@ Short term goals are aimed to be achieved in the current state of only supportin
 - [ ] Resolution menu
 - [X] Use .ini file for configuration
 
- - [ ] Stop log window from opening
->	- [ ] on Windows  [ ] on Linux
+- [X] Stop log window from opening
 - [X] Option for changing FPS (60 / 30)
 > It is now changeable through the .ini, but of course I'd like to make it a menu option as well :)
 - [ ] !!! Get it to NOT be flagged as a trojan! !!!
 - [ ] Add ability to remap buttons.
-- [ ] Try to provide a transparent background option.
 
 ### Medium term:
-- [ ] N64 & Gamecube & NES controller layouts / support
+- [ ] N64 & Gamecube Support
+> The PNG's are complete. Need to implement support.
+- [ ] NES layouts and support.
 - [ ] XBox & PS controller layouts / support
-- [ ] Get it compiled on Linux
+- [ ] Get it compiled on Linux and make features work (suppressing log window, etc.)
 
 ### Non-short and non-medium term:
 - Explore supplementing raylib with SDL's gamepad library for increased compatibility
 - Visual features (choose controller colors, etc.)
+>- [ ] Try to provide a transparent background option.
+>> Got the transparency to work on Windows but it is finnicky. 
 
 ### Dev non-features:
 - [ ] Refactor Config, remove validation repetitions
 > - [ ] Streamline default value creation if config.ini absent
-- [ ] Setup a GitHub repo 
+- [X] Setup a GitHub repo
