@@ -44,7 +44,8 @@ void Config::CreateDefaultConfig()
 		{"CURRENT_WINDOW_HEIGHT", std::to_string(DefaultValues::INITIAL_WINDOW_HEIGHT)},
 		{"IMAGE_CANVAS_WIDTH", std::to_string(DefaultValues::IMAGE_CANVAS_WIDTH)},
 		{"IMAGE_CANVAS_HEIGHT", std::to_string(DefaultValues::IMAGE_CANVAS_HEIGHT)},
-		{"TARGET_FPS", std::to_string(DefaultValues::TARGET_FPS)}
+		{"TARGET_FPS", std::to_string(DefaultValues::TARGET_FPS)},
+		{"TRANSPARENT_WIN", std::to_string(DefaultValues::TRANSPARENT_WIN)}
 		});
 	config_ini["Gamepad"].set({
 		{"STABILITY_THRESHOLD", std::to_string(DefaultValues::STABILITY_THRESHOLD)}
@@ -87,6 +88,11 @@ void Config::ValidateConfig()
 	if (!hasValue("Window", "TARGET_FPS"))
 	{
 		config_ini["Window"]["TARGET_FPS"] = std::to_string(DefaultValues::TARGET_FPS);
+		needsSave = true;
+	}
+	if (!hasValue("Window", "TRANSPARENT_WIN"))
+	{
+		config_ini["Window"]["TRANSPARENT_WIN"] = std::to_string(DefaultValues::TRANSPARENT_WIN);
 		needsSave = true;
 	}
 
@@ -146,6 +152,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::INITIAL_WINDOW_HEIGHT;
 		if (key == "TARGET_FPS") 
 			return DefaultValues::TARGET_FPS;
+		if (key == "TRANSPARENT_WIN")
+			return DefaultValues::TRANSPARENT_WIN;
 	}
 	if (section == "Gamepad") 
 	{

@@ -21,8 +21,11 @@ int main()
         "PadCast");
     window.SetTargetFPS(mainConfig.getFPS());
 
-    // Try transparent background
-    SetWindowTransparency(GetWindowHandle());
+    // Make window transparent if config file says so
+    if (mainConfig.getTransparentWin() == 1)
+    {
+        SetWindowTransparency(GetWindowHandle());
+    }
 
     GamepadDisplay display{ mainConfig };
 

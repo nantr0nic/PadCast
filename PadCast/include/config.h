@@ -19,6 +19,7 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
+		static constexpr int TRANSPARENT_WIN{ 0 };
 		// Image canvas dimensions
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
@@ -37,7 +38,6 @@ public:
 	~Config() { SaveConfig(); }
 
 	//$ ----- config.ini functions (load, save, etc.) ----- //
-	// this assumes that the executable is in the root directory
 	std::string GetConfigFilePath() const
 	{
 		return (std::filesystem::current_path() / "config" / "config.ini").string();
@@ -116,6 +116,10 @@ public:
 	int getDebugMode() const
 	{
 		return getValue("Debug", "MODE");
+	}
+	int getTransparentWin() const
+	{
+		return getValue("Window", "TRANSPARENT_WIN");
 	}
 	int getDefault(const std::string& section, const std::string& key) const;
 
