@@ -1,15 +1,24 @@
-﻿# CMakeList.txt : CMake project for PadCast, include source and define
-# project specific logic here.
-#
-
-# Add source to this project's executable.
-add_executable (PadCast 
+﻿# Add source to this project's executable.
+add_executable (PadCast
     "src/PadCast.cpp" 
     "include/PadCast.h" 
     "include/mini/ini.h" 
     "include/config.h"
     "src/config.cpp"
+    "src/winmain_proxy.cpp"
 )
+
+# Suppress Log window for non-debug builds
+set_target_properties(PadCast PROPERTIES
+    WIN32_EXECUTABLE $<NOT:$<CONFIG:Debug>>
+)
+
+# Save this for later for Linux builds
+#if (WIN32)
+#  target_link_options(PadCast PRIVATE 
+#    "$<$<NOT:$<CONFIG:Debug>>:-Wl,--subsystem,windows>"
+#  )
+#endif()
 
 # Add include directories
 target_include_directories(PadCast PRIVATE 
