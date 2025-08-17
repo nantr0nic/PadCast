@@ -5,9 +5,11 @@
 # Add source to this project's executable.
 add_executable (PadCast 
     "src/PadCast.cpp" 
+    "src/win_transparency.cpp"
     "include/PadCast.h" 
     "include/mini/ini.h" 
     "include/config.h"
+    "include/win_transparency.h"
     "src/config.cpp"
 )
 

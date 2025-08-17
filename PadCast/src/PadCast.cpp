@@ -1,9 +1,11 @@
 ﻿#include "PadCast.h"
+#include "win_transparency.h"
 
 #include <chrono>
 #include <thread>
 #include <print>
 #include <iostream>
+
 
 int main()
 {
@@ -18,6 +20,9 @@ int main()
         mainConfig.getInitWinHeight(),
         "PadCast");
     window.SetTargetFPS(mainConfig.getFPS());
+
+    // Try transparent background
+    SetWindowTransparency(GetWindowHandle());
 
     GamepadDisplay display{ mainConfig };
 
