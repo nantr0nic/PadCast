@@ -7,7 +7,7 @@ Short term goals are aimed to be achieved in the current state of only supportin
 
 - [X] Stop log window from opening
 - [X] Option for changing FPS (60 / 30)
-> It is now changeable through the .ini, but of course I'd like to make it a menu option as well :)
+> It is now changeable through the .ini, but need to make configurable in GUI.
 - [ ] !!! Get it to NOT be flagged as a trojan! !!!
 - [ ] Add ability to remap buttons.
 
@@ -25,6 +25,6 @@ Short term goals are aimed to be achieved in the current state of only supportin
 >> Got the transparency to work on Windows but it is finnicky. 
 
 ### Dev non-features:
-- [ ] Refactor Config, remove validation repetitions
-> - [ ] Streamline default value creation if config.ini absent
+- [X] Refactor Config, remove validation repetitions
+> - [X] Streamline default value creation if config.ini absent
 - [X] Setup a GitHub repo
