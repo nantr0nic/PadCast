@@ -9,7 +9,6 @@
 
 struct GamepadTextures
 {
-    // Textures are public data members
     raylib::Texture2D unpressed;
     raylib::Texture2D pressedA;
     raylib::Texture2D pressedB;
@@ -24,7 +23,6 @@ struct GamepadTextures
     raylib::Texture2D pressedLBump;
     raylib::Texture2D pressedRBump;
 
-    // Textures get loaded up in constructor
     GamepadTextures()
         : unpressed("resources/images/controller.png")
         , pressedA("resources/images/pressed/A.png")
@@ -107,7 +105,6 @@ public:
 
         if (debugMode)
         {
-            // Check for new button presses (single frame detection)
             int newButtonPress = gamepad.GetButtonPressed();
             if (newButtonPress > 0)
             {
@@ -115,7 +112,6 @@ public:
                 drawDebugButtonIndex(gamepad, scaling);
             }
 
-            // Check all gamepad axes for movement
             for (int axisIndex = 0; axisIndex < 6; ++axisIndex)  // Standard gamepads have 6 axes
             {
                 float axisValue = gamepad.GetAxisMovement(axisIndex);
@@ -205,13 +201,13 @@ public:
             textures.pressedSelect.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
 
-        // Left shoulder
+        // Shoulder buttons
         if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_TRIGGER_1) ||
             gamepad.IsButtonDown(static_cast<GamepadButton>(9)))
         {
             textures.pressedLBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
-
+        
         if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_TRIGGER_1) ||
             gamepad.IsButtonDown(static_cast<GamepadButton>(11)))
         {
@@ -236,6 +232,7 @@ public:
     }
 
     void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling)
+    // if debug mode is set to 1 in config.ini, this will print the button index in the window
     {
         int fontSize = std::max(
             static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),

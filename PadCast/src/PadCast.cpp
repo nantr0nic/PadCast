@@ -22,7 +22,11 @@ int main()
     GamepadDisplay display{ mainConfig };
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    SetTraceLogLevel(LOG_ALL);
+
+    if (debug_mode)
+    {
+        SetTraceLogLevel(LOG_ALL);
+    }
 
     while (!window.ShouldClose())
     {
@@ -36,7 +40,7 @@ int main()
             mainConfig.getImgCanvasHeight()
         );
 
-        // Always draw base controller
+        // Draw base controller
         display.getTextures().unpressed.Draw(
             raylib::Vector2{ scaling.offsetX, scaling.offsetY },
             0.0f,
@@ -51,15 +55,6 @@ int main()
         {
             raylib::Gamepad gamepad(0);
             display.drawGamepadButtons(gamepad, scaling);
-
-           /* if (debug_mode)
-            {
-                int newButtonPress = gamepad.GetButtonPressed();
-                if (newButtonPress > 0)
-                {
-                    TraceLog(LOG_DEBUG, "Button pressed: %d", newButtonPress);
-                }
-            }*/
         }
         else
         {
@@ -79,8 +74,6 @@ int main()
         || mainConfig.getCurrentWinWidth() != mainConfig.getInitWinWidth())
     {
         mainConfig.updateInitWinSizes();
-        TraceLog(LOG_INFO, "Updated INITIAL_WINDOW dimensions: %d x %d",
-            window.GetWidth(), window.GetHeight());
     }
 
     mainConfig.SaveConfig();

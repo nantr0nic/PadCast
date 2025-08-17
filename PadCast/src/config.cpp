@@ -18,7 +18,6 @@ void Config::LoadConfig()
 	catch (const std::filesystem::filesystem_error& e)
 	{
 		std::println("Error: Cannot create config directory - {}", e.what());
-
 		// Fallback: try to use current directory
 		configPath = "config.ini";
 		std::println("Falling back to current directory");
