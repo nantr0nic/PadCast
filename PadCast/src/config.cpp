@@ -105,12 +105,12 @@ void Config::ValidateConfig()
 	}
 	if (!hasValue("Font", "DEFAULT_FONT_SIZE"))
 	{
-		config_ini["Font"]["DEFAULT_FONT_SIZE"] = std::to_string(DefaultValues::MIN_FONT_SIZE);
+		config_ini["Font"]["DEFAULT_FONT_SIZE"] = std::to_string(DefaultValues::DEFAULT_FONT_SIZE);
 		needsSave = true;
 	}
 	if (!hasValue("Font", "TEXT_OFFSET"))
 	{
-		config_ini["Font"]["TEXT_OFFSET"] = std::to_string(DefaultValues::MIN_FONT_SIZE);
+		config_ini["Font"]["TEXT_OFFSET"] = std::to_string(DefaultValues::TEXT_OFFSET);
 		needsSave = true;
 	}
 
