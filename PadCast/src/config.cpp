@@ -29,34 +29,10 @@ void Config::LoadConfig()
 		// config.ini doesn't exist so we'll create one with default values
 		std::println("config.ini doesn't exist at {}, creating a default one.", configPath);
 		std::filesystem::create_directories(std::filesystem::path{ configPath }.parent_path());
-		CreateDefaultConfig();
+		ValidateConfig();
 		SaveConfig();
 	}
 	ValidateConfig();
-}
-
-void Config::CreateDefaultConfig()
-{
-	config_ini["Window"].set({
-		{"INITIAL_WINDOW_WIDTH", std::to_string(DefaultValues::INITIAL_WINDOW_WIDTH)},
-		{"INITIAL_WINDOW_HEIGHT", std::to_string(DefaultValues::INITIAL_WINDOW_HEIGHT)},
-		{"CURRENT_WINDOW_WIDTH", std::to_string(DefaultValues::INITIAL_WINDOW_WIDTH)},
-		{"CURRENT_WINDOW_HEIGHT", std::to_string(DefaultValues::INITIAL_WINDOW_HEIGHT)},
-		{"IMAGE_CANVAS_WIDTH", std::to_string(DefaultValues::IMAGE_CANVAS_WIDTH)},
-		{"IMAGE_CANVAS_HEIGHT", std::to_string(DefaultValues::IMAGE_CANVAS_HEIGHT)},
-		{"TARGET_FPS", std::to_string(DefaultValues::TARGET_FPS)}
-		});
-	config_ini["Gamepad"].set({
-		{"STABILITY_THRESHOLD", std::to_string(DefaultValues::STABILITY_THRESHOLD)}
-		});
-	config_ini["Font"].set({
-		{"MIN_FONT_SIZE", std::to_string(DefaultValues::MIN_FONT_SIZE)},
-		{"DEFAULT_FONT_SIZE", std::to_string(DefaultValues::DEFAULT_FONT_SIZE)},
-		{"TEXT_OFFSET", std::to_string(DefaultValues::TEXT_OFFSET)}
-		});
-	config_ini["Debug"].set({
-		{"MODE", std::to_string(DefaultValues::DEBUG_MODE)}
-		});
 }
 
 void Config::ValidateConfig()

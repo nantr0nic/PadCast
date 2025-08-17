@@ -45,8 +45,6 @@ public:
 
 	void LoadConfig();
 
-	void CreateDefaultConfig();
-
 	void ValidateConfig();
 
 	bool hasValue(const std::string& section, const std::string& key) const
