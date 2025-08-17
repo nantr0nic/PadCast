@@ -112,6 +112,7 @@ public:
             if (newButtonPress > 0)
             {
                 TraceLog(LOG_DEBUG, "Button pressed: %d", newButtonPress);
+                drawDebugButtonIndex(gamepad, scaling);
             }
 
             // Check all gamepad axes for movement
@@ -230,7 +231,26 @@ public:
             static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
             static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
             fontSize,
-            raylib::Color(raylib::GRAY)
+            raylib::Color(raylib::WHITE)
+        );
+    }
+
+    void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling)
+    {
+        int fontSize = std::max(
+            static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
+            config.getValue("Font", "MIN_FONT_SIZE")
+        );
+
+        int buttonIndex = gamepad.GetButtonPressed();
+        std::string buttonPressed = std::to_string(buttonIndex);
+
+        raylib::DrawText(
+            buttonPressed,
+            static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
+            static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
+            fontSize,
+            raylib::Color(raylib::WHITE)
         );
     }
 };
