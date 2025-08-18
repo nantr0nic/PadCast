@@ -1,15 +1,16 @@
 ﻿#include "PadCast.h"
+#include "menus.h"
 
 #include <chrono>
 #include <thread>
 #include <print>
-#include <iostream>
 
 int main()
 {
     bool debug_mode{ false };
 
     Config mainConfig{};
+    MenuContext menu;
 
     // Window setup
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -40,6 +41,8 @@ int main()
             mainConfig.getImgCanvasHeight()
         );
 
+        HandleMenuInput(menu, window, mainConfig, scaling);
+
         // Draw base controller
         display.getTextures().unpressed.Draw(
             raylib::Vector2{ scaling.offsetX, scaling.offsetY },
@@ -59,6 +62,11 @@ int main()
         else
         {
             display.drawNoGamepadMessage(scaling);
+        }
+
+        if (menu.active != Menu::None)
+        {
+            DrawMenu(menu, scaling, mainConfig, 50, 50);
         }
 
         if (mainConfig.getCurrentWinHeight() != window.GetHeight() 

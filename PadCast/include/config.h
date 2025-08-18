@@ -128,6 +128,10 @@ public:
 		config_ini["Window"]["INITIAL_WINDOW_WIDTH"] = config_ini["Window"]["CURRENT_WINDOW_WIDTH"];
 		config_ini["Window"]["INITIAL_WINDOW_HEIGHT"] = config_ini["Window"]["CURRENT_WINDOW_HEIGHT"];
 	}
+	void updateTargetFPS(int fps)
+	{
+		config_ini["Window"]["TARGET_FPS"] = std::to_string(fps);
+	}
 };
 
 #endif

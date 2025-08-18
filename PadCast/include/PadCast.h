@@ -5,8 +5,6 @@
 #include <raylib-cpp.hpp>
 #include "config.h"
 
-#include <print>
-
 struct GamepadTextures
 {
     raylib::Texture2D unpressed;
