@@ -153,13 +153,14 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
-		// Scaling setup 
+		// Scaling setup
+		float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
 		int baseX = 50;
 		int baseY = 50;
-		int scaledX = static_cast<int>(baseX * scaling.scale + scaling.offsetX);
-		int scaledY = static_cast<int>(baseY * scaling.scale + scaling.offsetY);
-		int scaledWidth = static_cast<int>(200 * scaling.scale);
-		int scaledLineHeight = static_cast<int>(30 * scaling.scale);
+		int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
+		int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
+		int scaledWidth = static_cast<int>(200 * menuScale);
+		int scaledLineHeight = static_cast<int>(30 * menuScale);
 		for (size_t i = 0; i < menu.items.size(); ++i)
 		{
 			Rectangle itemRect = {
@@ -190,12 +191,13 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 
 	// Scaling setup
-	int scaledX = static_cast<int>(baseX * scaling.scale + scaling.offsetX);
-	int scaledY = static_cast<int>(baseY * scaling.scale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(200 * scaling.scale);
-	int scaledLineHeight = static_cast<int>(30 * scaling.scale);
-	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * scaling.scale);
-	int scaledPadding = static_cast<int>(10 * scaling.scale);
+	float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
+	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
+	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
+	int scaledWidth = static_cast<int>(200 * menuScale);
+	int scaledLineHeight = static_cast<int>(30 * menuScale);
+	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
+	int scaledPadding = static_cast<int>(10 * menuScale);
 
 	// Draw semi-transparent background
 	DrawRectangle(scaledX - scaledPadding, scaledY - scaledPadding,
@@ -204,7 +206,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 
 	// Scaled font size
 	int fontSize = std::max(
-		static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
+		static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * menuScale),
 		config.getValue("Font", "MIN_FONT_SIZE")
 	);
 
