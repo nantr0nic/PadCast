@@ -30,14 +30,15 @@ int main()
     }
 
     // Track window dimensions
-    int lastWinWidth = window.GetWidth();
-    int lastWinHeight = window.GetHeight();
+    int lastWinWidth{ window.GetWidth() };
+    int lastWinHeight{ window.GetHeight() };
+    bool winDimensionsChanged{ false };
     // Cache canvas dimensions
-    const int canvasWidth = mainConfig.getImgCanvasWidth(); // constexpr? consteval?
-    const int canvasHeight = mainConfig.getImgCanvasHeight();
+    const int canvasWidth{ mainConfig.getImgCanvasWidth() };
+    const int canvasHeight{ mainConfig.getImgCanvasHeight() };
     // Gamepad connection counter stuff
     static int gamepadCheckCounter = 0;
-    bool gamepadConnected = false;
+    bool gamepadConnected{ false };
 
     while (!window.ShouldClose())
     {
@@ -50,6 +51,7 @@ int main()
             mainConfig.updateWindowSize(currentWidth, currentHeight);
             lastWinWidth = currentWidth;
             lastWinHeight = currentHeight;
+            winDimensionsChanged = true;
         }
 
         window.BeginDrawing();
@@ -96,8 +98,7 @@ int main()
     }
 
     // If window dimensions changed from last open, update initial dimensions
-    if (mainConfig.getCurrentWinHeight() != mainConfig.getInitWinHeight()
-        || mainConfig.getCurrentWinWidth() != mainConfig.getInitWinWidth())
+    if (winDimensionsChanged)
     {
         mainConfig.updateInitWinSizes();
     }

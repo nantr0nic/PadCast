@@ -74,8 +74,10 @@ private:
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
 
+    // Cache values for optimizing calls
     mutable Color cachedBGColor{ BLACK };
     mutable int lastBGColorValue{ -1 };
+    mutable int cachedStabilityThreshold{ -1 };
 
     bool debugMode{ false };
 
@@ -97,6 +99,12 @@ public:
     // Gamepad Display functions
     bool updateGamepadConnection(bool currentlyAvailable)
     {
+        // Cache stability threshold
+        if (cachedStabilityThreshold == -1)
+        {
+            cachedStabilityThreshold = config.getValue("Gamepad", "STABILITY_THRESHOLD");
+        }
+
         if (currentlyAvailable == gamepadWasConnected)
         {
             stabilityCounter = 0;
@@ -104,7 +112,7 @@ public:
         else
         {
             ++stabilityCounter;
-            if (stabilityCounter >= config.getValue("Gamepad", "STABILITY_THRESHOLD"))
+            if (stabilityCounter >= cachedStabilityThreshold)
             {
                 gamepadWasConnected = currentlyAvailable;
                 stabilityCounter = 0;
@@ -267,17 +275,19 @@ public:
 
 public:
     // Other functions (display, etc.)
-    bool isValidBackgroundColor(int value)
+    bool isValidBackgroundColor(int value) const
     {
-        return value >= 0 && value <= static_cast<int>(BackgroundColor::Blue);
+        return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
     }
-    Color getBGColor()
+    Color getBGColor() const
     {
         int currentBGValue = config.getBGColor();
 
         // Only change if config value changed
         if (currentBGValue != lastBGColorValue)
         { 
+            lastBGColorValue = currentBGValue;
+
             if (!isValidBackgroundColor(currentBGValue))
             {
                 currentBGValue = 0; // Default to black

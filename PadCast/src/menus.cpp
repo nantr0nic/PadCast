@@ -256,11 +256,12 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 		scaledWidth, scaledMenuHeight,
 		Fade(BLACK, 0.7f)); // %70 opacity
 
+	// Cached font sizes
+	static int defaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
+	static int minFontSize = config.getValue("Font", "MIN_FONT_SIZE");
+
 	// Scaled font size
-	int fontSize = std::max(
-		static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * menuScale),
-		config.getValue("Font", "MIN_FONT_SIZE")
-	);
+	int fontSize = std::max(static_cast<int>(defaultFontSize * menuScale), minFontSize);
 
 	// Draw menu items
 	for (size_t i = 0; i < menu.items.size(); ++i)
