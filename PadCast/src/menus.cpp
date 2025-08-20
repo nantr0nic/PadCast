@@ -11,7 +11,13 @@ void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config)
 		});
 	menu.items.push_back({
 		"FPS",
-		[&menu, &window, &config]() { menu.active = Menu::FPS; SetupFPSMenu(menu, window, config); }
+		[&menu, &window, &config]() { menu.active = Menu::FPS; 
+									SetupFPSMenu(menu, window, config); }
+		});
+	menu.items.push_back({
+		"Background Color",
+		[&menu, &window, &config]() { menu.active = Menu::BGColor;
+									SetupBGColorMenu(menu, window, config); }
 		});
 	/*
 	menu.items.push_back({
@@ -110,10 +116,50 @@ void SetupFPSMenu(MenuContext& menu, raylib::Window& window, Config& config)
 		});
 }
 
+void SetupBGColorMenu(MenuContext& menu, raylib::Window& window, Config& config)
+{
+	menu.items.clear();
+	menu.items.push_back({
+		"Black",
+		[&config]() { config.updateBGColor(0); }
+		});
+	menu.items.push_back({
+		"White",
+		[&config]() { config.updateBGColor(1); }
+		});
+	menu.items.push_back({
+		"\"Raywhite\"",
+		[&config]() { config.updateBGColor(2); }
+		});
+	menu.items.push_back({
+		"Red",
+		[&config]() { config.updateBGColor(3); }
+		});
+	menu.items.push_back({
+		"Green",
+		[&config]() { config.updateBGColor(4); }
+		});
+	menu.items.push_back({
+		"Blue",
+		[&config]() { config.updateBGColor(5); }
+		});
+	menu.items.push_back({
+		"Back",
+		[&menu, &window, &config]() { menu.active = Menu::Main;
+									SetupMainMenu(menu, window, config); }
+		});
+	menu.items.push_back({
+		"Close",
+		[&menu]() { menu.active = Menu::None; }
+		});
+
+	menu.selectedIndex = 0;
+}
+
 void HandleMenuInput(MenuContext& menu, raylib::Window& window, 
 					Config& config, ScalingInfo& scaling)
 {
-	// Menu open/close
+	// ----- Menu open/close ----- //
 	// a right click, spacebar, or M will open the main menu
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)
 		|| IsKeyPressed(KEY_SPACE)
@@ -132,7 +178,7 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 		return;
 	}
 
-	// Menu navigation
+	// ----- Menu navigation ----- //
 	if (menu.active != Menu::None)
 	{
 		// Keyboard navigation
@@ -194,7 +240,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
 	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
 	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(200 * menuScale);
+	int scaledWidth = static_cast<int>(300 * menuScale);
 	int scaledLineHeight = static_cast<int>(30 * menuScale);
 	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
 	int scaledPadding = static_cast<int>(10 * menuScale);

@@ -7,24 +7,24 @@
 
 int main()
 {
-    bool debug_mode{ false };
-
     Config mainConfig{};
     MenuContext menu;
 
-    // Window setup
+    // Window setup -- this must happen before instantiating GamepadDisplay
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     raylib::Window window(
         mainConfig.getInitWinWidth(), 
         mainConfig.getInitWinHeight(),
-        "PadCast");
+        "PadCast"
+    );
     window.SetTargetFPS(mainConfig.getFPS());
 
     GamepadDisplay display{ mainConfig };
 
+    // short pause to allow for controller detection
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    if (debug_mode)
+    if (mainConfig.getDebugMode())
     {
         SetTraceLogLevel(LOG_ALL);
     }
@@ -32,7 +32,7 @@ int main()
     while (!window.ShouldClose())
     {
         window.BeginDrawing();
-        window.ClearBackground(raylib::BLACK);
+        window.ClearBackground(display.getBGColor());
 
         ScalingInfo scaling(
             window.GetWidth(),
@@ -41,6 +41,7 @@ int main()
             mainConfig.getImgCanvasHeight()
         );
 
+        // Handles accessing menu and menu navigation
         HandleMenuInput(menu, window, mainConfig, scaling);
 
         // Draw base controller
@@ -52,9 +53,10 @@ int main()
         );
 
         // Handle gamepad input
-        bool connected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
+        bool gamepadConnected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
 
-        if (connected)
+        // Display gamepad stuff
+        if (gamepadConnected)
         {
             raylib::Gamepad gamepad(0);
             display.drawGamepadButtons(gamepad, scaling);
@@ -64,11 +66,13 @@ int main()
             display.drawNoGamepadMessage(scaling);
         }
 
+        // If menu is active, draw the menu
         if (menu.active != Menu::None)
         {
             DrawMenu(menu, scaling, mainConfig, 50, 50);
         }
 
+        // If user resized window, update config with new dimensions
         if (mainConfig.getCurrentWinHeight() != window.GetHeight() 
             || mainConfig.getCurrentWinWidth() != window.GetWidth())
         {
@@ -78,6 +82,7 @@ int main()
         window.EndDrawing();
     }
 
+    // If window dimensions changed from last open, update initial dimensions
     if (mainConfig.getCurrentWinHeight() != mainConfig.getInitWinHeight()
         || mainConfig.getCurrentWinWidth() != mainConfig.getInitWinWidth())
     {

@@ -11,7 +11,8 @@ enum class Menu
 	Main,
 	Resolution,
 	FPS,
-	// RemapButtons,
+	BGColor
+	// RemapButtons
 };
 
 struct MenuItem
@@ -33,6 +34,8 @@ void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config);
 void SetupResolutionMenu(MenuContext& menu, raylib::Window& window, Config& config);
 
 void SetupFPSMenu(MenuContext& menu, raylib::Window& window, Config& config);
+
+void SetupBGColorMenu(MenuContext& menu, raylib::Window& window, Config& config);
 
 void HandleMenuInput(MenuContext& menu, raylib::Window& window, Config& config, ScalingInfo& scaling);
 
