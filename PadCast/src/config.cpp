@@ -64,6 +64,11 @@ void Config::ValidateConfig()
 		config_ini["Window"]["TARGET_FPS"] = std::to_string(DefaultValues::TARGET_FPS);
 		needsSave = true;
 	}
+	if (!hasValue("Window", "BACKGROUND_COLOR"))
+	{
+		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(DefaultValues::BACKGROUND_COLOR);
+		needsSave = true;
+	}
 
 	// Check Gamepad section
 	if (!hasValue("Gamepad", "STABILITY_THRESHOLD"))
@@ -121,6 +126,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::INITIAL_WINDOW_HEIGHT;
 		if (key == "TARGET_FPS") 
 			return DefaultValues::TARGET_FPS;
+		if (key == "BACKGROUND_COLOR")
+			return DefaultValues::BACKGROUND_COLOR;
 	}
 	if (section == "Gamepad") 
 	{

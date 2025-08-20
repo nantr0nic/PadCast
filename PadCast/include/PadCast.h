@@ -5,8 +5,6 @@
 #include <raylib-cpp.hpp>
 #include "config.h"
 
-#include <print>
-
 struct GamepadTextures
 {
     raylib::Texture2D unpressed;
@@ -57,13 +55,30 @@ struct ScalingInfo
     }
 };
 
+enum class BackgroundColor
+{
+    Black,      // 0
+    White,      // 1
+    Raywhite,   // 2
+    Red,        // 3
+    Green,      // 4
+    Blue        // 5
+};
+
 class GamepadDisplay
 {
 private:
     GamepadTextures textures;
+    Config& config;
+
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
-    Config& config;
+
+    // Cache values for optimizing calls
+    mutable Color cachedBGColor{ BLACK };
+    mutable int lastBGColorValue{ -1 };
+    mutable int cachedStabilityThreshold{ -1 };
+
     bool debugMode{ false };
 
 public:
@@ -78,11 +93,18 @@ public:
 
     const GamepadTextures& getTextures() const { return textures; }
     Config& getConfig() { return config; }
+    bool isDebugOn() const { return debugMode; }
 
 public:
     // Gamepad Display functions
     bool updateGamepadConnection(bool currentlyAvailable)
     {
+        // Cache stability threshold
+        if (cachedStabilityThreshold == -1)
+        {
+            cachedStabilityThreshold = config.getValue("Gamepad", "STABILITY_THRESHOLD");
+        }
+
         if (currentlyAvailable == gamepadWasConnected)
         {
             stabilityCounter = 0;
@@ -90,7 +112,7 @@ public:
         else
         {
             ++stabilityCounter;
-            if (stabilityCounter >= config.getValue("Gamepad", "STABILITY_THRESHOLD"))
+            if (stabilityCounter >= cachedStabilityThreshold)
             {
                 gamepadWasConnected = currentlyAvailable;
                 stabilityCounter = 0;
@@ -249,6 +271,55 @@ public:
             fontSize,
             raylib::Color(raylib::WHITE)
         );
+    }
+
+public:
+    // Other functions (display, etc.)
+    bool isValidBackgroundColor(int value) const
+    {
+        return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
+    }
+    Color getBGColor() const
+    {
+        int currentBGValue = config.getBGColor();
+
+        // Only change if config value changed
+        if (currentBGValue != lastBGColorValue)
+        { 
+            lastBGColorValue = currentBGValue;
+
+            if (!isValidBackgroundColor(currentBGValue))
+            {
+                currentBGValue = 0; // Default to black
+            }
+
+            BackgroundColor bgColor = static_cast<BackgroundColor>(currentBGValue);
+            switch (bgColor)
+            {
+            case BackgroundColor::Black:
+                cachedBGColor = BLACK;
+                break;
+            case BackgroundColor::White:
+                cachedBGColor = WHITE;
+                break;
+            case BackgroundColor::Raywhite:
+                cachedBGColor = RAYWHITE;
+                break;
+            case BackgroundColor::Red:
+                cachedBGColor = RED;
+                break;
+            case BackgroundColor::Green:
+                cachedBGColor = GREEN;
+                break;
+            case BackgroundColor::Blue:
+                cachedBGColor = BLUE;
+                break;
+            default:
+                cachedBGColor = BLACK;
+                break;
+            }
+        }
+        return cachedBGColor;
     }
 };
 
