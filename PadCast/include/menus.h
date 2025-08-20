@@ -29,6 +29,14 @@ struct MenuContext
 	int selectedIndex{ 0 };
 };
 
+MenuItem createMenuItem(const std::string& label, std::function<void()> action);
+
+MenuItem createBackMenuItem(MenuContext& menu, raylib::Window& window, Config& config);
+
+MenuItem createCloseMenuItem(MenuContext& menu);
+
+MenuItem createSpacer();
+
 void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config);
 
 void SetupResolutionMenu(MenuContext& menu, raylib::Window& window, Config& config);

@@ -264,9 +264,19 @@ public:
 
 public:
     // Other functions (display, etc.)
+    bool isValidBackgroundColor(int value)
+    {
+        return value >= 0 && value <= static_cast<int>(BackgroundColor::Blue);
+    }
     Color getBGColor()
     {
-        BackgroundColor bgColor{ static_cast<BackgroundColor>(config.getBGColor()) };
+        int bgValue = config.getBGColor();
+        if (!isValidBackgroundColor(bgValue))
+        {
+            bgValue = 0; // Default to black
+        }
+
+        BackgroundColor bgColor = static_cast<BackgroundColor>(bgValue);
         switch (bgColor)
         {
             case BackgroundColor::Black:
