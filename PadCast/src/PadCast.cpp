@@ -1,66 +1,44 @@
 ﻿#include "PadCast.h"
-#include "menus.h"
 
 #include <chrono>
 #include <thread>
 #include <print>
+#include <iostream>
 
 int main()
 {
-    Config mainConfig{};
-    MenuContext menu;
+    bool debug_mode{ false };
 
-    // Window setup -- this must happen before instantiating GamepadDisplay
+    Config mainConfig{};
+
+    // Window setup
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     raylib::Window window(
         mainConfig.getInitWinWidth(), 
         mainConfig.getInitWinHeight(),
-        "PadCast"
-    );
+        "PadCast");
     window.SetTargetFPS(mainConfig.getFPS());
 
     GamepadDisplay display{ mainConfig };
 
-    // short pause to allow for controller detection
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    if (mainConfig.getDebugMode())
+    if (debug_mode)
     {
         SetTraceLogLevel(LOG_ALL);
     }
 
-    // Track window dimensions
-    int lastWinWidth{ window.GetWidth() };
-    int lastWinHeight{ window.GetHeight() };
-    bool winDimensionsChanged{ false };
-    // Cache canvas dimensions
-    const int canvasWidth{ mainConfig.getImgCanvasWidth() };
-    const int canvasHeight{ mainConfig.getImgCanvasHeight() };
-    // Gamepad connection counter stuff
-    static int gamepadCheckCounter = 0;
-    bool gamepadConnected{ false };
-
     while (!window.ShouldClose())
     {
-        int currentWidth = window.GetWidth();
-        int currentHeight = window.GetHeight();
-
-        // Check and update window dimensions if necessary
-        if (currentWidth != lastWinWidth || currentHeight != lastWinHeight)
-        {
-            mainConfig.updateWindowSize(currentWidth, currentHeight);
-            lastWinWidth = currentWidth;
-            lastWinHeight = currentHeight;
-            winDimensionsChanged = true;
-        }
-
         window.BeginDrawing();
-        window.ClearBackground(display.getBGColor());
+        window.ClearBackground(raylib::BLACK);
 
-        ScalingInfo scaling(currentWidth, currentHeight, canvasWidth, canvasHeight);
-
-        // Handles accessing menu and menu navigation
-        HandleMenuInput(menu, window, mainConfig, scaling);
+        ScalingInfo scaling(
+            window.GetWidth(),
+            window.GetHeight(),
+            mainConfig.getImgCanvasWidth(),
+            mainConfig.getImgCanvasHeight()
+        );
 
         // Draw base controller
         display.getTextures().unpressed.Draw(
@@ -70,15 +48,10 @@ int main()
             raylib::WHITE
         );
 
-        // Check gamepad connection
-        if (++gamepadCheckCounter >= 10)
-        {
-            gamepadCheckCounter = 0;
-            gamepadConnected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
-        }
+        // Handle gamepad input
+        bool connected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
 
-        // Display gamepad stuff
-        if (gamepadConnected)
+        if (connected)
         {
             raylib::Gamepad gamepad(0);
             display.drawGamepadButtons(gamepad, scaling);
@@ -88,17 +61,17 @@ int main()
             display.drawNoGamepadMessage(scaling);
         }
 
-        // If menu is active, draw the menu
-        if (menu.active != Menu::None)
+        if (mainConfig.getCurrentWinHeight() != window.GetHeight() 
+            || mainConfig.getCurrentWinWidth() != window.GetWidth())
         {
-            DrawMenu(menu, scaling, mainConfig, 50, 50);
+            mainConfig.updateWindowSize(window.GetWidth(), window.GetHeight());
         }
 
         window.EndDrawing();
     }
 
-    // If window dimensions changed from last open, update initial dimensions
-    if (winDimensionsChanged)
+    if (mainConfig.getCurrentWinHeight() != mainConfig.getInitWinHeight()
+        || mainConfig.getCurrentWinWidth() != mainConfig.getInitWinWidth())
     {
         mainConfig.updateInitWinSizes();
     }
