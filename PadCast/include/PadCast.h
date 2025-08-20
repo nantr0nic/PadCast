@@ -74,6 +74,9 @@ private:
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
 
+    mutable Color cachedBGColor{ BLACK };
+    mutable int lastBGColorValue{ -1 };
+
     bool debugMode{ false };
 
 public:
@@ -270,30 +273,43 @@ public:
     }
     Color getBGColor()
     {
-        int bgValue = config.getBGColor();
-        if (!isValidBackgroundColor(bgValue))
-        {
-            bgValue = 0; // Default to black
-        }
+        int currentBGValue = config.getBGColor();
 
-        BackgroundColor bgColor = static_cast<BackgroundColor>(bgValue);
-        switch (bgColor)
-        {
+        // Only change if config value changed
+        if (currentBGValue != lastBGColorValue)
+        { 
+            if (!isValidBackgroundColor(currentBGValue))
+            {
+                currentBGValue = 0; // Default to black
+            }
+
+            BackgroundColor bgColor = static_cast<BackgroundColor>(currentBGValue);
+            switch (bgColor)
+            {
             case BackgroundColor::Black:
-                return BLACK;
+                cachedBGColor = BLACK;
+                break;
             case BackgroundColor::White:
-                return WHITE;
+                cachedBGColor = WHITE;
+                break;
             case BackgroundColor::Raywhite:
-                return RAYWHITE;
+                cachedBGColor = RAYWHITE;
+                break;
             case BackgroundColor::Red:
-                return RED;
+                cachedBGColor = RED;
+                break;
             case BackgroundColor::Green:
-                return GREEN;
+                cachedBGColor = GREEN;
+                break;
             case BackgroundColor::Blue:
-                return BLUE;
+                cachedBGColor = BLUE;
+                break;
             default:
-                return BLACK;
+                cachedBGColor = BLACK;
+                break;
+            }
         }
+        return cachedBGColor;
     }
 };
 

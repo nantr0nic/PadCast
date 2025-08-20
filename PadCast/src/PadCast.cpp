@@ -29,17 +29,33 @@ int main()
         SetTraceLogLevel(LOG_ALL);
     }
 
+    // Track window dimensions
+    int lastWinWidth = window.GetWidth();
+    int lastWinHeight = window.GetHeight();
+    // Cache canvas dimensions
+    const int canvasWidth = mainConfig.getImgCanvasWidth(); // constexpr? consteval?
+    const int canvasHeight = mainConfig.getImgCanvasHeight();
+    // Gamepad connection counter stuff
+    static int gamepadCheckCounter = 0;
+    bool gamepadConnected = false;
+
     while (!window.ShouldClose())
     {
+        int currentWidth = window.GetWidth();
+        int currentHeight = window.GetHeight();
+
+        // Check and update window dimensions if necessary
+        if (currentWidth != lastWinWidth || currentHeight != lastWinHeight)
+        {
+            mainConfig.updateWindowSize(currentWidth, currentHeight);
+            lastWinWidth = currentWidth;
+            lastWinHeight = currentHeight;
+        }
+
         window.BeginDrawing();
         window.ClearBackground(display.getBGColor());
 
-        ScalingInfo scaling(
-            window.GetWidth(),
-            window.GetHeight(),
-            mainConfig.getImgCanvasWidth(),
-            mainConfig.getImgCanvasHeight()
-        );
+        ScalingInfo scaling(currentWidth, currentHeight, canvasWidth, canvasHeight);
 
         // Handles accessing menu and menu navigation
         HandleMenuInput(menu, window, mainConfig, scaling);
@@ -52,8 +68,12 @@ int main()
             raylib::WHITE
         );
 
-        // Handle gamepad input
-        bool gamepadConnected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
+        // Check gamepad connection
+        if (++gamepadCheckCounter >= 10)
+        {
+            gamepadCheckCounter = 0;
+            gamepadConnected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
+        }
 
         // Display gamepad stuff
         if (gamepadConnected)
@@ -70,13 +90,6 @@ int main()
         if (menu.active != Menu::None)
         {
             DrawMenu(menu, scaling, mainConfig, 50, 50);
-        }
-
-        // If user resized window, update config with new dimensions
-        if (mainConfig.getCurrentWinHeight() != window.GetHeight() 
-            || mainConfig.getCurrentWinWidth() != window.GetWidth())
-        {
-            mainConfig.updateWindowSize(window.GetWidth(), window.GetHeight());
         }
 
         window.EndDrawing();
