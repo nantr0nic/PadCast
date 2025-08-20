@@ -19,6 +19,7 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
+		static constexpr int BACKGROUND_COLOR{ 0 };
 		// Image canvas dimensions
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
@@ -111,6 +112,10 @@ public:
 	{
 		return getValue("Window", "TARGET_FPS");
 	}
+	int getBGColor() const 
+	{
+		return getValue("Window", "BACKGROUND_COLOR");
+	}
 	int getDebugMode() const
 	{
 		return getValue("Debug", "MODE");
@@ -131,6 +136,10 @@ public:
 	void updateTargetFPS(int fps)
 	{
 		config_ini["Window"]["TARGET_FPS"] = std::to_string(fps);
+	}
+	void updateBGColor(int background_int)
+	{
+		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(background_int);
 	}
 };
 

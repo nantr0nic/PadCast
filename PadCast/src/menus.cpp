@@ -1,5 +1,30 @@
 #include <menus.h>
 
+MenuItem createMenuItem(const std::string& label, std::function<void()> action)
+{
+	return { label, action };
+}
+
+MenuItem createBackMenuItem(MenuContext& menu, raylib::Window& window, Config& config)
+{
+	return createMenuItem("Back", [&menu, &window, &config]() {
+		menu.active = Menu::Main;
+		SetupMainMenu(menu, window, config);
+		});
+}
+
+MenuItem createCloseMenuItem(MenuContext& menu)
+{
+	return createMenuItem("Close", [&menu]() {
+		menu.active = Menu::None;
+		});
+}
+
+MenuItem createSpacer()
+{
+	return createMenuItem(" ", []() {});	// lol C++
+}
+
 void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config)
 {
 	menu.items.clear();
@@ -11,7 +36,13 @@ void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config)
 		});
 	menu.items.push_back({
 		"FPS",
-		[&menu, &window, &config]() { menu.active = Menu::FPS; SetupFPSMenu(menu, window, config); }
+		[&menu, &window, &config]() { menu.active = Menu::FPS; 
+									SetupFPSMenu(menu, window, config); }
+		});
+	menu.items.push_back({
+		"Background Color",
+		[&menu, &window, &config]() { menu.active = Menu::BGColor;
+									SetupBGColorMenu(menu, window, config); }
 		});
 	/*
 	menu.items.push_back({
@@ -19,10 +50,8 @@ void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config)
 		[&menu]() { menu.active = Menu::RemapButtons; SetupRemapMenu(menu); }
 	});
 	*/
-	menu.items.push_back({
-		"Close",
-		[&menu]() { menu.active = Menu::None; }
-		});
+	menu.items.push_back(createSpacer());
+	menu.items.push_back(createCloseMenuItem(menu));
 
 	menu.selectedIndex = 0;
 }
@@ -46,14 +75,9 @@ void SetupResolutionMenu(MenuContext& menu, raylib::Window& window, Config& conf
 		"480x270",
 		[&window]() { window.SetSize(480, 270); }
 		});
-	menu.items.push_back({
-		"Back",
-		[&menu, &window, &config]() { menu.active = Menu::Main; SetupMainMenu(menu, window, config); }
-		});
-	menu.items.push_back({
-		"Close",
-		[&menu]() { menu.active = Menu::None; }
-		});
+	menu.items.push_back(createSpacer());
+	menu.items.push_back(createBackMenuItem(menu, window, config));
+	menu.items.push_back(createCloseMenuItem(menu));
 
 	menu.selectedIndex = 0;
 }
@@ -99,21 +123,49 @@ void SetupFPSMenu(MenuContext& menu, raylib::Window& window, Config& config)
 			SetupFPSMenu(menu, window, config);
 		}
 		});
+	menu.items.push_back(createSpacer());
+	menu.items.push_back(createBackMenuItem(menu, window, config));
+	menu.items.push_back(createCloseMenuItem(menu));
+}
+
+void SetupBGColorMenu(MenuContext& menu, raylib::Window& window, Config& config)
+{
+	menu.items.clear();
 	menu.items.push_back({
-		"Back",
-		[&menu, &window, &config]() { menu.active = Menu::Main; 
-									SetupMainMenu(menu, window, config); }
+		"Black",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Black)); }
 		});
 	menu.items.push_back({
-		"Close",
-		[&menu]() { menu.active = Menu::None; }
+		"White",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::White)); }
 		});
+	menu.items.push_back({
+		"\"Raywhite\"",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Raywhite)); }
+		});
+	menu.items.push_back({
+		"Red",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Red)); }
+		});
+	menu.items.push_back({
+		"Green",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Green)); }
+		});
+	menu.items.push_back({
+		"Blue",
+		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Blue)); }
+		});
+	menu.items.push_back(createSpacer());
+	menu.items.push_back(createBackMenuItem(menu, window, config));
+	menu.items.push_back(createCloseMenuItem(menu));
+
+	menu.selectedIndex = 0;
 }
 
 void HandleMenuInput(MenuContext& menu, raylib::Window& window, 
 					Config& config, ScalingInfo& scaling)
 {
-	// Menu open/close
+	// ----- Menu open/close ----- //
 	// a right click, spacebar, or M will open the main menu
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)
 		|| IsKeyPressed(KEY_SPACE)
@@ -132,7 +184,7 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 		return;
 	}
 
-	// Menu navigation
+	// ----- Menu navigation ----- //
 	if (menu.active != Menu::None)
 	{
 		// Keyboard navigation
@@ -194,7 +246,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
 	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
 	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(200 * menuScale);
+	int scaledWidth = static_cast<int>(300 * menuScale);
 	int scaledLineHeight = static_cast<int>(30 * menuScale);
 	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
 	int scaledPadding = static_cast<int>(10 * menuScale);

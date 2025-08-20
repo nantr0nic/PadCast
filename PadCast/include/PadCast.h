@@ -55,13 +55,25 @@ struct ScalingInfo
     }
 };
 
+enum class BackgroundColor
+{
+    Black,      // 0
+    White,      // 1
+    Raywhite,   // 2
+    Red,        // 3
+    Green,      // 4
+    Blue        // 5
+};
+
 class GamepadDisplay
 {
 private:
     GamepadTextures textures;
+    Config& config;
+
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
-    Config& config;
+
     bool debugMode{ false };
 
 public:
@@ -76,6 +88,7 @@ public:
 
     const GamepadTextures& getTextures() const { return textures; }
     Config& getConfig() { return config; }
+    bool isDebugOn() const { return debugMode; }
 
 public:
     // Gamepad Display functions
@@ -247,6 +260,40 @@ public:
             fontSize,
             raylib::Color(raylib::WHITE)
         );
+    }
+
+public:
+    // Other functions (display, etc.)
+    bool isValidBackgroundColor(int value)
+    {
+        return value >= 0 && value <= static_cast<int>(BackgroundColor::Blue);
+    }
+    Color getBGColor()
+    {
+        int bgValue = config.getBGColor();
+        if (!isValidBackgroundColor(bgValue))
+        {
+            bgValue = 0; // Default to black
+        }
+
+        BackgroundColor bgColor = static_cast<BackgroundColor>(bgValue);
+        switch (bgColor)
+        {
+            case BackgroundColor::Black:
+                return BLACK;
+            case BackgroundColor::White:
+                return WHITE;
+            case BackgroundColor::Raywhite:
+                return RAYWHITE;
+            case BackgroundColor::Red:
+                return RED;
+            case BackgroundColor::Green:
+                return GREEN;
+            case BackgroundColor::Blue:
+                return BLUE;
+            default:
+                return BLACK;
+        }
     }
 };
 
