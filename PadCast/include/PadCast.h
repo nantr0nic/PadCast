@@ -74,6 +74,11 @@ private:
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
 
+    // Cache values for optimizing calls
+    mutable Color cachedBGColor{ BLACK };
+    mutable int lastBGColorValue{ -1 };
+    mutable int cachedStabilityThreshold{ -1 };
+
     bool debugMode{ false };
 
 public:
@@ -94,6 +99,12 @@ public:
     // Gamepad Display functions
     bool updateGamepadConnection(bool currentlyAvailable)
     {
+        // Cache stability threshold
+        if (cachedStabilityThreshold == -1)
+        {
+            cachedStabilityThreshold = config.getValue("Gamepad", "STABILITY_THRESHOLD");
+        }
+
         if (currentlyAvailable == gamepadWasConnected)
         {
             stabilityCounter = 0;
@@ -101,7 +112,7 @@ public:
         else
         {
             ++stabilityCounter;
-            if (stabilityCounter >= config.getValue("Gamepad", "STABILITY_THRESHOLD"))
+            if (stabilityCounter >= cachedStabilityThreshold)
             {
                 gamepadWasConnected = currentlyAvailable;
                 stabilityCounter = 0;
@@ -264,36 +275,51 @@ public:
 
 public:
     // Other functions (display, etc.)
-    bool isValidBackgroundColor(int value)
+    bool isValidBackgroundColor(int value) const
     {
-        return value >= 0 && value <= static_cast<int>(BackgroundColor::Blue);
+        return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
     }
-    Color getBGColor()
+    Color getBGColor() const
     {
-        int bgValue = config.getBGColor();
-        if (!isValidBackgroundColor(bgValue))
-        {
-            bgValue = 0; // Default to black
-        }
+        int currentBGValue = config.getBGColor();
 
-        BackgroundColor bgColor = static_cast<BackgroundColor>(bgValue);
-        switch (bgColor)
-        {
+        // Only change if config value changed
+        if (currentBGValue != lastBGColorValue)
+        { 
+            lastBGColorValue = currentBGValue;
+
+            if (!isValidBackgroundColor(currentBGValue))
+            {
+                currentBGValue = 0; // Default to black
+            }
+
+            BackgroundColor bgColor = static_cast<BackgroundColor>(currentBGValue);
+            switch (bgColor)
+            {
             case BackgroundColor::Black:
-                return BLACK;
+                cachedBGColor = BLACK;
+                break;
             case BackgroundColor::White:
-                return WHITE;
+                cachedBGColor = WHITE;
+                break;
             case BackgroundColor::Raywhite:
-                return RAYWHITE;
+                cachedBGColor = RAYWHITE;
+                break;
             case BackgroundColor::Red:
-                return RED;
+                cachedBGColor = RED;
+                break;
             case BackgroundColor::Green:
-                return GREEN;
+                cachedBGColor = GREEN;
+                break;
             case BackgroundColor::Blue:
-                return BLUE;
+                cachedBGColor = BLUE;
+                break;
             default:
-                return BLACK;
+                cachedBGColor = BLACK;
+                break;
+            }
         }
+        return cachedBGColor;
     }
 };
 
