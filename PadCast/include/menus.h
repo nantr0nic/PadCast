@@ -11,8 +11,8 @@ enum class Menu
 	Main,
 	Resolution,
 	FPS,
-	BGColor
-	// RemapButtons
+	BGColor,
+	RemapButtons
 };
 
 struct MenuItem
@@ -34,9 +34,10 @@ struct MenuContext
 		raylib::Window& window;
 		Config& config;
 		GamepadDisplay& display;
+		ScalingInfo& scaling;
 
-		MenuParams(MenuContext& m, raylib::Window& w, Config& c, GamepadDisplay& d)
-			: menu(m), window(w), config(c), display(d)
+		MenuParams(MenuContext& m, raylib::Window& w, Config& c, GamepadDisplay& d, ScalingInfo& s)
+			: menu(m), window(w), config(c), display(d), scaling(s)
 		{
 		}
 	};
@@ -60,9 +61,13 @@ void SetupBGColorMenu(MenuContext::MenuParams& params);
 
 void SetupRemapMenu(MenuContext::MenuParams& params);
 
-void HandleMenuInput(MenuContext::MenuParams& params, ScalingInfo& scaling);
+void HandleMenuInput(MenuContext::MenuParams& params);
 
 void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config& config,
 	int baseX, int baseY);
+
+void ResetRemapState();
+
+void RemapButtonScreens(MenuContext::MenuParams& params);
 
 #endif

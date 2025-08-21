@@ -1,4 +1,5 @@
-#include <menus.h>
+#include "menus.h"
+#include "debounce.h"
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
 {
@@ -44,12 +45,10 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		[&params]() { params.menu.active = Menu::BGColor;
 									SetupBGColorMenu(params); }
 		});
-	/*
 	params.menu.items.push_back({
 		"Remap Buttons",
-		[&menu]() { params.menu.active = Menu::RemapButtons; SetupRemapMenu(menu); }
+		[&params]() { SetupRemapMenu(params); }
 	});
-	*/
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
@@ -169,11 +168,11 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Start Remap",
-		[]() {}
+		[&params]() { params.menu.active = Menu::RemapButtons; ResetRemapState(); }
 		});
 	params.menu.items.push_back({
 		"Reset to Default",
-		[]() { }
+		[&params]() { params.display.resetButtonsToDefault(); }
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
@@ -182,7 +181,7 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.selectedIndex = 0;
 }
 
-void HandleMenuInput(MenuContext::MenuParams& params, ScalingInfo& scaling)
+void HandleMenuInput(MenuContext::MenuParams& params)
 {
 	// ----- Menu open/close ----- //
 	// a right click, spacebar, or M will open the main menu
@@ -225,11 +224,11 @@ void HandleMenuInput(MenuContext::MenuParams& params, ScalingInfo& scaling)
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
 		// Scaling setup
-		float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
+		float menuScale = std::max(params.scaling.scale, 0.8f); // don't scale menu font/positions below 80%
 		int baseX = 50;
 		int baseY = 50;
-		int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
-		int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
+		int scaledX = static_cast<int>(baseX * menuScale + params.scaling.offsetX);
+		int scaledY = static_cast<int>(baseY * menuScale + params.scaling.offsetY);
 		int scaledWidth = static_cast<int>(200 * menuScale);
 		int scaledLineHeight = static_cast<int>(30 * menuScale);
 		for (size_t i = 0; i < params.menu.items.size(); ++i)
@@ -289,5 +288,173 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 		DrawText(menu.items[i].label.c_str(),
 			scaledX, scaledY + static_cast<int>(i) * scaledLineHeight,
 			fontSize, color);
+	}
+}
+
+void ResetRemapState()
+{
+	// instead of making the static variables global...
+	// not a great solution
+	static bool resetRequested = false;
+	resetRequested = true;
+}
+
+void RemapButtonScreens(MenuContext::MenuParams& params)
+{
+	static bool isRemapping = false;
+	static bool waitingForInput = false;
+	static int buttonPromptIndex = 0;
+	static raylib::Gamepad remapGamepad(0);
+	static DebounceTimer buttonDebounce(0.5f);
+	static float lastAttemptTime = 0.0f;
+
+	static bool resetRequested = false;
+	if (resetRequested || !isRemapping)
+	{
+		isRemapping = true;
+		waitingForInput = true;
+		buttonPromptIndex = 0;
+		resetRequested = false;
+		buttonDebounce.Reset();
+		lastAttemptTime = 0.0f;
+		return; // let main loop call us again next frame
+	}
+
+	// Scaling and drawing setup
+	float rectScale = std::max(params.scaling.scale, 0.8f);
+	int rectWidth = static_cast<int>(300 * rectScale);
+	int rectHeight = static_cast<int>(300 * rectScale);
+	int rectX = static_cast<int>(
+		(params.window.GetWidth() - rectWidth) / 2 + params.scaling.offsetX
+		);
+	int rectY = static_cast<int>(
+		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY
+		);
+
+	static int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+	static int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
+
+	// Draw the background rectangle
+	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.7f));
+
+	const char* promptText = "";
+	int currentRaylibButton = 0;
+
+	switch (buttonPromptIndex)
+	{
+		// case #'s match order of buttons in unordered_map buttonIndex
+	case 0:
+		promptText = "Press D-pad UP";
+		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
+		break;
+	case 1:
+		promptText = "Press D-pad RIGHT";
+		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
+		break;
+	case 2:
+		promptText = "Press D-pad DOWN";
+		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
+		break;
+	case 3:
+		promptText = "Press D-pad LEFT";
+		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
+		break;
+	case 4:
+		promptText = "Press X";
+		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
+		break;
+	case 5:
+		promptText = "Press A";
+		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
+		break;
+	case 6:
+		promptText = "Press B";
+		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
+		break;
+	case 7:
+		promptText = "Press Y";
+		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
+		break;
+	case 8:
+		promptText = "Press LEFT Shoulder";
+		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
+		break;
+	case 9:
+		promptText = "Press RIGHT Shoulder";
+		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
+		break;
+	case 10:
+		promptText = "Press Select";
+		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
+		break;
+	case 11:
+		promptText = "Press Start";
+		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
+		break;
+	default:
+		// Finished remapping
+		isRemapping = false;
+		waitingForInput = false;
+		buttonPromptIndex = 0;
+		return;
+	}
+
+	// center prompt text
+	int textWidth = MeasureText(promptText, fontSize);
+	int textHeight = fontSize;
+	int textX = rectX + (rectWidth - textWidth) / 2;
+	int textY = rectY + (rectHeight - textHeight) / 2;
+	DrawText(promptText, textX, textY, fontSize, WHITE);
+
+	if (waitingForInput)
+	{
+		int newButtonPress = remapGamepad.GetButtonPressed();
+		if (newButtonPress > 0)
+		{
+			if (buttonDebounce.CanAcceptInput())
+			{
+				// Accept the input
+				params.display.setButtonMap(currentRaylibButton, newButtonPress);
+				buttonPromptIndex++;
+				waitingForInput = true;
+			}
+			else
+			{
+				lastAttemptTime = GetTime();
+			}
+		}
+
+		// Draw "Wait..." message if user pressed too quickly
+		float timeSinceAttempt = GetTime() - lastAttemptTime;
+		if (timeSinceAttempt < 1.0f && lastAttemptTime > 0.0f)
+		{
+			const char* waitText = "Wait...";
+			int waitWidth = MeasureText(waitText, static_cast<int>(fontSize * 0.7f));
+			int waitX = rectX + (rectWidth - waitWidth) / 2;
+			int waitY = textY + static_cast<int>(fontSize * 1.2f);
+			DrawText(waitText, waitX, waitY, static_cast<int>(fontSize * 0.7f), RED);
+		}
+
+		// Escape keymap if needed
+		if (IsKeyPressed(KEY_ESCAPE))
+		{
+			isRemapping = false;
+			waitingForInput = false;
+			buttonPromptIndex = 0;
+			params.menu.active = Menu::Main;
+			SetupMainMenu(params);
+		}
+	}
+
+	// When finished, return to main menu
+	if (buttonPromptIndex >= 12)
+	{
+		isRemapping = false;
+		waitingForInput = false;
+		buttonPromptIndex = 0;
+		params.menu.active = Menu::Main;
+		SetupMainMenu(params);
+		return;
 	}
 }

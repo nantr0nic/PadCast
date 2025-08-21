@@ -71,16 +71,16 @@ struct ButtonMap
 {
     std::unordered_map<int, int> buttonIndex;
     std::unordered_map<int, int> defaultSNESIndex{
-        {GAMEPAD_BUTTON_LEFT_FACE_UP, 1},
-        {GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},
-        {GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},
-        {GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2},
+        {GAMEPAD_BUTTON_LEFT_FACE_UP, 1},    // D-pad UP
+        {GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2}, // D-pad RIGHT
+        {GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},  // D-pad DOWN
+        {GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},  // D-pad LEFT
         {GAMEPAD_BUTTON_RIGHT_FACE_UP, 5},   // X
         {GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, 6},// A
         {GAMEPAD_BUTTON_RIGHT_FACE_DOWN, 7}, // B
         {GAMEPAD_BUTTON_RIGHT_FACE_LEFT, 8}, // Y
-        {GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},
-        {GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11},
+        {GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},  // Left shoulder
+        {GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11},// Right shoulder
         {GAMEPAD_BUTTON_MIDDLE_LEFT, 13},    // Select
         {GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
     };
@@ -93,7 +93,7 @@ struct ButtonMap
         buttonIndex = defaultSNESIndex;
     }
 
-    void RemapButton(int raylibButton, int newIndex)
+    void remapButton(int raylibButton, int newIndex)
     {
         // save for remap
         buttonIndex[raylibButton] = newIndex;
@@ -118,10 +118,10 @@ struct CachedButtons
 
     CachedButtons(const ButtonMap& buttonMap)
     {
-        RefreshCache(buttonMap);
+        refreshCache(buttonMap);
     }
 
-    void RefreshCache(const ButtonMap& buttonMap)
+    void refreshCache(const ButtonMap& buttonMap)
     {
         // Cache all button indices for fast access
         dpadUp = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_UP);
@@ -386,7 +386,13 @@ public:
     void resetButtonsToDefault()
     {
         buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
-        buttons.RefreshCache(buttonMap);
+        buttons.refreshCache(buttonMap);
+    }
+    void refreshButtonCache() { buttons.refreshCache(buttonMap); }
+    void setButtonMap(int raylibButton, int newIndex) 
+    { 
+        buttonMap.remapButton(raylibButton, newIndex);
+        buttons.refreshCache(buttonMap);
     }
 };
 
