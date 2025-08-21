@@ -27,25 +27,40 @@ struct MenuContext
 	// items will hold menu options for whatever the active menu is
 	std::vector<MenuItem> items;
 	int selectedIndex{ 0 };
+
+	struct MenuParams
+	{
+		MenuContext& menu;
+		raylib::Window& window;
+		Config& config;
+		GamepadDisplay& display;
+
+		MenuParams(MenuContext& m, raylib::Window& w, Config& c, GamepadDisplay& d)
+			: menu(m), window(w), config(c), display(d)
+		{
+		}
+	};
 };
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action);
 
-MenuItem createBackMenuItem(MenuContext& menu, raylib::Window& window, Config& config);
+MenuItem createBackMenuItem(MenuContext::MenuParams& params);
 
 MenuItem createCloseMenuItem(MenuContext& menu);
 
 MenuItem createSpacer();
 
-void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config);
+void SetupMainMenu(MenuContext::MenuParams& params);
 
-void SetupResolutionMenu(MenuContext& menu, raylib::Window& window, Config& config);
+void SetupResolutionMenu(MenuContext::MenuParams& params);
 
-void SetupFPSMenu(MenuContext& menu, raylib::Window& window, Config& config);
+void SetupFPSMenu(MenuContext::MenuParams& params);
 
-void SetupBGColorMenu(MenuContext& menu, raylib::Window& window, Config& config);
+void SetupBGColorMenu(MenuContext::MenuParams& params);
 
-void HandleMenuInput(MenuContext& menu, raylib::Window& window, Config& config, ScalingInfo& scaling);
+void SetupRemapMenu(MenuContext::MenuParams& params);
+
+void HandleMenuInput(MenuContext::MenuParams& params, ScalingInfo& scaling);
 
 void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config& config,
 	int baseX, int baseY);

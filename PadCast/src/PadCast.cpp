@@ -7,6 +7,7 @@
 
 int main()
 {
+    // ----- Setup ----- //
     Config mainConfig{};
     MenuContext menu;
 
@@ -29,6 +30,11 @@ int main()
         SetTraceLogLevel(LOG_ALL);
     }
 
+    // display = gamepad stuff, will refactor later
+    MenuContext::MenuParams menuParams(menu, window, mainConfig, display);
+    // ----- *** ----- //
+  
+    // ----- Cached values ----- //
     // Track window dimensions
     int lastWinWidth{ window.GetWidth() };
     int lastWinHeight{ window.GetHeight() };
@@ -39,7 +45,9 @@ int main()
     // Gamepad connection counter stuff
     static int gamepadCheckCounter = 0;
     bool gamepadConnected{ false };
+    // ----- *** ----- //
 
+    // ----- Main Loop ----- //
     while (!window.ShouldClose())
     {
         int currentWidth = window.GetWidth();
@@ -60,7 +68,7 @@ int main()
         ScalingInfo scaling(currentWidth, currentHeight, canvasWidth, canvasHeight);
 
         // Handles accessing menu and menu navigation
-        HandleMenuInput(menu, window, mainConfig, scaling);
+        HandleMenuInput(menuParams, scaling);
 
         // Draw base controller
         display.getTextures().unpressed.Draw(

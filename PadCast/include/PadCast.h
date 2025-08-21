@@ -5,6 +5,8 @@
 #include <raylib-cpp.hpp>
 #include "config.h"
 
+#include <unordered_map>
+
 struct GamepadTextures
 {
     raylib::Texture2D unpressed;
@@ -65,11 +67,85 @@ enum class BackgroundColor
     Blue        // 5
 };
 
+struct ButtonMap
+{
+    std::unordered_map<int, int> buttonIndex;
+    std::unordered_map<int, int> defaultSNESIndex{
+        {GAMEPAD_BUTTON_LEFT_FACE_UP, 1},
+        {GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},
+        {GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},
+        {GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2},
+        {GAMEPAD_BUTTON_RIGHT_FACE_UP, 5},   // X
+        {GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, 6},// A
+        {GAMEPAD_BUTTON_RIGHT_FACE_DOWN, 7}, // B
+        {GAMEPAD_BUTTON_RIGHT_FACE_LEFT, 8}, // Y
+        {GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},
+        {GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11},
+        {GAMEPAD_BUTTON_MIDDLE_LEFT, 13},    // Select
+        {GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
+    };
+
+    bool configNeedsUpdate{ false };
+
+    ButtonMap()
+    {
+        // For now, default to SNES index
+        buttonIndex = defaultSNESIndex;
+    }
+
+    void RemapButton(int raylibButton, int newIndex)
+    {
+        // save for remap
+        buttonIndex[raylibButton] = newIndex;
+    }
+};
+
+struct CachedButtons
+{
+    // Cache all frequently used button indices
+    int dpadUp;
+    int dpadRight;
+    int dpadDown;
+    int dpadLeft;
+    int xButton;        // RIGHT_FACE_UP
+    int aButton;        // RIGHT_FACE_RIGHT
+    int bButton;        // RIGHT_FACE_DOWN
+    int yButton;        // RIGHT_FACE_LEFT
+    int leftTrigger;
+    int rightTrigger;
+    int selectButton;   // MIDDLE_LEFT
+    int startButton;    // MIDDLE_RIGHT
+
+    CachedButtons(const ButtonMap& buttonMap)
+    {
+        RefreshCache(buttonMap);
+    }
+
+    void RefreshCache(const ButtonMap& buttonMap)
+    {
+        // Cache all button indices for fast access
+        dpadUp = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_UP);
+        dpadRight = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
+        dpadDown = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_DOWN);
+        dpadLeft = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_LEFT);
+        xButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_UP);
+        aButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
+        bButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+        yButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
+        leftTrigger = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_TRIGGER_1);
+        rightTrigger = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_TRIGGER_1);
+        selectButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_MIDDLE_LEFT);
+        startButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    }
+};
+
 class GamepadDisplay
 {
 private:
     GamepadTextures textures;
     Config& config;
+    ButtonMap buttonMap;
+    CachedButtons buttons;
 
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
@@ -84,6 +160,7 @@ private:
 public:
     GamepadDisplay(Config& mainConfig)
         : config{ mainConfig }
+        , buttons{ buttonMap }
     {
         if (config.getDebugMode() == 1)
         {
@@ -159,81 +236,65 @@ public:
             //}
         }
       
-        // This had been tested with SNES
-        // Face buttons (A, B, X, Y)
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_FACE_DOWN) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(7)))
-        {
-            textures.pressedB.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
-        }
-
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(6)))
-        {
-            textures.pressedA.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
-        }
-
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_FACE_UP) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(5)))
-        {
-            textures.pressedX.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
-        }
-
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_FACE_LEFT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(8)))
-        {
-            textures.pressedY.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
-        }
-
-        // D-pad buttons
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_FACE_UP) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(1)))
+        // D-Pad
+        if (gamepad.IsButtonDown(buttons.dpadUp))
         {
             textures.pressedUp.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
-
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_FACE_LEFT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(4)))
+        if (gamepad.IsButtonDown(buttons.dpadRight))
+        {
+            textures.pressedRight.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+        }
+        if (gamepad.IsButtonDown(buttons.dpadDown))
+        {
+            textures.pressedDown.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+        }
+        if (gamepad.IsButtonDown(buttons.dpadLeft))
         {
             textures.pressedLeft.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
 
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_FACE_DOWN) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(3)))
+        // Face buttons
+        if (gamepad.IsButtonDown(buttons.xButton))
         {
-            textures.pressedDown.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedX.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
 
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_FACE_RIGHT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(2)))
+        if (gamepad.IsButtonDown(buttons.aButton))
         {
-            textures.pressedRight.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedA.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
 
-        // Start
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_MIDDLE_RIGHT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(15)))
+        if (gamepad.IsButtonDown(buttons.bButton))
         {
-            textures.pressedStart.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedB.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
-        // Select
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_MIDDLE_LEFT) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(13)))
+
+        if (gamepad.IsButtonDown(buttons.yButton))
+        {
+            textures.pressedY.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+        }
+
+        // Shoulder buttons
+        if (gamepad.IsButtonDown(buttons.leftTrigger))
+        {
+            textures.pressedLBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+        }
+
+        if (gamepad.IsButtonDown(buttons.rightTrigger))
+        {
+            textures.pressedRBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+        }
+
+        // Select / Start
+        if (gamepad.IsButtonDown(buttons.selectButton))
         {
             textures.pressedSelect.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
 
-        // Shoulder buttons
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_LEFT_TRIGGER_1) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(9)))
+        if (gamepad.IsButtonDown(buttons.startButton))
         {
-            textures.pressedLBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
-        }
-        
-        if (gamepad.IsButtonDown(GAMEPAD_BUTTON_RIGHT_TRIGGER_1) ||
-            gamepad.IsButtonDown(static_cast<GamepadButton>(11)))
-        {
-            textures.pressedRBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedStart.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
         }
     }
 
@@ -320,6 +381,12 @@ public:
             }
         }
         return cachedBGColor;
+    }
+
+    void resetButtonsToDefault()
+    {
+        buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
+        buttons.RefreshCache(buttonMap);
     }
 };
 

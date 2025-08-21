@@ -5,11 +5,11 @@ MenuItem createMenuItem(const std::string& label, std::function<void()> action)
 	return { label, action };
 }
 
-MenuItem createBackMenuItem(MenuContext& menu, raylib::Window& window, Config& config)
+MenuItem createBackMenuItem(MenuContext::MenuParams& params)
 {
-	return createMenuItem("Back", [&menu, &window, &config]() {
-		menu.active = Menu::Main;
-		SetupMainMenu(menu, window, config);
+	return createMenuItem("Back", [&params]() {
+		params.menu.active = Menu::Main;
+		SetupMainMenu(params);
 		});
 }
 
@@ -25,145 +25,164 @@ MenuItem createSpacer()
 	return createMenuItem(" ", []() {});	// lol C++
 }
 
-void SetupMainMenu(MenuContext& menu, raylib::Window& window, Config& config)
+void SetupMainMenu(MenuContext::MenuParams& params)
 {
-	menu.items.clear();
+	params.menu.items.clear();
 	// push_back all menu items for active menu
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Resolution Menu",
-		[&menu, &window, &config]() { menu.active = Menu::Resolution; 
-									SetupResolutionMenu(menu, window, config); }
+		[&params]() { params.menu.active = Menu::Resolution; 
+									SetupResolutionMenu(params); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"FPS",
-		[&menu, &window, &config]() { menu.active = Menu::FPS; 
-									SetupFPSMenu(menu, window, config); }
+		[&params]() { params.menu.active = Menu::FPS; 
+									SetupFPSMenu(params); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Background Color",
-		[&menu, &window, &config]() { menu.active = Menu::BGColor;
-									SetupBGColorMenu(menu, window, config); }
+		[&params]() { params.menu.active = Menu::BGColor;
+									SetupBGColorMenu(params); }
 		});
 	/*
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Remap Buttons",
-		[&menu]() { menu.active = Menu::RemapButtons; SetupRemapMenu(menu); }
+		[&menu]() { params.menu.active = Menu::RemapButtons; SetupRemapMenu(menu); }
 	});
 	*/
-	menu.items.push_back(createSpacer());
-	menu.items.push_back(createCloseMenuItem(menu));
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
-	menu.selectedIndex = 0;
+	params.menu.selectedIndex = 0;
 }
 
-void SetupResolutionMenu(MenuContext& menu, raylib::Window& window, Config& config)
+void SetupResolutionMenu(MenuContext::MenuParams& params)
 {
-	menu.items.clear();
-	menu.items.push_back({
+	params.menu.items.clear();
+	params.menu.items.push_back({
 		"1280x720",
-		[&window]() { window.SetSize(1280, 720); }
+		[&params]() { params.window.SetSize(1280, 720); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"960x540",
-		[&window]() { window.SetSize(960, 540); }
+		[&params]() { params.window.SetSize(960, 540); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"640x360",
-		[&window]() { window.SetSize(640, 360); }
+		[&params]() { params.window.SetSize(640, 360); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"480x270",
-		[&window]() { window.SetSize(480, 270); }
+		[&params]() { params.window.SetSize(480, 270); }
 		});
-	menu.items.push_back(createSpacer());
-	menu.items.push_back(createBackMenuItem(menu, window, config));
-	menu.items.push_back(createCloseMenuItem(menu));
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
-	menu.selectedIndex = 0;
+	params.menu.selectedIndex = 0;
 }
 
-void SetupFPSMenu(MenuContext& menu, raylib::Window& window, Config& config)
+void SetupFPSMenu(MenuContext::MenuParams& params)
 {
-	std::string current_fps = std::to_string(config.getValue("Window", "TARGET_FPS"));
+	std::string current_fps = std::to_string(params.config.getValue("Window", "TARGET_FPS"));
 	std::string current_string = "Current FPS: " + current_fps;
-	menu.items.clear();
-	menu.items.push_back({
+	params.menu.items.clear();
+	params.menu.items.push_back({
 		current_string,
-		[&menu]() { menu.active = Menu::None; }
+		[&params]() { params.menu.active = Menu::None; }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"30 FPS",
-		[&menu, &window, &config]() {
-			window.SetTargetFPS(30);
-			config.updateTargetFPS(30);
-			SetupFPSMenu(menu, window, config);
+		[&params]() {
+			params.window.SetTargetFPS(30);
+			params.config.updateTargetFPS(30);
+			SetupFPSMenu(params);
 		}
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"60 FPS",
-		[&menu, &window, &config]() {
-			window.SetTargetFPS(60);
-			config.updateTargetFPS(60);
-			SetupFPSMenu(menu, window, config);
+		[&params]() {
+			params.window.SetTargetFPS(60);
+			params.config.updateTargetFPS(60);
+			SetupFPSMenu(params);
 		}
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"90 FPS",
-		[&menu, &window, &config]() {
-			window.SetTargetFPS(90);
-			config.updateTargetFPS(90);
-			SetupFPSMenu(menu, window, config);
+		[&params]() {
+			params.window.SetTargetFPS(90);
+			params.config.updateTargetFPS(90);
+			SetupFPSMenu(params);
 		}
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"120 FPS",
-		[&menu, &window, &config]() {
-			window.SetTargetFPS(120);
-			config.updateTargetFPS(120);
-			SetupFPSMenu(menu, window, config);
+		[&params]() {
+			params.window.SetTargetFPS(120);
+			params.config.updateTargetFPS(120);
+			SetupFPSMenu(params);
 		}
 		});
-	menu.items.push_back(createSpacer());
-	menu.items.push_back(createBackMenuItem(menu, window, config));
-	menu.items.push_back(createCloseMenuItem(menu));
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+
+	params.menu.selectedIndex = 0;
 }
 
-void SetupBGColorMenu(MenuContext& menu, raylib::Window& window, Config& config)
+void SetupBGColorMenu(MenuContext::MenuParams& params)
 {
-	menu.items.clear();
-	menu.items.push_back({
+	params.menu.items.clear();
+	params.menu.items.push_back({
 		"Black",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Black)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Black)); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"White",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::White)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"\"Raywhite\"",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Raywhite)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Raywhite)); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Red",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Red)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Red)); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Green",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Green)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Green)); }
 		});
-	menu.items.push_back({
+	params.menu.items.push_back({
 		"Blue",
-		[&config]() { config.updateBGColor(static_cast<int>(BackgroundColor::Blue)); }
+		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue)); }
 		});
-	menu.items.push_back(createSpacer());
-	menu.items.push_back(createBackMenuItem(menu, window, config));
-	menu.items.push_back(createCloseMenuItem(menu));
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
-	menu.selectedIndex = 0;
+	params.menu.selectedIndex = 0;
 }
 
-void HandleMenuInput(MenuContext& menu, raylib::Window& window, 
-					Config& config, ScalingInfo& scaling)
+void SetupRemapMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Start Remap",
+		[]() {}
+		});
+	params.menu.items.push_back({
+		"Reset to Default",
+		[]() { }
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+
+	params.menu.selectedIndex = 0;
+}
+
+void HandleMenuInput(MenuContext::MenuParams& params, ScalingInfo& scaling)
 {
 	// ----- Menu open/close ----- //
 	// a right click, spacebar, or M will open the main menu
@@ -171,35 +190,35 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 		|| IsKeyPressed(KEY_SPACE)
 		|| IsKeyPressed(KEY_M))
 	{
-		if (menu.active == Menu::None)
+		if (params.menu.active == Menu::None)
 		{
-			menu.active = Menu::Main;
-			SetupMainMenu(menu, window, config);
-			menu.selectedIndex = 0;
+			params.menu.active = Menu::Main;
+			SetupMainMenu(params);
+			params.menu.selectedIndex = 0;
 		}
 		else
 		{
-			menu.active = Menu::None;
+			params.menu.active = Menu::None;
 		}
 		return;
 	}
 
 	// ----- Menu navigation ----- //
-	if (menu.active != Menu::None)
+	if (params.menu.active != Menu::None)
 	{
 		// Keyboard navigation
 		if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
 		{
-			menu.selectedIndex = (menu.selectedIndex + 1) % menu.items.size();
+			params.menu.selectedIndex = (params.menu.selectedIndex + 1) % params.menu.items.size();
 		}
 		else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
 		{
-			menu.selectedIndex =
-				(menu.selectedIndex - 1 + menu.items.size()) % menu.items.size();
+			params.menu.selectedIndex =
+				(params.menu.selectedIndex - 1 + params.menu.items.size()) % params.menu.items.size();
 		}
 		else if (IsKeyPressed(KEY_ENTER))
 		{
-			menu.items[menu.selectedIndex].action();
+			params.menu.items[params.menu.selectedIndex].action();
 			// menu.active = Menu::None;
 		}
 
@@ -213,7 +232,7 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 		int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
 		int scaledWidth = static_cast<int>(200 * menuScale);
 		int scaledLineHeight = static_cast<int>(30 * menuScale);
-		for (size_t i = 0; i < menu.items.size(); ++i)
+		for (size_t i = 0; i < params.menu.items.size(); ++i)
 		{
 			Rectangle itemRect = {
 				static_cast<float>(scaledX),
@@ -224,10 +243,10 @@ void HandleMenuInput(MenuContext& menu, raylib::Window& window,
 			// Detect mouse clicking menu item
 			if (CheckCollisionPointRec(mousePos, itemRect))
 			{
-				menu.selectedIndex = static_cast<int>(i);
+				params.menu.selectedIndex = static_cast<int>(i);
 				if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 				{
-					menu.items[i].action();
+					params.menu.items[i].action();
 				}
 			}
 		}
