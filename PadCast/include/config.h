@@ -20,6 +20,7 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
+		// Background color defaults
 		static constexpr int BACKGROUND_COLOR{ 0 };
 		static constexpr int CUSTOM_BG_RED{ 0 };
 		static constexpr int CUSTOM_BG_GREEN{ 0 };
@@ -33,7 +34,7 @@ private:
 		static constexpr int IMAGE_TINT_GREEN{ 255 };
 		static constexpr int IMAGE_TINT_BLUE{ 255 };
 		static constexpr int IMAGE_TINT_PALETTE{ 0 };
-		// Controller defaults
+		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
@@ -132,11 +133,11 @@ public:
 	}
 	int getImgCanvasWidth() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_WIDTH");
+		return getValue("Image", "IMAGE_CANVAS_WIDTH");
 	}
 	int getImgCanvasHeight() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_HEIGHT");
+		return getValue("Image", "IMAGE_CANVAS_HEIGHT");
 	}
 	int getCurrentWinWidth() const
 	{
@@ -189,11 +190,11 @@ public:
 	}
 	void updateUseCustomTint(int useCustom)
 	{
-		config_ini["Window"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
+		config_ini["Image"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
 	}
 	void updateImageTintPalette(int paletteIndex)
 	{
-		config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+		config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
 	}
 
 //$ ----- Reset -----

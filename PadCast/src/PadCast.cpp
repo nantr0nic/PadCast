@@ -138,21 +138,22 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     if (!mTintCacheValid)
     {
         mCachedUseCustomTint
-            = mConfig.getValue("Window", "USE_CUSTOM_TINT");
-        mCachedTintR = mConfig.getValue("Window", "IMAGE_TINT_RED");
-        mCachedTintG = mConfig.getValue("Window", "IMAGE_TINT_GREEN");
-        mCachedTintB = mConfig.getValue("Window", "IMAGE_TINT_BLUE");
+            = mConfig.getValue("Image", "USE_CUSTOM_TINT");
+        mCachedTintR = mConfig.getValue("Image", "IMAGE_TINT_RED");
+        mCachedTintG = mConfig.getValue("Image", "IMAGE_TINT_GREEN");
+        mCachedTintB = mConfig.getValue("Image", "IMAGE_TINT_BLUE");
         if (mCachedUseCustomTint == 1)
         {
-            mCachedPressedTint
-                = Color{ (unsigned char)mCachedTintR,
-                         (unsigned char)mCachedTintG,
-                         (unsigned char)mCachedTintB,
-                         255 };
+            mCachedPressedTint = Color { 
+                (unsigned char)mCachedTintR,
+                (unsigned char)mCachedTintG,
+                (unsigned char)mCachedTintB,
+                255
+            };
         }
         else
         {
-            int sel = mConfig.getValue("Window", "IMAGE_TINT_PALETTE");
+            int sel = mConfig.getValue("Image", "IMAGE_TINT_PALETTE");
             switch (sel)
             {
             case 1:
