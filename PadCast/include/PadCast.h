@@ -37,8 +37,11 @@ struct ScalingInfo
 
 enum class BackgroundColor
 {
-	// 0     1     2     3     4
-	Black, White, Red, Green, Blue
+	Black, 
+	White, 
+	Red, 
+	Green, 
+	Blue
 };
 
 struct ButtonMap

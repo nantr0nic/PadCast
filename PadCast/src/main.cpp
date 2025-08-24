@@ -23,7 +23,7 @@ int main()
 	MenuContext menu;
 
 	// short pause to allow for controller detection
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(400));
 	if (mainConfig.getDebugMode())
 	{
 		SetTraceLogLevel(LOG_ALL);
@@ -80,7 +80,7 @@ int main()
         );
 
         // Check gamepad connection
-        if (++gamepadCheckCounter >= 30)
+        if (++gamepadCheckCounter >= 15)
         {
             gamepadCheckCounter = 0;
             gamepadConnected = padcast.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
