@@ -1,13 +1,11 @@
 ﻿# Add source to this project's executable.
 add_executable (PadCast
+    "src/main.cpp"
     "src/PadCast.cpp" 
     "src/config.cpp"
     "src/winmain_proxy.cpp"
     "src/menus.cpp"
-    "include/PadCast.h"
-    "include/config.h"
-    "include/menus.h"
-)
+ )
 
 # MSVC-specific optimizations to reduce false positives
 if(MSVC)
