@@ -62,10 +62,9 @@ enum class BackgroundColor
 {
     Black,      // 0
     White,      // 1
-    Raywhite,   // 2
-    Red,        // 3
-    Green,      // 4
-    Blue        // 5
+    Red,        // 2
+    Green,      // 3
+    Blue        // 4
 };
 
 struct ButtonMap
@@ -195,10 +194,22 @@ private:
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
 
-    // Cache values for optimizing calls
+    // Cache values for optimization
     mutable Color cachedBGColor{ BLACK };
     mutable int lastBGColorValue{ -1 };
+    mutable int lastUseCustomBG{ -1 };
+    mutable int lastCustomRed{ -1 };
+    mutable int lastCustomGreen{ -1 };
+    mutable int lastCustomBlue{ -1 };
     mutable int cachedStabilityThreshold{ -1 };
+
+    // Custom BG Color cache
+    mutable int cachedUseCustomBG{ -1 };
+    mutable int cachedCustomRed{ -1 };
+    mutable int cachedCustomGreen{ -1 };
+    mutable int cachedCustomBlue{ -1 };
+    mutable int cachedBGColorValue{ -1 };
+    mutable bool configCacheValid{ false };
 
     bool debugMode{ false };
 
@@ -390,46 +401,84 @@ public:
     {
         return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
     }
+
+    void invalidateBGCache()
+    {
+        configCacheValid = false;
+    }
+
     Color getBGColor() const
     {
-        int currentBGValue = config.getBGColor();
+        if (!configCacheValid)
+        {
+            // Read all config values once and cache them
+            cachedUseCustomBG = config.getValue("Window", "USE_CUSTOM_BG");
+            cachedCustomRed = config.getValue("Window", "CUSTOM_BG_RED");
+            cachedCustomGreen = config.getValue("Window", "CUSTOM_BG_GREEN");
+            cachedCustomBlue = config.getValue("Window", "CUSTOM_BG_BLUE");
+            cachedBGColorValue = config.getBGColor();
+            configCacheValid = true;
+        }
 
-        // Only change if config value changed
-        if (currentBGValue != lastBGColorValue)
-        { 
-            lastBGColorValue = currentBGValue;
-
-            if (!isValidBackgroundColor(currentBGValue))
+        if (cachedUseCustomBG == 1)
+        {
+            if (cachedUseCustomBG != lastUseCustomBG ||
+                cachedCustomRed != lastCustomRed ||
+                cachedCustomGreen != lastCustomGreen ||
+                cachedCustomBlue != lastCustomBlue)
             {
-                currentBGValue = 0; // Default to black
-            }
+                lastUseCustomBG = cachedUseCustomBG;
+                lastCustomRed = cachedCustomRed;
+                lastCustomGreen = cachedCustomGreen;
+                lastCustomBlue = cachedCustomBlue;
 
-            BackgroundColor bgColor = static_cast<BackgroundColor>(currentBGValue);
-            switch (bgColor)
-            {
-            case BackgroundColor::Black:
-                cachedBGColor = BLACK;
-                break;
-            case BackgroundColor::White:
-                cachedBGColor = WHITE;
-                break;
-            case BackgroundColor::Raywhite:
-                cachedBGColor = RAYWHITE;
-                break;
-            case BackgroundColor::Red:
-                cachedBGColor = RED;
-                break;
-            case BackgroundColor::Green:
-                cachedBGColor = GREEN;
-                break;
-            case BackgroundColor::Blue:
-                cachedBGColor = BLUE;
-                break;
-            default:
-                cachedBGColor = BLACK;
-                break;
+                cachedBGColor = Color{
+                    static_cast<unsigned char>(cachedCustomRed),
+                    static_cast<unsigned char>(cachedCustomGreen),
+                    static_cast<unsigned char>(cachedCustomBlue),
+                    255
+                };
             }
         }
+        else
+        {
+            // Palette mode
+            if (cachedUseCustomBG != lastUseCustomBG || cachedBGColorValue != lastBGColorValue)
+            {
+                lastUseCustomBG = cachedUseCustomBG;
+                lastBGColorValue = cachedBGColorValue;
+
+                // Validate and update cached color
+                int currentBGValue = cachedBGColorValue;
+                if (!isValidBackgroundColor(currentBGValue))
+                {
+                    currentBGValue = 0;
+                }
+
+                switch (static_cast<BackgroundColor>(currentBGValue))
+                {
+                case BackgroundColor::Black:
+                    cachedBGColor = BLACK;
+                    break;
+                case BackgroundColor::White:
+                    cachedBGColor = WHITE;
+                    break;
+                case BackgroundColor::Red:
+                    cachedBGColor = RED;
+                    break;
+                case BackgroundColor::Green:
+                    cachedBGColor = GREEN;
+                    break;
+                case BackgroundColor::Blue:
+                    cachedBGColor = BLUE;
+                    break;
+                default:
+                    cachedBGColor = BLACK;
+                    break;
+                }
+            }
+        }
+
         return cachedBGColor;
     }
 

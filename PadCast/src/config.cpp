@@ -69,6 +69,67 @@ void Config::ValidateConfig()
 		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(DefaultValues::BACKGROUND_COLOR);
 		needsSave = true;
 	}
+	if (!hasValue("Window", "CUSTOM_BG_RED"))
+	{
+		config_ini["Window"]["CUSTOM_BG_RED"] = std::to_string(DefaultValues::CUSTOM_BG_RED);
+		needsSave = true;
+	}
+	else
+	{
+		// Validate existing value is in valid range (0-255)
+		int existingRed = getValue("Window", "CUSTOM_BG_RED");
+		if (existingRed < 0 || existingRed > 255)
+		{
+			config_ini["Window"]["CUSTOM_BG_RED"] = std::to_string(DefaultValues::CUSTOM_BG_RED);
+			needsSave = true;
+		}
+	}
+
+	if (!hasValue("Window", "CUSTOM_BG_GREEN"))
+	{
+		config_ini["Window"]["CUSTOM_BG_GREEN"] = std::to_string(DefaultValues::CUSTOM_BG_GREEN);
+		needsSave = true;
+	}
+	else
+	{
+		int existingGreen = getValue("Window", "CUSTOM_BG_GREEN");
+		if (existingGreen < 0 || existingGreen > 255)
+		{
+			config_ini["Window"]["CUSTOM_BG_GREEN"] = std::to_string(DefaultValues::CUSTOM_BG_GREEN);
+			needsSave = true;
+		}
+	}
+
+	if (!hasValue("Window", "CUSTOM_BG_BLUE"))
+	{
+		config_ini["Window"]["CUSTOM_BG_BLUE"] = std::to_string(DefaultValues::CUSTOM_BG_BLUE);
+		needsSave = true;
+	}
+	else
+	{
+		int existingBlue = getValue("Window", "CUSTOM_BG_BLUE");
+		if (existingBlue < 0 || existingBlue > 255)
+		{
+			config_ini["Window"]["CUSTOM_BG_BLUE"] = std::to_string(DefaultValues::CUSTOM_BG_BLUE);
+			needsSave = true;
+		}
+	}
+
+	if (!hasValue("Window", "USE_CUSTOM_BG"))
+	{
+		config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(DefaultValues::USE_CUSTOM_BG);
+		needsSave = true;
+	}
+	else
+	{
+		// Validate USE_CUSTOM_BG is 0 or 1
+		int existingUseCustom = getValue("Window", "USE_CUSTOM_BG");
+		if (existingUseCustom != 0 && existingUseCustom != 1)
+		{
+			config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(DefaultValues::USE_CUSTOM_BG);
+			needsSave = true;
+		}
+	}
 
 	// Check Gamepad section
 	if (!hasValue("Gamepad", "STABILITY_THRESHOLD"))
@@ -190,6 +251,14 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::TARGET_FPS;
 		if (key == "BACKGROUND_COLOR")
 			return DefaultValues::BACKGROUND_COLOR;
+		if (key == "CUSTOM_BG_RED")
+			return DefaultValues::CUSTOM_BG_RED;
+		if (key == "CUSTOM_BG_GREEN")
+			return DefaultValues::CUSTOM_BG_GREEN;
+		if (key == "CUSTOM_BG_BLUE")
+			return DefaultValues::CUSTOM_BG_BLUE;
+		if (key == "USE_CUSTOM_BG")
+			return DefaultValues::USE_CUSTOM_BG;
 	}
 	if (section == "Gamepad") 
 	{

@@ -32,18 +32,24 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	// push_back all menu items for active menu
 	params.menu.items.push_back({
 		"Resolution Menu",
-		[&params]() { params.menu.active = Menu::Resolution; 
-									SetupResolutionMenu(params); }
+		[&params]() { 
+			params.menu.active = Menu::Resolution; 
+			SetupResolutionMenu(params); 
+		}
 		});
 	params.menu.items.push_back({
 		"FPS",
-		[&params]() { params.menu.active = Menu::FPS; 
-									SetupFPSMenu(params); }
+		[&params]() { 
+			params.menu.active = Menu::FPS; 					
+			SetupFPSMenu(params); 
+		}
 		});
 	params.menu.items.push_back({
 		"Background Color",
-		[&params]() { params.menu.active = Menu::BGColor;
-									SetupBGColorMenu(params); }
+		[&params]() { 
+			params.menu.active = Menu::BGColor;
+			SetupBGColorMenu(params); 
+		}
 		});
 	params.menu.items.push_back({
 		"Remap Buttons",
@@ -134,27 +140,50 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Black",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Black)); }
+		[&params]() { 
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
+			params.config.updateUseCustomBG(0);
+			params.display.invalidateBGCache();
+		}
 		});
 	params.menu.items.push_back({
 		"White",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); }
-		});
-	params.menu.items.push_back({
-		"\"Raywhite\"",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Raywhite)); }
+		[&params]() { 
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
+			params.config.updateUseCustomBG(0);
+			params.display.invalidateBGCache();
+		}
 		});
 	params.menu.items.push_back({
 		"Red",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Red)); }
+		[&params]() { 
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
+			params.config.updateUseCustomBG(0);
+			params.display.invalidateBGCache();
+		}
 		});
 	params.menu.items.push_back({
 		"Green",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Green)); }
+		[&params]() { 
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
+			params.config.updateUseCustomBG(0); 
+			params.display.invalidateBGCache(); 
+		}
 		});
 	params.menu.items.push_back({
 		"Blue",
-		[&params]() { params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue)); }
+		[&params]() { 
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
+			params.config.updateUseCustomBG(0); 
+			params.display.invalidateBGCache(); 
+		}
+		});
+	params.menu.items.push_back({
+		"Custom Color",
+		[&params]() { 
+			params.config.updateUseCustomBG(1);
+			params.display.invalidateBGCache();
+		}
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
@@ -168,11 +197,17 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Start Remap",
-		[&params]() { params.menu.active = Menu::RemapButtons; ResetRemapState(); }
+		[&params]() { 
+			params.menu.active = Menu::RemapButtons; 
+			ResetRemapState(); 
+		}
 		});
 	params.menu.items.push_back({
 		"Reset to Default",
-		[&params]() { params.display.resetButtonsToDefault(); params.config.resetButtonMap(); }
+		[&params]() { 
+			params.display.resetButtonsToDefault(); 
+			params.config.resetButtonMap(); 
+		}
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
@@ -223,7 +258,7 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
-		// Scaling setup
+		// Scaling setup for collision box
 		float menuScale = std::max(params.scaling.scale, 0.7f); // don't scale collision box below 70%
 		int baseX = 50;
 		int baseY = 50;
@@ -346,22 +381,22 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	{
 		// case #'s match order of buttons in unordered_map buttonIndex
 	case 0:
-		promptText = "Press D-pad UP";
+		promptText = "Press D-pad\n       UP";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
 		currentButtonConfig = "DPAD_UP";
 		break;
 	case 1:
-		promptText = "Press D-pad RIGHT";
+		promptText = "Press D-pad\n    RIGHT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
 		currentButtonConfig = "DPAD_RIGHT";
 		break;
 	case 2:
-		promptText = "Press D-pad DOWN";
+		promptText = "Press D-pad\n    DOWN";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
 		currentButtonConfig = "DPAD_DOWN";
 		break;
 	case 3:
-		promptText = "Press D-pad LEFT";
+		promptText = "Press D-pad\n     LEFT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
 		currentButtonConfig = "DPAD_LEFT";
 		break;
@@ -386,12 +421,12 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		currentButtonConfig = "Y_BUTTON";
 		break;
 	case 8:
-		promptText = "Press LEFT Shoulder";
+		promptText = "    Press\nLEFT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
 		currentButtonConfig = "L_BUTTON";
 		break;
 	case 9:
-		promptText = "Press RIGHT Shoulder";
+		promptText = "    Press\nRIGHT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
 		currentButtonConfig = "R_BUTTON";
 		break;

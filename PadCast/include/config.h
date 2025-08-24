@@ -21,6 +21,10 @@ private:
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
 		static constexpr int BACKGROUND_COLOR{ 0 };
+		static constexpr int CUSTOM_BG_RED{ 0 };
+		static constexpr int CUSTOM_BG_GREEN{ 0 };
+		static constexpr int CUSTOM_BG_BLUE{ 0 };
+		static constexpr int USE_CUSTOM_BG{ 0 };
 		// Image canvas dimensions
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
@@ -164,6 +168,10 @@ public:
 	{
 		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(background_int);
 	}
+	void updateUseCustomBG(int useCustom)
+	{
+		config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(useCustom);
+	} //*
 	void updateButtonConfig(const std::string& key, int new_button)
 	{
 		config_ini["ButtonMap"][key] = std::to_string(new_button);
