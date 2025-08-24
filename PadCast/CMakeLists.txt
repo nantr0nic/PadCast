@@ -2,6 +2,9 @@
 add_executable (PadCast
     "src/main.cpp"
     "src/PadCast.cpp" 
+    "include/PadCast.h" 
+    "include/mini/ini.h" 
+    "include/config.h"
     "src/config.cpp"
     "src/winmain_proxy.cpp"
     "src/menus.cpp"
@@ -9,9 +12,6 @@ add_executable (PadCast
 
 # MSVC-specific optimizations to reduce false positives
 if(MSVC)
-    # Force Zi instead of ZI (Edit and Continue debug)
-    target_compile_options(PadCast PRIVATE /Zi)
-
     target_compile_options(PadCast PRIVATE 
         /GL          # Whole program optimization
         /guard:cf    # Control Flow Guard (security feature)

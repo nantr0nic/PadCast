@@ -151,7 +151,7 @@ public:
 	{
 		return getValue("Window", "TARGET_FPS");
 	}
-	int getBGColor() const 
+	int getBGColor() const
 	{
 		return getValue("Window", "BACKGROUND_COLOR");
 	}
