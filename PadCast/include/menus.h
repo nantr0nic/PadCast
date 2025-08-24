@@ -12,6 +12,7 @@ enum class Menu
 	Resolution,
 	FPS,
 	BGColor,
+	Tint,
 	RemapButtons
 };
 
@@ -58,6 +59,8 @@ void SetupResolutionMenu(MenuContext::MenuParams& params);
 void SetupFPSMenu(MenuContext::MenuParams& params);
 
 void SetupBGColorMenu(MenuContext::MenuParams& params);
+
+void SetupTintMenu(MenuContext::MenuParams& params);
 
 void SetupRemapMenu(MenuContext::MenuParams& params);
 

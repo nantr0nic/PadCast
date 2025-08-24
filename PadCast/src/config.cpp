@@ -59,6 +59,67 @@ void Config::ValidateConfig()
 		config_ini["Window"]["IMAGE_CANVAS_HEIGHT"] = std::to_string(DefaultValues::IMAGE_CANVAS_HEIGHT);
 		needsSave = true;
 	}
+	if (!hasValue("Window", "USE_CUSTOM_TINT"))
+	{
+		config_ini["Window"]["USE_CUSTOM_TINT"] = std::to_string(DefaultValues::USE_CUSTOM_TINT);
+		needsSave = true;
+	}
+	if (!hasValue("Window", "IMAGE_TINT_RED"))
+	{
+		config_ini["Window"]["IMAGE_TINT_RED"] = std::to_string(DefaultValues::IMAGE_TINT_RED);
+		needsSave = true;
+	}
+	else
+	{
+		int existingRed = getValue("Window", "IMAGE_TINT_RED");
+		if (existingRed < 0 || existingRed > 255)
+		{
+			config_ini["Window"]["IMAGE_TINT_RED"] = std::to_string(DefaultValues::IMAGE_TINT_RED);
+			needsSave = true;
+		}
+	}
+	if (!hasValue("Window", "IMAGE_TINT_GREEN"))
+	{
+		config_ini["Window"]["IMAGE_TINT_GREEN"] = std::to_string(DefaultValues::IMAGE_TINT_GREEN);
+		needsSave = true;
+	}
+	else
+	{
+		int existingGreen = getValue("Window", "IMAGE_TINT_GREEN");
+		if (existingGreen < 0 || existingGreen > 255)
+		{
+			config_ini["Window"]["IMAGE_TINT_GREEN"] = std::to_string(DefaultValues::IMAGE_TINT_GREEN);
+			needsSave = true;
+		}
+	}
+	if (!hasValue("Window", "IMAGE_TINT_BLUE"))
+	{
+		config_ini["Window"]["IMAGE_TINT_BLUE"] = std::to_string(DefaultValues::IMAGE_TINT_BLUE);
+		needsSave = true;
+	}
+	else
+	{
+		int existingBlue = getValue("Window", "IMAGE_TINT_BLUE");
+		if (existingBlue < 0 || existingBlue > 255)
+		{
+			config_ini["Window"]["IMAGE_TINT_BLUE"] = std::to_string(DefaultValues::IMAGE_TINT_BLUE);
+			needsSave = true;
+		}
+	}
+	if (!hasValue("Window", "IMAGE_TINT_PALETTE"))
+	{
+		config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(DefaultValues::IMAGE_TINT_PALETTE);
+		needsSave = true;
+	}
+	else
+	{
+		int existingPalette = getValue("Window", "IMAGE_TINT_PALETTE");
+		if (existingPalette < 0 || existingPalette > 3) // valid range is 0-3
+		{
+			config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(DefaultValues::IMAGE_TINT_PALETTE);
+			needsSave = true;
+		}
+	}
 	if (!hasValue("Window", "TARGET_FPS"))
 	{
 		config_ini["Window"]["TARGET_FPS"] = std::to_string(DefaultValues::TARGET_FPS);
@@ -76,7 +137,6 @@ void Config::ValidateConfig()
 	}
 	else
 	{
-		// Validate existing value is in valid range (0-255)
 		int existingRed = getValue("Window", "CUSTOM_BG_RED");
 		if (existingRed < 0 || existingRed > 255)
 		{
@@ -259,6 +319,16 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::CUSTOM_BG_BLUE;
 		if (key == "USE_CUSTOM_BG")
 			return DefaultValues::USE_CUSTOM_BG;
+		if (key == "USE_CUSTOM_TINT")   
+			return DefaultValues::USE_CUSTOM_TINT;
+		if (key == "IMAGE_TINT_RED")    
+			return DefaultValues::IMAGE_TINT_RED;
+		if (key == "IMAGE_TINT_GREEN")  
+			return DefaultValues::IMAGE_TINT_GREEN;
+		if (key == "IMAGE_TINT_BLUE")   
+			return DefaultValues::IMAGE_TINT_BLUE;
+		if (key == "IMAGE_TINT_PALETTE")
+			return DefaultValues::IMAGE_TINT_PALETTE;
 	}
 	if (section == "Gamepad") 
 	{

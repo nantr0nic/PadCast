@@ -202,7 +202,6 @@ private:
     mutable int lastCustomGreen{ -1 };
     mutable int lastCustomBlue{ -1 };
     mutable int cachedStabilityThreshold{ -1 };
-
     // Custom BG Color cache
     mutable int cachedUseCustomBG{ -1 };
     mutable int cachedCustomRed{ -1 };
@@ -210,6 +209,13 @@ private:
     mutable int cachedCustomBlue{ -1 };
     mutable int cachedBGColorValue{ -1 };
     mutable bool configCacheValid{ false };
+    // Custom pressed tint cache
+    mutable bool tintCacheValid{ false };
+    mutable int cachedUseCustomTint{ -1 };
+    mutable int cachedTintR{ -1 };
+    mutable int cachedTintG{ -1 };
+    mutable int cachedTintB{ -1 };
+    mutable Color cachedTextureTint{ WHITE };
 
     bool debugMode{ false };
 
@@ -260,7 +266,46 @@ public:
     {
         const raylib::Vector2 position{ scaling.offsetX, scaling.offsetY };
         auto scale = scaling.scale;
-        auto texture_tint = raylib::WHITE;
+
+        // pressed texture tint
+        if (!tintCacheValid)
+        {
+            cachedUseCustomTint
+                = config.getValue("Window", "USE_CUSTOM_TINT");
+            cachedTintR = config.getValue("Window", "IMAGE_TINT_RED");
+            cachedTintG = config.getValue("Window", "IMAGE_TINT_GREEN");
+            cachedTintB = config.getValue("Window", "IMAGE_TINT_BLUE");
+            if (cachedUseCustomTint == 1)
+            {
+                cachedTextureTint
+                    = Color{ (unsigned char)cachedTintR,
+                             (unsigned char)cachedTintG,
+                             (unsigned char)cachedTintB,
+                             255 };
+            }
+            else
+            {
+                int sel = config.getValue("Window", "IMAGE_TINT_PALETTE");
+                switch (sel)
+                {
+                case 1: 
+                    cachedTextureTint = RED;   
+                    break;
+                case 2: 
+                    cachedTextureTint = GREEN; 
+                    break;
+                case 3:
+                    cachedTextureTint = BLUE;
+                    break;
+                default:
+                    cachedTextureTint = WHITE; 
+                    break;
+                }
+            }
+            tintCacheValid = true;
+        }
+
+        auto texture_tint = cachedTextureTint;
 
         if (debugMode)
         {
@@ -396,7 +441,6 @@ public:
 
 public:
     // Background color functions
-
     bool isValidBackgroundColor(int value) const
     {
         return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
@@ -482,8 +526,13 @@ public:
         return cachedBGColor;
     }
 
-    // Button Map functions
+    // Tint functions
+    void invalidateTintCache()
+    {
+        tintCacheValid = false;
+    }
 
+    // Button Map functions
     void loadButtonsFromConfig()
     {
         std::println("DEBUG: Checking if ButtonMap section exists...");
@@ -590,7 +639,6 @@ public:
         buttonCache.refreshCache(buttonMap);
         std::println("DEBUG: Finished loading button mappings");
     }
-
     void resetButtonsToDefault()
     {
         buttonMap.buttonIndex = buttonMap.defaultSNESIndex;

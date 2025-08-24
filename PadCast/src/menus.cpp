@@ -52,9 +52,25 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		}
 		});
 	params.menu.items.push_back({
+		"Button Tint Color",
+		[&params]() {
+			params.menu.active = Menu::Tint;
+			SetupTintMenu(params);
+		}
+		});
+	params.menu.items.push_back({
 		"Remap Buttons",
 		[&params]() { SetupRemapMenu(params); }
-	});
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back({
+		"Read Config File",
+		[&params]() {
+			params.config.ReloadConfig();
+			params.display.invalidateBGCache();
+			params.display.invalidateTintCache();
+		}
+		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
@@ -189,6 +205,54 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back(createBackMenuItem(params));
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
+	params.menu.selectedIndex = 0;
+}
+
+void SetupTintMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({ 
+		"White",
+		[&params]() {
+			params.config.updateImageTintPalette(0);
+			params.config.updateUseCustomTint(0);
+			params.display.invalidateTintCache();
+		}
+		});
+	params.menu.items.push_back({ 
+		"Red",
+		[&params]() {
+			params.config.updateImageTintPalette(1);
+			params.config.updateUseCustomTint(0);
+			params.display.invalidateTintCache();
+		}
+		});
+	params.menu.items.push_back({ 
+		"Green",
+		[&params]() {
+			params.config.updateImageTintPalette(2);
+			params.config.updateUseCustomTint(0);
+			params.display.invalidateTintCache();
+		}
+		});
+	params.menu.items.push_back({
+		"Blue",
+		[&params]() {
+			params.config.updateImageTintPalette(3);
+			params.config.updateUseCustomTint(0);
+			params.display.invalidateTintCache();
+		}
+		});
+	params.menu.items.push_back({ 
+		"Custom Tint",
+		[&params]() {
+			params.config.updateUseCustomTint(1);
+			params.display.invalidateTintCache();
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 	params.menu.selectedIndex = 0;
 }
 

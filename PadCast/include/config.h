@@ -25,9 +25,14 @@ private:
 		static constexpr int CUSTOM_BG_GREEN{ 0 };
 		static constexpr int CUSTOM_BG_BLUE{ 0 };
 		static constexpr int USE_CUSTOM_BG{ 0 };
-		// Image canvas dimensions
+		// Image defaults
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
+		static constexpr int USE_CUSTOM_TINT{ 0 };
+		static constexpr int IMAGE_TINT_RED{ 255 };
+		static constexpr int IMAGE_TINT_GREEN{ 255 };
+		static constexpr int IMAGE_TINT_BLUE{ 255 };
+		static constexpr int IMAGE_TINT_PALETTE{ 0 };
 		// Controller defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		// Font defaults
@@ -86,6 +91,12 @@ public:
 	bool SaveConfig()
 	{
 		return config.write(config_ini);
+	}
+
+	void ReloadConfig()
+	{
+		config.read(config_ini);
+		ValidateConfig();
 	}
 
 	//$ ----- getters ----- //
@@ -175,6 +186,14 @@ public:
 	void updateButtonConfig(const std::string& key, int new_button)
 	{
 		config_ini["ButtonMap"][key] = std::to_string(new_button);
+	}
+	void updateUseCustomTint(int useCustom)
+	{
+		config_ini["Window"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
+	}
+	void updateImageTintPalette(int paletteIndex)
+	{
+		config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
 	}
 
 //$ ----- Reset -----
