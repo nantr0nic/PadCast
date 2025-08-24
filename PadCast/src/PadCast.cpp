@@ -70,6 +70,7 @@ void CachedButtons::refreshCache(const ButtonMap& buttonMap)
         /* For future non-SNES controller use:
         case 10: // Left trigger display
             leftTrigger2 = displayIndex;
+            break;
             */
         case 11: // Right shoulder display
             rightTrigger = displayIndex;
@@ -77,6 +78,7 @@ void CachedButtons::refreshCache(const ButtonMap& buttonMap)
         /* For future non-SNES controller use:
         case 12: // Left trigger display
             leftTrigger2 = displayIndex;
+            break;
             */
         case 13: // Select display
             selectButton = displayIndex;
@@ -91,39 +93,39 @@ void CachedButtons::refreshCache(const ButtonMap& buttonMap)
 //$ ----- PadCast ----- //
 
 PadCast::PadCast(Config& mainConfig)
-    : config{ mainConfig }
+    : mConfig{ mainConfig }
 {
-    if (config.getDebugMode() == 1)
+    if (mConfig.getDebugMode() == 1)
     {
-        debugMode = true;
+        mDebugMode = true;
     }
 
     loadButtonsFromConfig();
-    buttonCache.refreshCache(buttonMap);
+    mButtonCache.refreshCache(mButtonMap);
 }
 
 bool PadCast::updateGamepadConnection(bool currentlyAvailable)
 {
     // Cache stability threshold
-    if (cachedStabilityThreshold == -1)
+    if (mCachedStabilityThreshold == -1)
     {
-        cachedStabilityThreshold = config.getValue("Gamepad", "STABILITY_THRESHOLD");
+        mCachedStabilityThreshold = mConfig.getValue("Gamepad", "STABILITY_THRESHOLD");
     }
 
-    if (currentlyAvailable == gamepadWasConnected)
+    if (currentlyAvailable == mGamepadWasConnected)
     {
-        stabilityCounter = 0;
+        mStabilityCounter = 0;
     }
     else
     {
-        ++stabilityCounter;
-        if (stabilityCounter >= cachedStabilityThreshold)
+        ++mStabilityCounter;
+        if (mStabilityCounter >= mCachedStabilityThreshold)
         {
-            gamepadWasConnected = currentlyAvailable;
-            stabilityCounter = 0;
+            mGamepadWasConnected = currentlyAvailable;
+            mStabilityCounter = 0;
         }
     }
-    return gamepadWasConnected;
+    return mGamepadWasConnected;
 }
 
 void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad, 
@@ -133,46 +135,46 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     auto scale = scaling.scale;
 
     // pressed texture tint
-    if (!tintCacheValid)
+    if (!mTintCacheValid)
     {
-        cachedUseCustomTint
-            = config.getValue("Window", "USE_CUSTOM_TINT");
-        cachedTintR = config.getValue("Window", "IMAGE_TINT_RED");
-        cachedTintG = config.getValue("Window", "IMAGE_TINT_GREEN");
-        cachedTintB = config.getValue("Window", "IMAGE_TINT_BLUE");
-        if (cachedUseCustomTint == 1)
+        mCachedUseCustomTint
+            = mConfig.getValue("Window", "USE_CUSTOM_TINT");
+        mCachedTintR = mConfig.getValue("Window", "IMAGE_TINT_RED");
+        mCachedTintG = mConfig.getValue("Window", "IMAGE_TINT_GREEN");
+        mCachedTintB = mConfig.getValue("Window", "IMAGE_TINT_BLUE");
+        if (mCachedUseCustomTint == 1)
         {
-            cachedTextureTint
-                = Color{ (unsigned char)cachedTintR,
-                         (unsigned char)cachedTintG,
-                         (unsigned char)cachedTintB,
+            mCachedPressedTint
+                = Color{ (unsigned char)mCachedTintR,
+                         (unsigned char)mCachedTintG,
+                         (unsigned char)mCachedTintB,
                          255 };
         }
         else
         {
-            int sel = config.getValue("Window", "IMAGE_TINT_PALETTE");
+            int sel = mConfig.getValue("Window", "IMAGE_TINT_PALETTE");
             switch (sel)
             {
             case 1:
-                cachedTextureTint = RED;
+                mCachedPressedTint = RED;
                 break;
             case 2:
-                cachedTextureTint = GREEN;
+                mCachedPressedTint = GREEN;
                 break;
             case 3:
-                cachedTextureTint = BLUE;
+                mCachedPressedTint = BLUE;
                 break;
             default:
-                cachedTextureTint = WHITE;
+                mCachedPressedTint = WHITE;
                 break;
             }
         }
-        tintCacheValid = true;
+        mTintCacheValid = true;
     }
 
-    auto texture_tint = cachedTextureTint;
+    auto texture_tint = mCachedPressedTint;
 
-    if (debugMode)
+    if (mDebugMode)
     {
         int newButtonPress = gamepad.GetButtonPressed();
         if (newButtonPress > 0)
@@ -207,78 +209,78 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     }
 
     // D-Pad
-    if (gamepad.IsButtonDown(buttonCache.dpadUp))
+    if (gamepad.IsButtonDown(mButtonCache.dpadUp))
     {
-        textures.pressedUp.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedUp.Draw(position, 0.0f, scale, texture_tint);
     }
-    if (gamepad.IsButtonDown(buttonCache.dpadRight))
+    if (gamepad.IsButtonDown(mButtonCache.dpadRight))
     {
-        textures.pressedRight.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedRight.Draw(position, 0.0f, scale, texture_tint);
     }
-    if (gamepad.IsButtonDown(buttonCache.dpadDown))
+    if (gamepad.IsButtonDown(mButtonCache.dpadDown))
     {
-        textures.pressedDown.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedDown.Draw(position, 0.0f, scale, texture_tint);
     }
-    if (gamepad.IsButtonDown(buttonCache.dpadLeft))
+    if (gamepad.IsButtonDown(mButtonCache.dpadLeft))
     {
-        textures.pressedLeft.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedLeft.Draw(position, 0.0f, scale, texture_tint);
     }
 
     // Face buttons
-    if (gamepad.IsButtonDown(buttonCache.xButton))
+    if (gamepad.IsButtonDown(mButtonCache.xButton))
     {
-        textures.pressedX.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedX.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    if (gamepad.IsButtonDown(buttonCache.aButton))
+    if (gamepad.IsButtonDown(mButtonCache.aButton))
     {
-        textures.pressedA.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedA.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    if (gamepad.IsButtonDown(buttonCache.bButton))
+    if (gamepad.IsButtonDown(mButtonCache.bButton))
     {
-        textures.pressedB.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedB.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    if (gamepad.IsButtonDown(buttonCache.yButton))
+    if (gamepad.IsButtonDown(mButtonCache.yButton))
     {
-        textures.pressedY.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedY.Draw(position, 0.0f, scale, texture_tint);
     }
 
     // Shoulder buttons
-    if (gamepad.IsButtonDown(buttonCache.leftTrigger))
+    if (gamepad.IsButtonDown(mButtonCache.leftTrigger))
     {
-        textures.pressedLBump.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedLBump.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    if (gamepad.IsButtonDown(buttonCache.rightTrigger))
+    if (gamepad.IsButtonDown(mButtonCache.rightTrigger))
     {
-        textures.pressedRBump.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedRBump.Draw(position, 0.0f, scale, texture_tint);
     }
 
     // Select / Start
-    if (gamepad.IsButtonDown(buttonCache.selectButton))
+    if (gamepad.IsButtonDown(mButtonCache.selectButton))
     {
-        textures.pressedSelect.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedSelect.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    if (gamepad.IsButtonDown(buttonCache.startButton))
+    if (gamepad.IsButtonDown(mButtonCache.startButton))
     {
-        textures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
+        mTextures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
     }
 }
 
 void PadCast::drawNoGamepadMessage(const ScalingInfo& scaling)
 {
     int fontSize = std::max(
-        static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
-        config.getValue("Font", "MIN_FONT_SIZE")
+        static_cast<int>(mConfig.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
+        mConfig.getValue("Font", "MIN_FONT_SIZE")
     );
 
     raylib::DrawText(
         "No Gamepad Connected",
-        static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
-        static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
         fontSize,
         raylib::Color(raylib::WHITE)
     );
@@ -289,8 +291,8 @@ void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
 // if debug mode is set to 1 in config.ini, this will print the button index in the window
 {
     int fontSize = std::max(
-        static_cast<int>(config.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
-        config.getValue("Font", "MIN_FONT_SIZE")
+        static_cast<int>(mConfig.getValue("Font", "DEFAULT_FONT_SIZE") * scaling.scale),
+        mConfig.getValue("Font", "MIN_FONT_SIZE")
     );
 
     int buttonIndex = gamepad.GetButtonPressed();
@@ -298,8 +300,8 @@ void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
 
     raylib::DrawText(
         buttonPressed,
-        static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
-        static_cast<int>(config.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
         fontSize,
         raylib::Color(raylib::WHITE)
     );
@@ -307,33 +309,33 @@ void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
 
 raylib::Color PadCast::getBGColor() const
 {
-    if (!configCacheValid)
+    if (!mBGCacheValid)
     {
         // Read all config values once and cache them
-        cachedUseCustomBG = config.getValue("Window", "USE_CUSTOM_BG");
-        cachedCustomRed = config.getValue("Window", "CUSTOM_BG_RED");
-        cachedCustomGreen = config.getValue("Window", "CUSTOM_BG_GREEN");
-        cachedCustomBlue = config.getValue("Window", "CUSTOM_BG_BLUE");
-        cachedBGColorValue = config.getBGColor();
-        configCacheValid = true;
+        mCachedUseCustomBG = mConfig.getValue("Window", "USE_CUSTOM_BG");
+        mCachedCustomRed = mConfig.getValue("Window", "CUSTOM_BG_RED");
+        mCachedCustomGreen = mConfig.getValue("Window", "CUSTOM_BG_GREEN");
+        mCachedCustomBlue = mConfig.getValue("Window", "CUSTOM_BG_BLUE");
+        mCachedBGColorValue = mConfig.getBGColor();
+        mBGCacheValid = true;
     }
 
-    if (cachedUseCustomBG == 1)
+    if (mCachedUseCustomBG == 1)
     {
-        if (cachedUseCustomBG != lastUseCustomBG ||
-            cachedCustomRed != lastCustomRed ||
-            cachedCustomGreen != lastCustomGreen ||
-            cachedCustomBlue != lastCustomBlue)
+        if (mCachedUseCustomBG != mLastUseCustomBG ||
+            mCachedCustomRed != mLastCustomRed ||
+            mCachedCustomGreen != mLastCustomGreen ||
+            mCachedCustomBlue != mLastCustomBlue)
         {
-            lastUseCustomBG = cachedUseCustomBG;
-            lastCustomRed = cachedCustomRed;
-            lastCustomGreen = cachedCustomGreen;
-            lastCustomBlue = cachedCustomBlue;
+            mLastUseCustomBG = mCachedUseCustomBG;
+            mLastCustomRed = mCachedCustomRed;
+            mLastCustomGreen = mCachedCustomGreen;
+            mLastCustomBlue = mCachedCustomBlue;
 
-            cachedBGColor = Color{
-                static_cast<unsigned char>(cachedCustomRed),
-                static_cast<unsigned char>(cachedCustomGreen),
-                static_cast<unsigned char>(cachedCustomBlue),
+            mCachedBGColor = Color{
+                static_cast<unsigned char>(mCachedCustomRed),
+                static_cast<unsigned char>(mCachedCustomGreen),
+                static_cast<unsigned char>(mCachedCustomBlue),
                 255
             };
         }
@@ -341,13 +343,13 @@ raylib::Color PadCast::getBGColor() const
     else
     {
         // Palette mode
-        if (cachedUseCustomBG != lastUseCustomBG || cachedBGColorValue != lastBGColorValue)
+        if (mCachedUseCustomBG != mLastUseCustomBG || mCachedBGColorValue != mLastBGColorValue)
         {
-            lastUseCustomBG = cachedUseCustomBG;
-            lastBGColorValue = cachedBGColorValue;
+            mLastUseCustomBG = mCachedUseCustomBG;
+            mLastBGColorValue = mCachedBGColorValue;
 
             // Validate and update cached color
-            int currentBGValue = cachedBGColorValue;
+            int currentBGValue = mCachedBGColorValue;
             if (!isValidBackgroundColor(currentBGValue))
             {
                 currentBGValue = 0;
@@ -356,47 +358,47 @@ raylib::Color PadCast::getBGColor() const
             switch (static_cast<BackgroundColor>(currentBGValue))
             {
             case BackgroundColor::Black:
-                cachedBGColor = BLACK;
+                mCachedBGColor = BLACK;
                 break;
             case BackgroundColor::White:
-                cachedBGColor = WHITE;
+                mCachedBGColor = WHITE;
                 break;
             case BackgroundColor::Red:
-                cachedBGColor = RED;
+                mCachedBGColor = RED;
                 break;
             case BackgroundColor::Green:
-                cachedBGColor = GREEN;
+                mCachedBGColor = GREEN;
                 break;
             case BackgroundColor::Blue:
-                cachedBGColor = BLUE;
+                mCachedBGColor = BLUE;
                 break;
             default:
-                cachedBGColor = BLACK;
+                mCachedBGColor = BLACK;
                 break;
             }
         }
     }
 
-    return cachedBGColor;
+    return mCachedBGColor;
 }
 
 void PadCast::loadButtonsFromConfig()
 {
     //std::println("DEBUG: Checking if ButtonMap section exists...");
     // Clear the index
-    buttonMap.buttonIndex.clear();
+    mButtonMap.buttonIndex.clear();
     //std::println("DEBUG: Cleared buttonIndex");
 
-    if (!config.getIni().has("ButtonMap"))
+    if (!mConfig.getIni().has("ButtonMap"))
     {
         //std::println("DEBUG: ButtonMap section NOT found, using default SNES map");
-        buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
-        buttonCache.refreshCache(buttonMap);
+        mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
+        mButtonCache.refreshCache(mButtonMap);
         return;
     }
 
     //std::println("DEBUG: ButtonMap section found, loading mappings...");
-    const auto& buttonSection = config.getIni().get("ButtonMap");
+    const auto& buttonSection = mConfig.getIni().get("ButtonMap");
 
     //std::println("DEBUG: ButtonSection size: {}", buttonSection.size());
 
@@ -416,53 +418,53 @@ void PadCast::loadButtonsFromConfig()
         // Map INI keys to raylib button constants
         bool mapped = false;
         if (key == "DPAD_UP") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
         }
         else if (key == "DPAD_RIGHT") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
         }
         else if (key == "DPAD_DOWN") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
         }
         else if (key == "DPAD_LEFT") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
         }
         else if (key == "X_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
         }
         else if (key == "A_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
         }
         else if (key == "B_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
         }
         else if (key == "Y_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
         }
         else if (key == "L_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
         }
         else if (key == "R_BUTTON") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
         }
         else if (key == "SELECT") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
         }
         else if (key == "START") {
-            buttonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
         }
     }
 
     //std::println("DEBUG: Final buttonIndex size: {}", buttonMap.buttonIndex.size());
 
     // Safety check - if somehow buttonIndex is still empty, use defaults
-    if (buttonMap.buttonIndex.empty())
+    if (mButtonMap.buttonIndex.empty())
     {
         std::println("DEBUG: WARNING - buttonIndex still empty, using defaults");
-        buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
+        mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
     }
 
     // Refresh the cache after loading
-    buttonCache.refreshCache(buttonMap);
+    mButtonCache.refreshCache(mButtonMap);
     //std::println("DEBUG: Finished loading button mappings");
 }

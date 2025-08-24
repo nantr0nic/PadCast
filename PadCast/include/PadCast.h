@@ -102,9 +102,9 @@ public:
 	explicit PadCast(Config& mainConfig);
 	~PadCast() = default;
 
-	const GamepadTextures& getTextures() const { return textures; }
-	Config& getConfig() { return config; }
-	bool isDebugOn() const { return debugMode; }
+	const GamepadTextures& getTextures() const { return mTextures; }
+	Config& getConfig() { return mConfig; }
+	bool isDebugOn() const { return mDebugMode; }
 
 public:
 	// Gamepad display functions
@@ -118,59 +118,59 @@ public:
 	{
 		return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
 	}
-	void invalidateBGCache() { configCacheValid = false; }
+	void invalidateBGCache() { mBGCacheValid = false; }
 	raylib::Color getBGColor() const;
 
 	// Tint
-	void invalidateTintCache() { tintCacheValid = false; }
+	void invalidateTintCache() { mTintCacheValid = false; }
 
 	// Button Map Functions
 	void loadButtonsFromConfig();
 	void resetButtonsToDefault()
 	{
-		buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
-		buttonCache.refreshCache(buttonMap);
+		mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
+		mButtonCache.refreshCache(mButtonMap);
 	}
-	void refreshButtonCache() { buttonCache.refreshCache(buttonMap); }
+	void refreshButtonCache() { mButtonCache.refreshCache(mButtonMap); }
 	void setButtonMap(int raylibButton, int newIndex)
 	{
-		buttonMap.remapButton(raylibButton, newIndex);
-		buttonCache.refreshCache(buttonMap);
+		mButtonMap.remapButton(raylibButton, newIndex);
+		mButtonCache.refreshCache(mButtonMap);
 	}
 
 private:
-	GamepadTextures textures;
-	Config& config;
-	ButtonMap buttonMap;
-	CachedButtons buttonCache;
+	GamepadTextures mTextures;
+	Config& mConfig;
+	ButtonMap mButtonMap;
+	CachedButtons mButtonCache;
 
-	bool gamepadWasConnected{ false };
-	int stabilityCounter{ 0 };
+	bool mGamepadWasConnected{ false };
+	int mStabilityCounter{ 0 };
 
 	// Cache values for optimization
-	mutable Color cachedBGColor{ BLACK };
-	mutable int lastBGColorValue{ -1 };
-	mutable int lastUseCustomBG{ -1 };
-	mutable int lastCustomRed{ -1 };
-	mutable int lastCustomGreen{ -1 };
-	mutable int lastCustomBlue{ -1 };
-	mutable int cachedStabilityThreshold{ -1 };
+	mutable Color mCachedBGColor{ BLACK };
+	mutable int mLastBGColorValue{ -1 };
+	mutable int mLastUseCustomBG{ -1 };
+	mutable int mLastCustomRed{ -1 };
+	mutable int mLastCustomGreen{ -1 };
+	mutable int mLastCustomBlue{ -1 };
+	mutable int mCachedStabilityThreshold{ -1 };
 	// Custom BG Color cache
-	mutable int cachedUseCustomBG{ -1 };
-	mutable int cachedCustomRed{ -1 };
-	mutable int cachedCustomGreen{ -1 };
-	mutable int cachedCustomBlue{ -1 };
-	mutable int cachedBGColorValue{ -1 };
-	mutable bool configCacheValid{ false };
+	mutable int mCachedUseCustomBG{ -1 };
+	mutable int mCachedCustomRed{ -1 };
+	mutable int mCachedCustomGreen{ -1 };
+	mutable int mCachedCustomBlue{ -1 };
+	mutable int mCachedBGColorValue{ -1 };
+	mutable bool mBGCacheValid{ false };
 	// Custom pressed tint cache
-	mutable bool tintCacheValid{ false };
-	mutable int cachedUseCustomTint{ -1 };
-	mutable int cachedTintR{ -1 };
-	mutable int cachedTintG{ -1 };
-	mutable int cachedTintB{ -1 };
-	mutable Color cachedTextureTint{ WHITE };
+	mutable bool mTintCacheValid{ false };
+	mutable int mCachedUseCustomTint{ -1 };
+	mutable int mCachedTintR{ -1 };
+	mutable int mCachedTintG{ -1 };
+	mutable int mCachedTintB{ -1 };
+	mutable Color mCachedPressedTint{ WHITE };
 
-	bool debugMode{ false };
+	bool mDebugMode{ false };
 };
 
 #endif

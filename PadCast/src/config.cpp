@@ -1,13 +1,13 @@
 #include "config.h"
 
-void Config::LoadConfig()
+void Config::loadConfig()
 {
-	configPath = GetConfigFilePath();
-	config = mINI::INIFile{ configPath };
+	mConfigPath = getConfigFilePath();
+	mConfigFile = mINI::INIFile{ mConfigPath };
 
 	try
 	{
-		auto configDir{ std::filesystem::path{configPath}.parent_path() };
+		auto configDir{ std::filesystem::path{mConfigPath}.parent_path() };
 
 		if (!std::filesystem::exists(configDir))
 		{
@@ -19,22 +19,22 @@ void Config::LoadConfig()
 	{
 		std::println("Error: Cannot create config directory - {}", e.what());
 		// Fallback: try to use current directory
-		configPath = "config.ini";
+		mConfigPath = "config.ini";
 		std::println("Falling back to current directory");
 	}
 
-	if (!config.read(config_ini))
+	if (!mConfigFile.read(config_ini))
 	{
 		// config.ini doesn't exist so we'll create one with default values
-		std::println("config.ini doesn't exist at {}, creating a default one.", configPath);
-		std::filesystem::create_directories(std::filesystem::path{ configPath }.parent_path());
-		ValidateConfig();
-		SaveConfig();
+		std::println("config.ini doesn't exist at {}, creating a default one.", mConfigPath);
+		std::filesystem::create_directories(std::filesystem::path{ mConfigPath }.parent_path());
+		validateConfig();
+		saveConfig();
 	}
-	ValidateConfig();
+	validateConfig();
 }
 
-void Config::ValidateConfig()
+void Config::validateConfig()
 {
 	bool needsSave{ false };
 
@@ -286,7 +286,7 @@ void Config::ValidateConfig()
 	if (needsSave)
 	{
 		std::println("Adding missing config values...");
-		SaveConfig();
+		saveConfig();
 	}
 }
 
@@ -387,5 +387,5 @@ void Config::resetButtonMap()
 		{"SELECT",     "13"},
 		{"START",      "15"}
 	});
-	SaveConfig();
+	saveConfig();
 }

@@ -10,8 +10,8 @@
 class Config
 {
 private:
-	std::string configPath{};
-	mINI::INIFile config{ configPath };
+	std::string mConfigPath{};
+	mINI::INIFile mConfigFile{ mConfigPath };
 	mINI::INIStructure config_ini;
 
 	struct DefaultValues
@@ -64,19 +64,19 @@ private:
 	};
 
 public:
-	Config() { LoadConfig(); }
-	~Config() { SaveConfig(); }
+	Config() { loadConfig(); }
+	~Config() { saveConfig(); }
 
 	//$ ----- config.ini functions (load, save, etc.) ----- //
 	// this assumes that the executable is in the root directory
-	std::string GetConfigFilePath() const
+	std::string getConfigFilePath() const
 	{
 		return (std::filesystem::current_path() / "config" / "config.ini").string();
 	}
 
-	void LoadConfig();
+	void loadConfig();
 
-	void ValidateConfig();
+	void validateConfig();
 
 	bool hasValue(const std::string& section, const std::string& key) const
 	{
@@ -88,15 +88,15 @@ public:
 		return sectionData.has(key);
 	}
 
-	bool SaveConfig()
+	bool saveConfig()
 	{
-		return config.write(config_ini);
+		return mConfigFile.write(config_ini);
 	}
 
-	void ReloadConfig()
+	void reloadConfig()
 	{
-		config.read(config_ini);
-		ValidateConfig();
+		mConfigFile.read(config_ini);
+		validateConfig();
 	}
 
 	//$ ----- getters ----- //

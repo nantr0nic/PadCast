@@ -64,9 +64,9 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back({
-		"Read Config File",
+		"Reload Config File",
 		[&params]() {
-			params.config.ReloadConfig();
+			params.config.reloadConfig();
 			params.padcast.invalidateBGCache();
 			params.padcast.invalidateTintCache();
 		}
@@ -283,7 +283,7 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 void HandleMenuInput(MenuContext::MenuParams& params)
 {
 	// ----- Menu open/close ----- //
-	// a right click, spacebar, or M will open the main menu
+	// a right click, spacebar, or M will open/close the main menu
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)
 		|| IsKeyPressed(KEY_SPACE)
 		|| IsKeyPressed(KEY_M))
@@ -304,7 +304,7 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 	// ----- Menu navigation ----- //
 	if (params.menu.active != Menu::None)
 	{
-		// Keyboard navigation
+		// Keyboard navigation (arrow keys or W/S)
 		if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
 		{
 			params.menu.selectedIndex = (params.menu.selectedIndex + 1) % params.menu.items.size();
@@ -317,7 +317,6 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		else if (IsKeyPressed(KEY_ENTER))
 		{
 			params.menu.items[params.menu.selectedIndex].action();
-			// menu.active = Menu::None;
 		}
 
 		// Mouse navigation
@@ -421,8 +420,8 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	// Scaling and drawing setup
 	float rectScale = std::max(params.scaling.scale, 0.8f);
-	int rectWidth = static_cast<int>(300 * rectScale);
-	int rectHeight = static_cast<int>(300 * rectScale);
+	int rectWidth = static_cast<int>(420 * rectScale);
+	int rectHeight = static_cast<int>(200 * rectScale);
 	int rectX = static_cast<int>(
 		(params.window.GetWidth() - rectWidth) / 2 + params.scaling.offsetX
 		);
@@ -435,9 +434,9 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
 
 	// Draw the background rectangle
-	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.7f));
+	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
 
-	const char* promptText = "";
+	const char* promptText = ""; // cuz raylib's DrawText() argument asks for a const char*
 	int currentRaylibButton = 0;
 	std::string currentButtonConfig;
 
@@ -445,22 +444,22 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	{
 		// case #'s match order of buttons in unordered_map buttonIndex
 	case 0:
-		promptText = "Press D-pad\n       UP";
+		promptText = "Press D-pad UP";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
 		currentButtonConfig = "DPAD_UP";
 		break;
 	case 1:
-		promptText = "Press D-pad\n    RIGHT";
+		promptText = "Press D-pad RIGHT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
 		currentButtonConfig = "DPAD_RIGHT";
 		break;
 	case 2:
-		promptText = "Press D-pad\n    DOWN";
+		promptText = "Press D-pad DOWN";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
 		currentButtonConfig = "DPAD_DOWN";
 		break;
 	case 3:
-		promptText = "Press D-pad\n     LEFT";
+		promptText = "Press D-pad LEFT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
 		currentButtonConfig = "DPAD_LEFT";
 		break;
@@ -485,12 +484,12 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		currentButtonConfig = "Y_BUTTON";
 		break;
 	case 8:
-		promptText = "    Press\nLEFT Shoulder";
+		promptText = "Press LEFT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
 		currentButtonConfig = "L_BUTTON";
 		break;
 	case 9:
-		promptText = "    Press\nRIGHT Shoulder";
+		promptText = "Press RIGHT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
 		currentButtonConfig = "R_BUTTON";
 		break;
@@ -567,7 +566,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		waitingForInput = false;
 		buttonPromptIndex = 0;
 		params.menu.active = Menu::Main;
-		params.config.SaveConfig();
+		params.config.saveConfig();
 		SetupMainMenu(params);
 		return;
 	}

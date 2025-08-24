@@ -80,7 +80,7 @@ int main()
         );
 
         // Check gamepad connection
-        if (++gamepadCheckCounter >= 10)
+        if (++gamepadCheckCounter >= 30)
         {
             gamepadCheckCounter = 0;
             gamepadConnected = padcast.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
@@ -116,7 +116,7 @@ int main()
         mainConfig.updateInitWinSizes();
     }
 
-    mainConfig.SaveConfig();
+    mainConfig.saveConfig();
 
     return 0;
 }
