@@ -67,8 +67,8 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		"Read Config File",
 		[&params]() {
 			params.config.ReloadConfig();
-			params.display.invalidateBGCache();
-			params.display.invalidateTintCache();
+			params.padcast.invalidateBGCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -159,7 +159,7 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
 			params.config.updateUseCustomBG(0);
-			params.display.invalidateBGCache();
+			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -167,7 +167,7 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
 			params.config.updateUseCustomBG(0);
-			params.display.invalidateBGCache();
+			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -175,7 +175,7 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
 			params.config.updateUseCustomBG(0);
-			params.display.invalidateBGCache();
+			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -183,7 +183,7 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
 			params.config.updateUseCustomBG(0); 
-			params.display.invalidateBGCache(); 
+			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
@@ -191,14 +191,14 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
 			params.config.updateUseCustomBG(0); 
-			params.display.invalidateBGCache(); 
+			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
 		"Custom Color",
 		[&params]() { 
 			params.config.updateUseCustomBG(1);
-			params.display.invalidateBGCache();
+			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -216,7 +216,7 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(0);
 			params.config.updateUseCustomTint(0);
-			params.display.invalidateTintCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -224,7 +224,7 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(1);
 			params.config.updateUseCustomTint(0);
-			params.display.invalidateTintCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -232,7 +232,7 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(2);
 			params.config.updateUseCustomTint(0);
-			params.display.invalidateTintCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -240,14 +240,14 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(3);
 			params.config.updateUseCustomTint(0);
-			params.display.invalidateTintCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
 		"Custom Tint",
 		[&params]() {
 			params.config.updateUseCustomTint(1);
-			params.display.invalidateTintCache();
+			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -269,7 +269,7 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back({
 		"Reset to Default",
 		[&params]() { 
-			params.display.resetButtonsToDefault(); 
+			params.padcast.resetButtonsToDefault(); 
 			params.config.resetButtonMap(); 
 		}
 		});
@@ -527,7 +527,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			if (buttonDebounce.CanAcceptInput())
 			{
 				// Accept the input
-				params.display.setButtonMap(currentRaylibButton, newButtonPress);
+				params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
 				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
 				buttonPromptIndex++;
 				waitingForInput = true;

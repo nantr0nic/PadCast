@@ -10,7 +10,7 @@ int main()
     Config mainConfig{};
     MenuContext menu;
 
-    // Window setup -- this must happen before instantiating GamepadDisplay
+    // Window setup -- this must happen before instantiating PadCast
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     raylib::Window window(
         mainConfig.getInitWinWidth(), 
@@ -19,7 +19,7 @@ int main()
     );
     window.SetTargetFPS(mainConfig.getFPS());
 
-    GamepadDisplay display{ mainConfig };
+    PadCast padcast{ mainConfig };
     
 
     // short pause to allow for controller detection
@@ -47,8 +47,8 @@ int main()
 
     // initial scaling
     ScalingInfo scaling(window.GetWidth(), window.GetHeight(), canvasWidth, canvasHeight);
-    // display = gamepad stuff, will refactor later
-    MenuContext::MenuParams menuParams(menu, window, mainConfig, display, scaling);
+    // padcast = gamepad stuff, will refactor later
+    MenuContext::MenuParams menuParams(menu, window, mainConfig, padcast, scaling);
 
     // ----- Main Loop ----- //
     while (!window.ShouldClose())
@@ -66,7 +66,7 @@ int main()
         }
 
         window.BeginDrawing();
-        window.ClearBackground(display.getBGColor());
+        window.ClearBackground(padcast.getBGColor());
 
         // Update scaling each frame
         scaling = ScalingInfo(currentWidth, currentHeight, canvasWidth, canvasHeight);
@@ -76,7 +76,7 @@ int main()
         HandleMenuInput(menuParams);
 
         // Draw base controller
-        display.getTextures().unpressed.Draw(
+        padcast.getTextures().unpressed.Draw(
             raylib::Vector2{ scaling.offsetX, scaling.offsetY },
             0.0f,
             scaling.scale,
@@ -87,18 +87,18 @@ int main()
         if (++gamepadCheckCounter >= 10)
         {
             gamepadCheckCounter = 0;
-            gamepadConnected = display.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
+            gamepadConnected = padcast.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
         }
 
         // Display gamepad stuff
         if (gamepadConnected && (menu.active != Menu::RemapButtons))
         {
             raylib::Gamepad gamepad(0);
-            display.drawGamepadButtons(gamepad, scaling);
+            padcast.drawGamepadButtons(gamepad, scaling);
         }
         else
         {
-            display.drawNoGamepadMessage(scaling);
+            padcast.drawNoGamepadMessage(scaling);
         }
 
         // Add remap screen handling here to avoid lambda insanity

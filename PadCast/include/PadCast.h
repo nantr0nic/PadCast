@@ -183,7 +183,7 @@ struct CachedButtons
     }
 };
 
-class GamepadDisplay
+class PadCast
 {
 private:
     GamepadTextures textures;
@@ -220,7 +220,7 @@ private:
     bool debugMode{ false };
 
 public:
-    GamepadDisplay(Config& mainConfig)
+    PadCast(Config& mainConfig)
         : config{ mainConfig }
     {
         if (config.getDebugMode() == 1)
