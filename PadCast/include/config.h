@@ -1,5 +1,6 @@
 #ifndef PADCAST_CONFIG_H
 #define PADCAST_CONFIG_H
+#define MINI_CASE_SENSITIVE
 
 #include "mini/ini.h"
 #include <filesystem>
@@ -31,6 +32,26 @@ private:
 		static constexpr int TEXT_OFFSET{ 50 };
 		// Debug defaults
 		static constexpr int DEBUG_MODE{ 0 };
+	};
+
+	struct SNESMapDefaults
+	{
+		// D-Pad ("Left face")
+		static constexpr int DPAD_UP{ 1 };
+		static constexpr int DPAD_RIGHT{ 2 };
+		static constexpr int DPAD_DOWN{ 3 };
+		static constexpr int DPAD_LEFT{ 4 };
+		// Buttons ("Right face")
+		static constexpr int X_BUTTON{ 5 };
+		static constexpr int A_BUTTON{ 6 };
+		static constexpr int B_BUTTON{ 7 };
+		static constexpr int Y_BUTTON{ 8 };
+		// Shoulder buttons  
+		static constexpr int L_BUTTON{ 9 };
+		static constexpr int R_BUTTON{ 11 };
+		// System buttons
+		static constexpr int SELECT{ 13 };
+		static constexpr int START{ 15 };
 	};
 
 public:
@@ -66,6 +87,8 @@ public:
 	//$ ----- getters ----- //
 	// so far all the values are ints, so we'll just keep this function
 	// but it would be fun to write a template at a later time :)
+	auto& getIni() const { return config_ini; }
+
 	int getValue(const std::string& section, const std::string& key) const
 	{
 		if (!hasValue(section, key))
@@ -140,6 +163,10 @@ public:
 	void updateBGColor(int background_int)
 	{
 		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(background_int);
+	}
+	void updateButtonConfig(const std::string& key, int new_button)
+	{
+		config_ini["ButtonMap"][key] = std::to_string(new_button);
 	}
 };
 

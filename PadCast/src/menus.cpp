@@ -340,6 +340,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	const char* promptText = "";
 	int currentRaylibButton = 0;
+	std::string currentButtonConfig;
 
 	switch (buttonPromptIndex)
 	{
@@ -347,50 +348,62 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	case 0:
 		promptText = "Press D-pad UP";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
+		currentButtonConfig = "DPAD_UP";
 		break;
 	case 1:
 		promptText = "Press D-pad RIGHT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
+		currentButtonConfig = "DPAD_RIGHT";
 		break;
 	case 2:
 		promptText = "Press D-pad DOWN";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
+		currentButtonConfig = "DPAD_DOWN";
 		break;
 	case 3:
 		promptText = "Press D-pad LEFT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
+		currentButtonConfig = "DPAD_LEFT";
 		break;
 	case 4:
 		promptText = "Press X";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
+		currentButtonConfig = "X_BUTTON";
 		break;
 	case 5:
 		promptText = "Press A";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
+		currentButtonConfig = "A_BUTTON";
 		break;
 	case 6:
 		promptText = "Press B";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
+		currentButtonConfig = "B_BUTTON";
 		break;
 	case 7:
 		promptText = "Press Y";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
+		currentButtonConfig = "Y_BUTTON";
 		break;
 	case 8:
 		promptText = "Press LEFT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
+		currentButtonConfig = "L_BUTTON";
 		break;
 	case 9:
 		promptText = "Press RIGHT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
+		currentButtonConfig = "R_BUTTON";
 		break;
 	case 10:
 		promptText = "Press Select";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
+		currentButtonConfig = "SELECT";
 		break;
 	case 11:
 		promptText = "Press Start";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
+		currentButtonConfig = "START";
 		break;
 	default:
 		// Finished remapping
@@ -416,6 +429,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			{
 				// Accept the input
 				params.display.setButtonMap(currentRaylibButton, newButtonPress);
+				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
 				buttonPromptIndex++;
 				waitingForInput = true;
 			}
@@ -454,6 +468,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		waitingForInput = false;
 		buttonPromptIndex = 0;
 		params.menu.active = Menu::Main;
+		params.config.SaveConfig();
 		SetupMainMenu(params);
 		return;
 	}

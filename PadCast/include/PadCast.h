@@ -6,6 +6,7 @@
 #include "config.h"
 
 #include <unordered_map>
+#include <vector>
 
 struct GamepadTextures
 {
@@ -85,17 +86,16 @@ struct ButtonMap
         {GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
     };
 
-    bool configNeedsUpdate{ false };
-
     ButtonMap()
     {
-        // For now, default to SNES index
-        buttonIndex = defaultSNESIndex;
+        // Start with empty buttonIndex - loadButtonsFromConfig() will populate it
+        std::println("DEBUG: ButtonMap constructor - buttonIndex starts empty");
+        // Old default:
+        // buttonIndex = defaultSNESIndex;
     }
 
     void remapButton(int raylibButton, int newIndex)
     {
-        // save for remap
         buttonIndex[raylibButton] = newIndex;
     }
 };
@@ -103,18 +103,20 @@ struct ButtonMap
 struct CachedButtons
 {
     // Cache all frequently used button indices
-    int dpadUp;
-    int dpadRight;
-    int dpadDown;
-    int dpadLeft;
-    int xButton;        // RIGHT_FACE_UP
-    int aButton;        // RIGHT_FACE_RIGHT
-    int bButton;        // RIGHT_FACE_DOWN
-    int yButton;        // RIGHT_FACE_LEFT
-    int leftTrigger;
-    int rightTrigger;
-    int selectButton;   // MIDDLE_LEFT
-    int startButton;    // MIDDLE_RIGHT
+    int dpadUp{};
+    int dpadRight{};
+    int dpadDown{};
+    int dpadLeft{};
+    int xButton{};        // RIGHT_FACE_UP
+    int aButton{};        // RIGHT_FACE_RIGHT
+    int bButton{};        // RIGHT_FACE_DOWN
+    int yButton{};        // RIGHT_FACE_LEFT
+    int leftTrigger{};
+    int rightTrigger{};
+    int selectButton{};   // MIDDLE_LEFT
+    int startButton{};    // MIDDLE_RIGHT
+
+    CachedButtons() {}; // empty default
 
     CachedButtons(const ButtonMap& buttonMap)
     {
@@ -123,19 +125,62 @@ struct CachedButtons
 
     void refreshCache(const ButtonMap& buttonMap)
     {
-        // Cache all button indices for fast access
-        dpadUp = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_UP);
-        dpadRight = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_RIGHT);
-        dpadDown = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_DOWN);
-        dpadLeft = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_FACE_LEFT);
-        xButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_UP);
-        aButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT);
-        bButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-        yButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
-        leftTrigger = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_LEFT_TRIGGER_1);
-        rightTrigger = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_RIGHT_TRIGGER_1);
-        selectButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_MIDDLE_LEFT);
-        startButton = buttonMap.buttonIndex.at(GAMEPAD_BUTTON_MIDDLE_RIGHT);
+        std::println("DEBUG: Starting refreshCache()");
+        // reset each
+        dpadUp = dpadRight = dpadDown = dpadLeft = 0;
+        xButton = aButton = bButton = yButton = 0;
+        leftTrigger = rightTrigger = selectButton = startButton = 0;
+        for (const auto& [raylibButton, displayIndex] : buttonMap.buttonIndex)
+        {
+            std::println("DEBUG: refreshing {} to {}", raylibButton, displayIndex);
+            switch (raylibButton)
+            {
+            case 1: // D-pad UP display
+                dpadUp = displayIndex;
+                break;
+            case 2: // D-pad RIGHT display
+                dpadRight = displayIndex;
+                break;
+            case 3: // D-pad DOWN display
+                dpadDown = displayIndex;
+                break;
+            case 4: // D-pad LEFT display
+                dpadLeft = displayIndex;
+                break;
+            case 5: // X button display
+                xButton = displayIndex;
+                break;
+            case 6: // A button display
+                aButton = displayIndex;
+                break;
+            case 7: // B button display
+                bButton = displayIndex;
+                break;
+            case 8: // Y button display
+                yButton = displayIndex;
+                break;
+            case 9: // Left shoulder display
+                leftTrigger = displayIndex;
+                break;
+                /* For future non-SNES controller use:
+                case 10: // Left trigger display
+                    leftTrigger2 = displayIndex;
+                    */
+            case 11: // Right shoulder display
+                rightTrigger = displayIndex;
+                break;
+                /* For future non-SNES controller use:
+                case 12: // Left trigger display
+                    leftTrigger2 = displayIndex;
+                    */
+            case 13: // Select display
+                selectButton = displayIndex;
+                break;
+            case 15: // Start display
+                startButton = displayIndex;
+                break;
+            }
+        }
     }
 };
 
@@ -145,7 +190,7 @@ private:
     GamepadTextures textures;
     Config& config;
     ButtonMap buttonMap;
-    CachedButtons buttons;
+    CachedButtons buttonCache;
 
     bool gamepadWasConnected{ false };
     int stabilityCounter{ 0 };
@@ -160,12 +205,14 @@ private:
 public:
     GamepadDisplay(Config& mainConfig)
         : config{ mainConfig }
-        , buttons{ buttonMap }
     {
         if (config.getDebugMode() == 1)
         {
             debugMode = true;
         }
+
+        loadButtonsFromConfig();
+        buttonCache.refreshCache(buttonMap);
     }
 
     const GamepadTextures& getTextures() const { return textures; }
@@ -201,6 +248,8 @@ public:
     void drawGamepadButtons(const raylib::Gamepad& gamepad, const ScalingInfo& scaling)
     {
         const raylib::Vector2 position{ scaling.offsetX, scaling.offsetY };
+        auto scale = scaling.scale;
+        auto texture_tint = raylib::WHITE;
 
         if (debugMode)
         {
@@ -237,64 +286,64 @@ public:
         }
       
         // D-Pad
-        if (gamepad.IsButtonDown(buttons.dpadUp))
+        if (gamepad.IsButtonDown(buttonCache.dpadUp))
         {
-            textures.pressedUp.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedUp.Draw(position, 0.0f, scale, texture_tint);
         }
-        if (gamepad.IsButtonDown(buttons.dpadRight))
+        if (gamepad.IsButtonDown(buttonCache.dpadRight))
         {
-            textures.pressedRight.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedRight.Draw(position, 0.0f, scale, texture_tint);
         }
-        if (gamepad.IsButtonDown(buttons.dpadDown))
+        if (gamepad.IsButtonDown(buttonCache.dpadDown))
         {
-            textures.pressedDown.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedDown.Draw(position, 0.0f, scale, texture_tint);
         }
-        if (gamepad.IsButtonDown(buttons.dpadLeft))
+        if (gamepad.IsButtonDown(buttonCache.dpadLeft))
         {
-            textures.pressedLeft.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedLeft.Draw(position, 0.0f, scale, texture_tint);
         }
 
         // Face buttons
-        if (gamepad.IsButtonDown(buttons.xButton))
+        if (gamepad.IsButtonDown(buttonCache.xButton))
         {
-            textures.pressedX.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedX.Draw(position, 0.0f, scale, texture_tint);
         }
 
-        if (gamepad.IsButtonDown(buttons.aButton))
+        if (gamepad.IsButtonDown(buttonCache.aButton))
         {
-            textures.pressedA.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedA.Draw(position, 0.0f, scale, texture_tint);
         }
 
-        if (gamepad.IsButtonDown(buttons.bButton))
+        if (gamepad.IsButtonDown(buttonCache.bButton))
         {
-            textures.pressedB.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedB.Draw(position, 0.0f, scale, texture_tint);
         }
 
-        if (gamepad.IsButtonDown(buttons.yButton))
+        if (gamepad.IsButtonDown(buttonCache.yButton))
         {
-            textures.pressedY.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedY.Draw(position, 0.0f, scale, texture_tint);
         }
 
         // Shoulder buttons
-        if (gamepad.IsButtonDown(buttons.leftTrigger))
+        if (gamepad.IsButtonDown(buttonCache.leftTrigger))
         {
-            textures.pressedLBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedLBump.Draw(position, 0.0f, scale, texture_tint);
         }
 
-        if (gamepad.IsButtonDown(buttons.rightTrigger))
+        if (gamepad.IsButtonDown(buttonCache.rightTrigger))
         {
-            textures.pressedRBump.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedRBump.Draw(position, 0.0f, scale, texture_tint);
         }
 
         // Select / Start
-        if (gamepad.IsButtonDown(buttons.selectButton))
+        if (gamepad.IsButtonDown(buttonCache.selectButton))
         {
-            textures.pressedSelect.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedSelect.Draw(position, 0.0f, scale, texture_tint);
         }
 
-        if (gamepad.IsButtonDown(buttons.startButton))
+        if (gamepad.IsButtonDown(buttonCache.startButton))
         {
-            textures.pressedStart.Draw(position, 0.0f, scaling.scale, raylib::WHITE);
+            textures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
         }
     }
 
@@ -335,7 +384,8 @@ public:
     }
 
 public:
-    // Other functions (display, etc.)
+    // Background color functions
+
     bool isValidBackgroundColor(int value) const
     {
         return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
@@ -383,16 +433,125 @@ public:
         return cachedBGColor;
     }
 
+    // Button Map functions
+
+    void loadButtonsFromConfig()
+    {
+        std::println("DEBUG: Checking if ButtonMap section exists...");
+        // Clear the index
+        buttonMap.buttonIndex.clear();
+        std::println("DEBUG: Cleared buttonIndex");
+
+        // Only process the ButtonMap section
+        if (!config.getIni().has("ButtonMap"))
+        {
+            std::println("DEBUG: ButtonMap section NOT found, using default SNES map");
+            buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
+            buttonCache.refreshCache(buttonMap);
+            return;
+        }
+
+        std::println("DEBUG: ButtonMap section found, loading mappings...");
+        const auto& buttonSection = config.getIni().get("ButtonMap");
+
+        std::println("DEBUG: ButtonSection size: {}", buttonSection.size());
+
+        for (const auto& [key, value_str] : buttonSection)
+        {
+            std::println("DEBUG: Processing {} = {}", key, value_str);
+            int value = 0;
+            try {
+                value = std::stoi(value_str);
+                std::println("DEBUG: Converted {} to int: {}", value_str, value);
+            }
+            catch (...) {
+                std::println("DEBUG: Failed to convert {} to int", value_str);
+                continue;
+            }
+
+            // Map INI keys to raylib button constants
+            bool mapped = false;
+            if (key == "DPAD_UP") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
+                mapped = true;
+            }
+            else if (key == "DPAD_RIGHT") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
+                mapped = true;
+            }
+            else if (key == "DPAD_DOWN") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
+                mapped = true;
+            }
+            else if (key == "DPAD_LEFT") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
+                mapped = true;
+            }
+            else if (key == "X_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
+                mapped = true;
+            }
+            else if (key == "A_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
+                mapped = true;
+            }
+            else if (key == "B_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
+                mapped = true;
+            }
+            else if (key == "Y_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
+                mapped = true;
+            }
+            else if (key == "L_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
+                mapped = true;
+            }
+            else if (key == "R_BUTTON") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
+                mapped = true;
+            }
+            else if (key == "SELECT") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
+                mapped = true;
+            }
+            else if (key == "START") {
+                buttonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
+                mapped = true;
+            }
+
+            if (mapped) {
+                std::println("DEBUG: Successfully mapped {} to display index {}", key, value);
+            }
+            else {
+                std::println("DEBUG: WARNING - Unrecognized key: {}", key);
+            }
+        }
+
+        std::println("DEBUG: Final buttonIndex size: {}", buttonMap.buttonIndex.size());
+
+        // Safety check - if somehow buttonIndex is still empty, use defaults
+        if (buttonMap.buttonIndex.empty())
+        {
+            std::println("DEBUG: WARNING - buttonIndex still empty, using defaults");
+            buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
+        }
+
+        // Refresh the cache after loading
+        buttonCache.refreshCache(buttonMap);
+        std::println("DEBUG: Finished loading button mappings");
+    }
+
     void resetButtonsToDefault()
     {
         buttonMap.buttonIndex = buttonMap.defaultSNESIndex;
-        buttons.refreshCache(buttonMap);
+        buttonCache.refreshCache(buttonMap);
     }
-    void refreshButtonCache() { buttons.refreshCache(buttonMap); }
+    void refreshButtonCache() { buttonCache.refreshCache(buttonMap); }
     void setButtonMap(int raylibButton, int newIndex) 
     { 
         buttonMap.remapButton(raylibButton, newIndex);
-        buttons.refreshCache(buttonMap);
+        buttonCache.refreshCache(buttonMap);
     }
 };
 

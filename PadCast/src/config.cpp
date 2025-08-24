@@ -94,6 +94,68 @@ void Config::ValidateConfig()
 		needsSave = true;
 	}
 
+	// Check ButtonMap section
+	if (!hasValue("ButtonMap", "DPAD_UP"))
+	{
+		config_ini["ButtonMap"]["DPAD_UP"] = std::to_string(SNESMapDefaults::DPAD_UP);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "DPAD_RIGHT"))
+	{
+		config_ini["ButtonMap"]["DPAD_RIGHT"] = std::to_string(SNESMapDefaults::DPAD_RIGHT);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "DPAD_DOWN"))
+	{
+		config_ini["ButtonMap"]["DPAD_DOWN"] = std::to_string(SNESMapDefaults::DPAD_DOWN);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "DPAD_LEFT"))
+	{
+		config_ini["ButtonMap"]["DPAD_LEFT"] = std::to_string(SNESMapDefaults::DPAD_LEFT);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "X_BUTTON"))
+	{
+		config_ini["ButtonMap"]["X_BUTTON"] = std::to_string(SNESMapDefaults::X_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "A_BUTTON"))
+	{
+		config_ini["ButtonMap"]["A_BUTTON"] = std::to_string(SNESMapDefaults::A_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "B_BUTTON"))
+	{
+		config_ini["ButtonMap"]["B_BUTTON"] = std::to_string(SNESMapDefaults::B_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "Y_BUTTON"))
+	{
+		config_ini["ButtonMap"]["Y_BUTTON"] = std::to_string(SNESMapDefaults::Y_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "L_BUTTON"))
+	{
+		config_ini["ButtonMap"]["L_BUTTON"] = std::to_string(SNESMapDefaults::L_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "R_BUTTON"))
+	{
+		config_ini["ButtonMap"]["R_BUTTON"] = std::to_string(SNESMapDefaults::R_BUTTON);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "SELECT"))
+	{
+		config_ini["ButtonMap"]["SELECT"] = std::to_string(SNESMapDefaults::SELECT);
+		needsSave = true;
+	}
+	if (!hasValue("ButtonMap", "START"))
+	{
+		config_ini["ButtonMap"]["START"] = std::to_string(SNESMapDefaults::START);
+		needsSave = true;
+	}
+
 	// Check Debug section
 	if (!hasValue("Debug", "MODE"))
 	{
@@ -133,6 +195,33 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 	{
 		if (key == "STABILITY_THRESHOLD") 
 			return DefaultValues::STABILITY_THRESHOLD;
+	}
+	if (section == "ButtonMap")
+	{
+		if (key == "DPAD_UP")
+			return SNESMapDefaults::DPAD_UP;
+		if (key == "DPAD_RIGHT")
+			return SNESMapDefaults::DPAD_RIGHT;
+		if (key == "DPAD_DOWN")
+			return SNESMapDefaults::DPAD_DOWN;
+		if (key == "DPAD_LEFT")
+			return SNESMapDefaults::DPAD_LEFT;
+		if (key == "X_BUTTON")
+			return SNESMapDefaults::X_BUTTON;
+		if (key == "A_BUTTON")
+			return SNESMapDefaults::A_BUTTON;
+		if (key == "B_BUTTON")
+			return SNESMapDefaults::B_BUTTON;
+		if (key == "Y_BUTTON")
+			return SNESMapDefaults::Y_BUTTON;
+		if (key == "L_BUTTON")
+			return SNESMapDefaults::L_BUTTON;
+		if (key == "R_BUTTON")
+			return SNESMapDefaults::R_BUTTON;
+		if (key == "SELECT")
+			return SNESMapDefaults::SELECT;
+		if (key == "START")
+			return SNESMapDefaults::START;
 	}
 	if (section == "Debug") 
 	{
