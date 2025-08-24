@@ -1,5 +1,6 @@
 #ifndef PADCAST_CONFIG_H
 #define PADCAST_CONFIG_H
+#define MINI_CASE_SENSITIVE
 
 #include "mini/ini.h"
 #include <filesystem>
@@ -20,9 +21,18 @@ private:
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
 		static constexpr int BACKGROUND_COLOR{ 0 };
-		// Image canvas dimensions
+		static constexpr int CUSTOM_BG_RED{ 0 };
+		static constexpr int CUSTOM_BG_GREEN{ 0 };
+		static constexpr int CUSTOM_BG_BLUE{ 0 };
+		static constexpr int USE_CUSTOM_BG{ 0 };
+		// Image defaults
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
+		static constexpr int USE_CUSTOM_TINT{ 0 };
+		static constexpr int IMAGE_TINT_RED{ 255 };
+		static constexpr int IMAGE_TINT_GREEN{ 255 };
+		static constexpr int IMAGE_TINT_BLUE{ 255 };
+		static constexpr int IMAGE_TINT_PALETTE{ 0 };
 		// Controller defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		// Font defaults
@@ -31,6 +41,26 @@ private:
 		static constexpr int TEXT_OFFSET{ 50 };
 		// Debug defaults
 		static constexpr int DEBUG_MODE{ 0 };
+	};
+
+	struct SNESMapDefaults
+	{
+		// D-Pad ("Left face")
+		static constexpr int DPAD_UP{ 1 };
+		static constexpr int DPAD_RIGHT{ 2 };
+		static constexpr int DPAD_DOWN{ 3 };
+		static constexpr int DPAD_LEFT{ 4 };
+		// Buttons ("Right face")
+		static constexpr int X_BUTTON{ 5 };
+		static constexpr int A_BUTTON{ 6 };
+		static constexpr int B_BUTTON{ 7 };
+		static constexpr int Y_BUTTON{ 8 };
+		// Shoulder buttons  
+		static constexpr int L_BUTTON{ 9 };
+		static constexpr int R_BUTTON{ 11 };
+		// System buttons
+		static constexpr int SELECT{ 13 };
+		static constexpr int START{ 15 };
 	};
 
 public:
@@ -63,9 +93,17 @@ public:
 		return config.write(config_ini);
 	}
 
+	void ReloadConfig()
+	{
+		config.read(config_ini);
+		ValidateConfig();
+	}
+
 	//$ ----- getters ----- //
 	// so far all the values are ints, so we'll just keep this function
 	// but it would be fun to write a template at a later time :)
+	auto& getIni() const { return config_ini; }
+
 	int getValue(const std::string& section, const std::string& key) const
 	{
 		if (!hasValue(section, key))
@@ -141,6 +179,25 @@ public:
 	{
 		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(background_int);
 	}
+	void updateUseCustomBG(int useCustom)
+	{
+		config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(useCustom);
+	} //*
+	void updateButtonConfig(const std::string& key, int new_button)
+	{
+		config_ini["ButtonMap"][key] = std::to_string(new_button);
+	}
+	void updateUseCustomTint(int useCustom)
+	{
+		config_ini["Window"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
+	}
+	void updateImageTintPalette(int paletteIndex)
+	{
+		config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+	}
+
+//$ ----- Reset -----
+	void resetButtonMap();
 };
 
 #endif

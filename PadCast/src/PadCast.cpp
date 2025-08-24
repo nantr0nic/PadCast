@@ -3,10 +3,10 @@
 
 #include <chrono>
 #include <thread>
-#include <print>
 
 int main()
 {
+    // ----- Setup ----- //
     Config mainConfig{};
     MenuContext menu;
 
@@ -20,6 +20,7 @@ int main()
     window.SetTargetFPS(mainConfig.getFPS());
 
     GamepadDisplay display{ mainConfig };
+    
 
     // short pause to allow for controller detection
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -29,6 +30,9 @@ int main()
         SetTraceLogLevel(LOG_ALL);
     }
 
+    // ----- *** ----- //
+  
+    // ----- Cached values ----- //
     // Track window dimensions
     int lastWinWidth{ window.GetWidth() };
     int lastWinHeight{ window.GetHeight() };
@@ -39,7 +43,14 @@ int main()
     // Gamepad connection counter stuff
     static int gamepadCheckCounter = 0;
     bool gamepadConnected{ false };
+    // ----- *** ----- //
 
+    // initial scaling
+    ScalingInfo scaling(window.GetWidth(), window.GetHeight(), canvasWidth, canvasHeight);
+    // display = gamepad stuff, will refactor later
+    MenuContext::MenuParams menuParams(menu, window, mainConfig, display, scaling);
+
+    // ----- Main Loop ----- //
     while (!window.ShouldClose())
     {
         int currentWidth = window.GetWidth();
@@ -57,10 +68,12 @@ int main()
         window.BeginDrawing();
         window.ClearBackground(display.getBGColor());
 
-        ScalingInfo scaling(currentWidth, currentHeight, canvasWidth, canvasHeight);
+        // Update scaling each frame
+        scaling = ScalingInfo(currentWidth, currentHeight, canvasWidth, canvasHeight);
+        menuParams.scaling = scaling;
 
         // Handles accessing menu and menu navigation
-        HandleMenuInput(menu, window, mainConfig, scaling);
+        HandleMenuInput(menuParams);
 
         // Draw base controller
         display.getTextures().unpressed.Draw(
@@ -78,7 +91,7 @@ int main()
         }
 
         // Display gamepad stuff
-        if (gamepadConnected)
+        if (gamepadConnected && (menu.active != Menu::RemapButtons))
         {
             raylib::Gamepad gamepad(0);
             display.drawGamepadButtons(gamepad, scaling);
@@ -88,8 +101,12 @@ int main()
             display.drawNoGamepadMessage(scaling);
         }
 
-        // If menu is active, draw the menu
-        if (menu.active != Menu::None)
+        // Add remap screen handling here to avoid lambda insanity
+        if (menu.active == Menu::RemapButtons)
+        {
+            RemapButtonScreens(menuParams);
+        }
+        else if (menu.active != Menu::None)
         {
             DrawMenu(menu, scaling, mainConfig, 50, 50);
         }
