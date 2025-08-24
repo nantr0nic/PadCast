@@ -1,5 +1,6 @@
 #ifndef PADCAST_CONFIG_H
 #define PADCAST_CONFIG_H
+#define MINI_CASE_SENSITIVE
 
 #include "mini/ini.h"
 #include <filesystem>
@@ -9,8 +10,8 @@
 class Config
 {
 private:
-	std::string configPath{};
-	mINI::INIFile config{ configPath };
+	std::string mConfigPath{};
+	mINI::INIFile mConfigFile{ mConfigPath };
 	mINI::INIStructure config_ini;
 
 	struct DefaultValues
@@ -19,10 +20,21 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
-		// Image canvas dimensions
+		// Background color defaults
+		static constexpr int BACKGROUND_COLOR{ 0 };
+		static constexpr int CUSTOM_BG_RED{ 0 };
+		static constexpr int CUSTOM_BG_GREEN{ 0 };
+		static constexpr int CUSTOM_BG_BLUE{ 0 };
+		static constexpr int USE_CUSTOM_BG{ 0 };
+		// Image defaults
 		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
 		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
-		// Controller defaults
+		static constexpr int USE_CUSTOM_TINT{ 0 };
+		static constexpr int IMAGE_TINT_RED{ 255 };
+		static constexpr int IMAGE_TINT_GREEN{ 255 };
+		static constexpr int IMAGE_TINT_BLUE{ 255 };
+		static constexpr int IMAGE_TINT_PALETTE{ 0 };
+		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
@@ -32,20 +44,40 @@ private:
 		static constexpr int DEBUG_MODE{ 0 };
 	};
 
+	struct SNESMapDefaults
+	{
+		// D-Pad ("Left face")
+		static constexpr int DPAD_UP{ 1 };
+		static constexpr int DPAD_RIGHT{ 2 };
+		static constexpr int DPAD_DOWN{ 3 };
+		static constexpr int DPAD_LEFT{ 4 };
+		// Buttons ("Right face")
+		static constexpr int X_BUTTON{ 5 };
+		static constexpr int A_BUTTON{ 6 };
+		static constexpr int B_BUTTON{ 7 };
+		static constexpr int Y_BUTTON{ 8 };
+		// Shoulder buttons  
+		static constexpr int L_BUTTON{ 9 };
+		static constexpr int R_BUTTON{ 11 };
+		// System buttons
+		static constexpr int SELECT{ 13 };
+		static constexpr int START{ 15 };
+	};
+
 public:
-	Config() { LoadConfig(); }
-	~Config() { SaveConfig(); }
+	Config() { loadConfig(); }
+	~Config() { saveConfig(); }
 
 	//$ ----- config.ini functions (load, save, etc.) ----- //
 	// this assumes that the executable is in the root directory
-	std::string GetConfigFilePath() const
+	std::string getConfigFilePath() const
 	{
 		return (std::filesystem::current_path() / "config" / "config.ini").string();
 	}
 
-	void LoadConfig();
+	void loadConfig();
 
-	void ValidateConfig();
+	void validateConfig();
 
 	bool hasValue(const std::string& section, const std::string& key) const
 	{
@@ -57,14 +89,22 @@ public:
 		return sectionData.has(key);
 	}
 
-	bool SaveConfig()
+	bool saveConfig()
 	{
-		return config.write(config_ini);
+		return mConfigFile.write(config_ini);
+	}
+
+	void reloadConfig()
+	{
+		mConfigFile.read(config_ini);
+		validateConfig();
 	}
 
 	//$ ----- getters ----- //
 	// so far all the values are ints, so we'll just keep this function
 	// but it would be fun to write a template at a later time :)
+	auto& getIni() const { return config_ini; }
+
 	int getValue(const std::string& section, const std::string& key) const
 	{
 		if (!hasValue(section, key))
@@ -93,11 +133,11 @@ public:
 	}
 	int getImgCanvasWidth() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_WIDTH");
+		return getValue("Image", "IMAGE_CANVAS_WIDTH");
 	}
 	int getImgCanvasHeight() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_HEIGHT");
+		return getValue("Image", "IMAGE_CANVAS_HEIGHT");
 	}
 	int getCurrentWinWidth() const
 	{
@@ -110,6 +150,10 @@ public:
 	int getFPS() const
 	{
 		return getValue("Window", "TARGET_FPS");
+	}
+	int getBGColor() const
+	{
+		return getValue("Window", "BACKGROUND_COLOR");
 	}
 	int getDebugMode() const
 	{
@@ -128,6 +172,33 @@ public:
 		config_ini["Window"]["INITIAL_WINDOW_WIDTH"] = config_ini["Window"]["CURRENT_WINDOW_WIDTH"];
 		config_ini["Window"]["INITIAL_WINDOW_HEIGHT"] = config_ini["Window"]["CURRENT_WINDOW_HEIGHT"];
 	}
+	void updateTargetFPS(int fps)
+	{
+		config_ini["Window"]["TARGET_FPS"] = std::to_string(fps);
+	}
+	void updateBGColor(int background_int)
+	{
+		config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(background_int);
+	}
+	void updateUseCustomBG(int useCustom)
+	{
+		config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(useCustom);
+	} //*
+	void updateButtonConfig(const std::string& key, int new_button)
+	{
+		config_ini["ButtonMap"][key] = std::to_string(new_button);
+	}
+	void updateUseCustomTint(int useCustom)
+	{
+		config_ini["Image"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
+	}
+	void updateImageTintPalette(int paletteIndex)
+	{
+		config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+	}
+
+//$ ----- Reset -----
+	void resetButtonMap();
 };
 
 #endif
