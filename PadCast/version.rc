@@ -19,12 +19,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Andrew Khazanovsky"
             VALUE "FileDescription", "PadCast - Gamepad Display for Streamers"
-            VALUE "FileVersion", "1.0.0.0"
+            VALUE "FileVersion", "1.1.0.0"
             VALUE "InternalName", "PadCast"
             VALUE "LegalCopyright", "Copyright (C) 2025 Andrew Khazanovsky"
             VALUE "OriginalFilename", "PadCast.exe"
             VALUE "ProductName", "PadCast"
-            VALUE "ProductVersion", "1.0.0.0"
+            VALUE "ProductVersion", "1.1.0.0"
             VALUE "Comments", "Displays gamepad input for live streaming applications"
         END
     END

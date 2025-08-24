@@ -34,11 +34,11 @@ struct MenuContext
 		MenuContext& menu;
 		raylib::Window& window;
 		Config& config;
-		GamepadDisplay& display;
+		PadCast& padcast;
 		ScalingInfo& scaling;
 
-		MenuParams(MenuContext& m, raylib::Window& w, Config& c, GamepadDisplay& d, ScalingInfo& s)
-			: menu(m), window(w), config(c), display(d), scaling(s)
+		MenuParams(MenuContext& men, raylib::Window& win, Config& con, PadCast& pad, ScalingInfo& sca)
+			: menu(men), window(win), config(con), padcast(pad), scaling(sca)
 		{
 		}
 	};

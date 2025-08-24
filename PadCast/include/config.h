@@ -10,8 +10,8 @@
 class Config
 {
 private:
-	std::string configPath{};
-	mINI::INIFile config{ configPath };
+	std::string mConfigPath{};
+	mINI::INIFile mConfigFile{ mConfigPath };
 	mINI::INIStructure config_ini;
 
 	struct DefaultValues
@@ -20,6 +20,7 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
+		// Background color defaults
 		static constexpr int BACKGROUND_COLOR{ 0 };
 		static constexpr int CUSTOM_BG_RED{ 0 };
 		static constexpr int CUSTOM_BG_GREEN{ 0 };
@@ -33,7 +34,7 @@ private:
 		static constexpr int IMAGE_TINT_GREEN{ 255 };
 		static constexpr int IMAGE_TINT_BLUE{ 255 };
 		static constexpr int IMAGE_TINT_PALETTE{ 0 };
-		// Controller defaults
+		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
@@ -64,19 +65,19 @@ private:
 	};
 
 public:
-	Config() { LoadConfig(); }
-	~Config() { SaveConfig(); }
+	Config() { loadConfig(); }
+	~Config() { saveConfig(); }
 
 	//$ ----- config.ini functions (load, save, etc.) ----- //
 	// this assumes that the executable is in the root directory
-	std::string GetConfigFilePath() const
+	std::string getConfigFilePath() const
 	{
 		return (std::filesystem::current_path() / "config" / "config.ini").string();
 	}
 
-	void LoadConfig();
+	void loadConfig();
 
-	void ValidateConfig();
+	void validateConfig();
 
 	bool hasValue(const std::string& section, const std::string& key) const
 	{
@@ -88,15 +89,15 @@ public:
 		return sectionData.has(key);
 	}
 
-	bool SaveConfig()
+	bool saveConfig()
 	{
-		return config.write(config_ini);
+		return mConfigFile.write(config_ini);
 	}
 
-	void ReloadConfig()
+	void reloadConfig()
 	{
-		config.read(config_ini);
-		ValidateConfig();
+		mConfigFile.read(config_ini);
+		validateConfig();
 	}
 
 	//$ ----- getters ----- //
@@ -132,11 +133,11 @@ public:
 	}
 	int getImgCanvasWidth() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_WIDTH");
+		return getValue("Image", "IMAGE_CANVAS_WIDTH");
 	}
 	int getImgCanvasHeight() const
 	{
-		return getValue("Window", "IMAGE_CANVAS_HEIGHT");
+		return getValue("Image", "IMAGE_CANVAS_HEIGHT");
 	}
 	int getCurrentWinWidth() const
 	{
@@ -189,11 +190,11 @@ public:
 	}
 	void updateUseCustomTint(int useCustom)
 	{
-		config_ini["Window"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
+		config_ini["Image"]["USE_CUSTOM_TINT"] = std::to_string(useCustom);
 	}
 	void updateImageTintPalette(int paletteIndex)
 	{
-		config_ini["Window"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+		config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
 	}
 
 //$ ----- Reset -----
