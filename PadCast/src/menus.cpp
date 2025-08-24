@@ -172,7 +172,7 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 		});
 	params.menu.items.push_back({
 		"Reset to Default",
-		[&params]() { params.display.resetButtonsToDefault(); }
+		[&params]() { params.display.resetButtonsToDefault(); params.config.resetButtonMap(); }
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
@@ -224,12 +224,12 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
 		// Scaling setup
-		float menuScale = std::max(params.scaling.scale, 0.8f); // don't scale menu font/positions below 80%
+		float menuScale = std::max(params.scaling.scale, 0.7f); // don't scale collision box below 70%
 		int baseX = 50;
 		int baseY = 50;
 		int scaledX = static_cast<int>(baseX * menuScale + params.scaling.offsetX);
 		int scaledY = static_cast<int>(baseY * menuScale + params.scaling.offsetY);
-		int scaledWidth = static_cast<int>(200 * menuScale);
+		int scaledWidth = static_cast<int>(340 * menuScale);
 		int scaledLineHeight = static_cast<int>(30 * menuScale);
 		for (size_t i = 0; i < params.menu.items.size(); ++i)
 		{
@@ -261,10 +261,10 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 
 	// Scaling setup
-	float menuScale = std::max(scaling.scale, 0.8f); // don't scale menu font/positions below 80%
+	float menuScale = std::max(scaling.scale, 0.7f); // don't scale menu font/positions below 70%
 	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
 	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(300 * menuScale);
+	int scaledWidth = static_cast<int>(340 * menuScale);
 	int scaledLineHeight = static_cast<int>(30 * menuScale);
 	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
 	int scaledPadding = static_cast<int>(10 * menuScale);
@@ -284,7 +284,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	// Draw menu items
 	for (size_t i = 0; i < menu.items.size(); ++i)
 	{
-		Color color = (i == menu.selectedIndex ? RAYWHITE : Fade(WHITE, 0.8f));
+		Color color = (i == menu.selectedIndex ? WHITE : Fade(RAYWHITE, 0.7f));
 		DrawText(menu.items[i].label.c_str(),
 			scaledX, scaledY + static_cast<int>(i) * scaledLineHeight,
 			fontSize, color);

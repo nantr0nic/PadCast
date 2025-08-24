@@ -231,3 +231,22 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 	// Fallback if unknown
 	return 0;
 }
+
+void Config::resetButtonMap()
+{
+	config_ini["ButtonMap"].set({
+		{"DPAD_UP",    "1"},
+		{"DPAD_RIGHT", "2"},
+		{"DPAD_DOWN",  "3"},
+		{"DPAD_LEFT",  "4"},
+		{"X_BUTTON",   "5"},
+		{"A_BUTTON",   "6"},
+		{"B_BUTTON",   "7"},
+		{"Y_BUTTON",   "8"},
+		{"L_BUTTON",   "9"},
+		{"R_BUTTON",   "11"},
+		{"SELECT",     "13"},
+		{"START",      "15"}
+	});
+	SaveConfig();
+}

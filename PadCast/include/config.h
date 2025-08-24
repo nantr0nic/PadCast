@@ -168,6 +168,9 @@ public:
 	{
 		config_ini["ButtonMap"][key] = std::to_string(new_button);
 	}
+
+//$ ----- Reset -----
+	void resetButtonMap();
 };
 
 #endif
