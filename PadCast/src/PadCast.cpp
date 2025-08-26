@@ -301,11 +301,35 @@ void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
 
     raylib::DrawText(
         buttonPressed,
-        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
-        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
+      static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale +
+                       scaling.offsetX),
+      static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale +
+                       scaling.offsetY),
         fontSize,
-        raylib::Color(raylib::WHITE)
-    );
+      raylib::Color(raylib::WHITE));
+}
+
+void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad) {
+  std::println("=== Gamepad Debug Info ===");
+
+  // Check all possible gamepad slots
+  for (int i = 0; i < 4; ++i) {
+    bool available = raylib::Gamepad::IsAvailable(i);
+    std::println("Gamepad {}: Available = {}", i, available);
+
+    if (available) {
+      raylib::Gamepad testPad(i);
+      std::println("  Name: {}", testPad.GetName());
+
+      // Quick button test
+      for (int btn = 0; btn < 16; ++btn) {
+        if (testPad.IsButtonDown(btn)) {
+          std::println("  Button {} pressed on gamepad {}", btn, i);
+        }
+      }
+    }
+  }
+  std::println("========================");
 }
 
 raylib::Color PadCast::getBGColor() const
@@ -421,37 +445,48 @@ void PadCast::loadButtonsFromConfig()
         if (key == "DPAD_UP") {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
         }
-        else if (key == "DPAD_RIGHT") {
+    else if (key == "DPAD_RIGHT") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
         }
-        else if (key == "DPAD_DOWN") {
+    else if (key == "DPAD_DOWN") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
         }
-        else if (key == "DPAD_LEFT") {
+    else if (key == "DPAD_LEFT") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
         }
-        else if (key == "X_BUTTON") {
+    else if (key == "X_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
         }
-        else if (key == "A_BUTTON") {
+    else if (key == "A_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
         }
-        else if (key == "B_BUTTON") {
+    else if (key == "B_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
         }
-        else if (key == "Y_BUTTON") {
+    else if (key == "Y_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
         }
-        else if (key == "L_BUTTON") {
+    else if (key == "L_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
         }
-        else if (key == "R_BUTTON") {
+    else if (key == "R_BUTTON") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
         }
-        else if (key == "SELECT") {
+    else if (key == "SELECT") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
         }
-        else if (key == "START") {
+    else if (key == "START") 
+    {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
         }
     }
@@ -467,5 +502,5 @@ void PadCast::loadButtonsFromConfig()
 
     // Refresh the cache after loading
     mButtonCache.refreshCache(mButtonMap);
-    //std::println("DEBUG: Finished loading button mappings");
+    // std::println("DEBUG: Finished loading button mappings");
 }

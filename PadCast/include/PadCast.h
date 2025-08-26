@@ -115,6 +115,7 @@ public:
 	void drawGamepadButtons(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
 	void drawNoGamepadMessage(const ScalingInfo& scaling);
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
+	void debugGamepadInfo(const raylib::Gamepad& gamepad);
 
 	// Background color functions
 	bool isValidBackgroundColor(int value) const
