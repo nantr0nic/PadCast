@@ -1,5 +1,5 @@
 #include "PadCast.h"
-#include "menus.h"
+#include "Gamepad.hpp"
 
 GamepadTextures::GamepadTextures()
     : unpressed("resources/images/controller.png")
@@ -99,6 +99,8 @@ PadCast::PadCast(Config& mainConfig)
     {
         mDebugMode = true;
     }
+
+    gamepadIndex = mainConfig.getGPIndex();
 
     loadButtonsFromConfig();
     mButtonCache.refreshCache(mButtonMap);
@@ -232,17 +234,14 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     {
         mTextures.pressedX.Draw(position, 0.0f, scale, texture_tint);
     }
-
     if (gamepad.IsButtonDown(mButtonCache.aButton))
     {
         mTextures.pressedA.Draw(position, 0.0f, scale, texture_tint);
     }
-
     if (gamepad.IsButtonDown(mButtonCache.bButton))
     {
         mTextures.pressedB.Draw(position, 0.0f, scale, texture_tint);
     }
-
     if (gamepad.IsButtonDown(mButtonCache.yButton))
     {
         mTextures.pressedY.Draw(position, 0.0f, scale, texture_tint);
@@ -253,7 +252,6 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     {
         mTextures.pressedLBump.Draw(position, 0.0f, scale, texture_tint);
     }
-
     if (gamepad.IsButtonDown(mButtonCache.rightTrigger))
     {
         mTextures.pressedRBump.Draw(position, 0.0f, scale, texture_tint);
@@ -264,7 +262,6 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     {
         mTextures.pressedSelect.Draw(position, 0.0f, scale, texture_tint);
     }
-
     if (gamepad.IsButtonDown(mButtonCache.startButton))
     {
         mTextures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
@@ -287,6 +284,24 @@ void PadCast::drawNoGamepadMessage(const ScalingInfo& scaling)
     );
 }
 
+void PadCast::findGamepadIndex()
+{
+    // For debugging...
+    // I'm unsure if this needs to be more than 3 (zero-index), 
+    // it seems GLFW doesn't go past 4 devices...
+    // So if it is registering keyboard and mouse and a bluetooth device, it will
+    // only detect 1 of 2 plugged in controllers (by default?)
+    for (int i = 0; i < 4; ++i)
+    {
+        if (raylib::Gamepad::IsAvailable(i))
+        {
+            raylib::Gamepad tempGP(i);
+            // testing this
+            std::println("Gamepad found: {} at {}", tempGP.GetName(), tempGP.GetNumber());
+        }
+    }
+}
+
 void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
                                    const ScalingInfo& scaling)
 // if debug mode is set to 1 in config.ini, this will print the button index in the window
@@ -301,32 +316,35 @@ void PadCast::drawDebugButtonIndex(const raylib::Gamepad& gamepad,
 
     raylib::DrawText(
         buttonPressed,
-      static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale +
-                       scaling.offsetX),
-      static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale +
-                       scaling.offsetY),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetX),
+        static_cast<int>(mConfig.getValue("Font", "TEXT_OFFSET") * scaling.scale + scaling.offsetY),
         fontSize,
-      raylib::Color(raylib::WHITE));
+        raylib::Color(raylib::WHITE));
 }
 
-void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad) {
+void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad)
+// this will print what gamepads are available to the log window
+// good for troubleshooting devices on linux
+{
   std::println("=== Gamepad Debug Info ===");
 
-  // Check all possible gamepad slots
   for (int i = 0; i < 4; ++i) {
     bool available = raylib::Gamepad::IsAvailable(i);
     std::println("Gamepad {}: Available = {}", i, available);
 
-    if (available) {
-      raylib::Gamepad testPad(i);
-      std::println("  Name: {}", testPad.GetName());
+    if (available) 
+    {
+        raylib::Gamepad testPad(i);
+        std::println("  Name: {}", testPad.GetName());
 
-      // Quick button test
-      for (int btn = 0; btn < 16; ++btn) {
-        if (testPad.IsButtonDown(btn)) {
-          std::println("  Button {} pressed on gamepad {}", btn, i);
+        // Button test -- press a button on the controller and see if its #0-4
+        for (int btn = 0; btn < 16; ++btn) 
+        {
+            if (testPad.IsButtonDown(btn)) 
+            {
+            std::println("  Button {} pressed on gamepad {}", btn, i);
+            }
         }
-      }
     }
   }
   std::println("========================");
@@ -424,7 +442,6 @@ void PadCast::loadButtonsFromConfig()
 
     //std::println("DEBUG: ButtonMap section found, loading mappings...");
     const auto& buttonSection = mConfig.getIni().get("ButtonMap");
-
     //std::println("DEBUG: ButtonSection size: {}", buttonSection.size());
 
     for (const auto& [key, value_str] : buttonSection)
@@ -442,52 +459,53 @@ void PadCast::loadButtonsFromConfig()
 
         // Map INI keys to raylib button constants
         bool mapped = false;
-        if (key == "DPAD_UP") {
+        if (key == "DPAD_UP") 
+        {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
         }
-    else if (key == "DPAD_RIGHT") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
+        else if (key == "DPAD_RIGHT") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
         }
-    else if (key == "DPAD_DOWN") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
+        else if (key == "DPAD_DOWN") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
         }
-    else if (key == "DPAD_LEFT") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
+        else if (key == "DPAD_LEFT") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
         }
-    else if (key == "X_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
+        else if (key == "X_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
         }
-    else if (key == "A_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
+        else if (key == "A_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
         }
-    else if (key == "B_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
+        else if (key == "B_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
         }
-    else if (key == "Y_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
+        else if (key == "Y_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
         }
-    else if (key == "L_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
+        else if (key == "L_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
         }
-    else if (key == "R_BUTTON") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
+        else if (key == "R_BUTTON") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
         }
-    else if (key == "SELECT") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
+        else if (key == "SELECT") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
         }
-    else if (key == "START") 
-    {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
+        else if (key == "START") 
+        {
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
         }
     }
 

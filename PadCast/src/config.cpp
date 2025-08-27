@@ -1,4 +1,5 @@
 #include "config.h"
+#include <string>
 
 void Config::loadConfig()
 {
@@ -279,6 +280,21 @@ void Config::validateConfig()
         if (val < 1)
         {
             config_ini["Gamepad"]["STABILITY_THRESHOLD"] = std::to_string(DefaultValues::STABILITY_THRESHOLD);
+            needsSave = true;
+        }
+    }
+
+    if (!hasValue("Gamepad", "GAMEPAD_INDEX"))
+    {
+        config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
+        needsSave = true;
+    }
+    else 
+    {
+        int val = getValue("Gamepad", "GAMEPAD_INDEX");
+        if (val < 0 || val > 3)
+        {
+            config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
             needsSave = true;
         }
     }
@@ -575,6 +591,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 	{
 		if (key == "STABILITY_THRESHOLD") 
 			return DefaultValues::STABILITY_THRESHOLD;
+        if (key == "GAMEPAD_INDEX")
+            return DefaultValues::GAMEPAD_INDEX;
 	}
 	if (section == "Font")
 	{

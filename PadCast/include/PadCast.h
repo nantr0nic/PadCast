@@ -110,10 +110,17 @@ public:
 	bool isDebugOn() const { return mDebugMode; }
 
 public:
-	// Gamepad display functions
+	// Gamepad functions
 	bool updateGamepadConnection(bool currentlyAvailable);
 	void drawGamepadButtons(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
 	void drawNoGamepadMessage(const ScalingInfo& scaling);
+	// USB gamepads seem to be 0 by default on Windows, might require finding on Linux
+	void findGamepadIndex();
+	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
+	int getGamepadIndex() { return gamepadIndex; }
+	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+
+	// Gamepad debug functions
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
 	void debugGamepadInfo(const raylib::Gamepad& gamepad);
 
@@ -150,6 +157,7 @@ private:
 
 	bool mGamepadWasConnected{ false };
 	int mStabilityCounter{ 0 };
+	int gamepadIndex{ 0 };
 
 	// Cache values for optimization
 	mutable Color mCachedBGColor{ BLACK };

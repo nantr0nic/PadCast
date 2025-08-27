@@ -23,7 +23,7 @@ int main()
 	MenuContext menu;
 
 	// short pause to allow for controller detection
-	std::this_thread::sleep_for(std::chrono::milliseconds(400));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	if (mainConfig.getDebugMode())
 	{
 		SetTraceLogLevel(LOG_ALL);
@@ -38,13 +38,14 @@ int main()
 	// Cache canvas dimensions
 	const int canvasWidth{ mainConfig.getImgCanvasWidth() };
 	const int canvasHeight{ mainConfig.getImgCanvasHeight() };
-	// Gamepad connection counter stuff
+	// Gamepad connection
 	static int gamepadCheckCounter = 0;
+    static int gamepadIndex{ mainConfig.getGPIndex() };
 	bool gamepadConnected{ false };
 	// ----- ***** ----- //
 
 	ScalingInfo scaling{ window.GetWidth(), window.GetHeight(), canvasWidth, canvasHeight };
-	MenuContext::MenuParams menuParams{ menu, window, mainConfig, padcast, scaling };
+	MenuContext::MenuParams menuParams{ menu, window, mainConfig, padcast, scaling, gamepadIndex};
 
 	//$ ----- Main Loop ----- //
     while (!window.ShouldClose())
@@ -83,13 +84,15 @@ int main()
         if (++gamepadCheckCounter >= 15)
         {
             gamepadCheckCounter = 0;
-            gamepadConnected = padcast.updateGamepadConnection(raylib::Gamepad::IsAvailable(0));
+            gamepadConnected = padcast.updateGamepadConnection(
+                                       raylib::Gamepad::IsAvailable(gamepadIndex)
+                               );
         }
 
         // Display gamepad stuff
         if (gamepadConnected && (menu.active != Menu::RemapButtons))
         {
-            raylib::Gamepad gamepad(0);
+            raylib::Gamepad gamepad(gamepadIndex);
             padcast.drawGamepadButtons(gamepad, scaling);
         }
         else

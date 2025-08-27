@@ -36,6 +36,7 @@ private:
 		static constexpr int IMAGE_TINT_PALETTE{ 0 };
 		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
+		static constexpr int GAMEPAD_INDEX{ 0 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -155,6 +156,10 @@ public:
 	{
 		return getValue("Window", "BACKGROUND_COLOR");
 	}
+	int getGPIndex() const
+	{
+		return getValue("Gamepad", "GAMEPAD_INDEX");
+	}
 	int getDebugMode() const
 	{
 		return getValue("Debug", "MODE");
@@ -195,6 +200,10 @@ public:
 	void updateImageTintPalette(int paletteIndex)
 	{
 		config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+	}
+	void updateGamepadIndex(int gpIndex)
+	{
+		config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(gpIndex);
 	}
 
 //$ ----- Reset -----
