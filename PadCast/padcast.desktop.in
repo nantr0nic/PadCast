@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=PadCast
+Comment=Gamepad visualization tool for streamers
+Exec=@CMAKE_INSTALL_PREFIX@/bin/padcast
+Icon=
+Categories=Game;Utility;AudioVideo;
+Terminal=false
+StartupWMClass=PadCast
+Keywords=gamepad;controller;streaming;twitch;obs;

@@ -2,19 +2,19 @@
 #include "Gamepad.hpp"
 
 GamepadTextures::GamepadTextures()
-    : unpressed("resources/images/controller.png")
-    , pressedA("resources/images/pressed/A.png")
-    , pressedB("resources/images/pressed/B.png")
-    , pressedX("resources/images/pressed/X.png")
-    , pressedY("resources/images/pressed/Y.png")
-    , pressedUp("resources/images/pressed/up.png")
-    , pressedLeft("resources/images/pressed/left.png")
-    , pressedDown("resources/images/pressed/down.png")
-    , pressedRight("resources/images/pressed/right.png")
-    , pressedStart("resources/images/pressed/start.png")
-    , pressedSelect("resources/images/pressed/select.png")
-    , pressedLBump("resources/images/pressed/L-bumper.png")
-    , pressedRBump("resources/images/pressed/R-bumper.png")
+: unpressed(PathManager::getResourcePath("images/controller.png"))
+, pressedA(PathManager::getResourcePath("images/pressed/A.png"))
+, pressedB(PathManager::getResourcePath("images/pressed/B.png"))
+, pressedX(PathManager::getResourcePath("images/pressed/X.png"))
+, pressedY(PathManager::getResourcePath("images/pressed/Y.png"))
+, pressedUp(PathManager::getResourcePath("images/pressed/up.png"))
+, pressedLeft(PathManager::getResourcePath("images/pressed/left.png"))
+, pressedDown(PathManager::getResourcePath("images/pressed/down.png"))
+, pressedRight(PathManager::getResourcePath("images/pressed/right.png"))
+, pressedStart(PathManager::getResourcePath("images/pressed/start.png"))
+, pressedSelect(PathManager::getResourcePath("images/pressed/select.png"))
+, pressedLBump(PathManager::getResourcePath("images/pressed/L-bumper.png"))
+, pressedRBump(PathManager::getResourcePath("images/pressed/R-bumper.png"))
 {
 }
 

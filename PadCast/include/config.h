@@ -3,9 +3,11 @@
 #define MINI_CASE_SENSITIVE
 
 #include "mini/ini.h"
+#include "pathmanager.h"
+
 #include <filesystem>
 #include <string>
-#include <print>
+// #include <print> (in pathmanager.h)
 
 class Config
 {
@@ -73,7 +75,7 @@ public:
 	// this assumes that the executable is in the root directory
 	std::string getConfigFilePath() const
 	{
-		return (std::filesystem::current_path() / "config" / "config.ini").string();
+		return PathManager::getConfigFilePath();
 	}
 
 	void loadConfig();
