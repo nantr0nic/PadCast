@@ -35,6 +35,7 @@ void Config::loadConfig()
 	validateConfig();
 }
 
+//! [!!!] Rewrite this as a template! [!!!]
 void Config::validateConfig()
 {
 	bool needsSave{ false };

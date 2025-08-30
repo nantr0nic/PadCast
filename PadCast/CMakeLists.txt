@@ -55,6 +55,14 @@ target_include_directories(PadCast PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/mini
 )
 
+# Include GNUInstallDirs to use standard installation path variables
+include(GNUInstallDirs)
+
+# Define the system data directory path for the application
+target_compile_definitions(PadCast PRIVATE
+    PADCAST_DATA_DIR="${CMAKE_INSTALL_FULL_DATADIR}/padcast"
+)
+
 # If using vcpkg stuff, add it here vvv
 
 # Link libraries
@@ -115,4 +123,5 @@ set(CPACK_DEBIAN_PACKAGE_SECTION "games")
 set(CPACK_RPM_PACKAGE_REQUIRES "raylib-devel")
 set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
 
+set(CPACK_GENERATORS_INSTALL ON)
 include(CPack)
