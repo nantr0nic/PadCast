@@ -1,5 +1,18 @@
+#ifdef _WIN32
+    #define NOGDI
+    #define NOUSER
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+#endif
+
 #include "PadCast.h"
 #include "Gamepad.hpp"
+
+#ifdef _WIN32
+    #undef NOGDI
+    #undef NOUSER
+#endif
+
 #include <iostream>
 
 GamepadTextures::GamepadTextures()

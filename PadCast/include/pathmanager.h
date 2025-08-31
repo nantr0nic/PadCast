@@ -8,12 +8,29 @@
 #include <iostream>
 
 #ifdef _WIN32
-#include <Windows.h>
-// MAX_PATH is 260, which might not be enough for modern Windows.
-// Using a larger buffer is safer.
-#ifndef MAX_PATH_LONG
-#define MAX_PATH_LONG 32767
-#endif
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+
+    #ifndef NOMINMAX
+    #define NOMINMAX
+    #endif
+    
+    #define NOGDI
+    #define NOUSER
+    #define NODRAWTEXT
+
+    #include <Windows.h>
+
+    #undef NOGDI
+    #undef NOUSER
+    #undef NODRAWTEXT
+
+    // MAX_PATH is 260, which might not be enough for modern Windows.
+    // Using a larger buffer is safer.
+    #ifndef MAX_PATH_LONG
+    #define MAX_PATH_LONG 32767
+    #endif
 #endif
 
 // PADCAST_DATA_DIR should be configured/defined in CMakeLists but if its not

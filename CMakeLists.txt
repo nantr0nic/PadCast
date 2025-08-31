@@ -3,6 +3,9 @@
 #
 cmake_minimum_required (VERSION 3.15)
 
+# Set to OFF as a default for Windows builds. The flatpak-builder YAML file sets this to ON explicitly.
+option(BUILD_FOR_FLATPAK "Build for Flatpak packaging" OFF)
+
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -71,17 +74,15 @@ set(PLATFORM "Desktop" CACHE STRING "" FORCE)
 ### FetchContent stuff ###
 # If not building for Flatpak, fetch dependencies.
 # For Flatpak, dependencies are provided as separate modules.
-if(NOT BUILD_FOR_FLATPAK)
+if(WIN32 OR NOT BUILD_FOR_FLATPAK)
     # Fetch raylib
     FetchContent_Declare(
         raylib
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
         GIT_TAG 5.5
     )
-
-    # Configure and fetch raylib-cpp
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    
+    # Fetch raylib-cpp
     FetchContent_Declare(
         raylib_cpp
         GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git

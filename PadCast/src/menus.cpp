@@ -1,5 +1,6 @@
 #include "menus.h"
 #include "debounce.h"
+
 #include <string>
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)

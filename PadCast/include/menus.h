@@ -1,9 +1,22 @@
 #ifndef PADCAST_MENUS_H
 #define PADCAST_MENUS_H
 
+#ifdef _WIN32
+	#define NOGDI
+	#define NOUSER
+	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
+#endif
+
+#include <PadCast.h>
+
+#ifdef _WIN32
+	#undef NOGDI
+	#undef NOUSER
+#endif
+
 #include <functional>
 #include <vector>
-#include <PadCast.h>
 
 enum class Menu
 {

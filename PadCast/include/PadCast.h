@@ -1,10 +1,22 @@
 #ifndef PADCAST_H
 #define PADCAST_H
 
+#ifdef _WIN32
+	#define NOGDI             // hide GDI: Rectangle, DrawText, etc.
+	#define NOUSER            // hide USER32: CloseWindow, ShowCursor, etc.
+	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
+#endif
+
 #include <raylib.h>
+
+#ifdef _WIN32
+	#undef NOGDI
+	#undef NOUSER
+#endif
+
 #include <raylib-cpp.hpp>
 #include "config.h"
-
 #include <unordered_map>
 
 struct GamepadTextures
