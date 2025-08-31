@@ -11,6 +11,10 @@ endif()
 
 project ("PadCast")
 
+if (UNIX)
+    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
+endif()
+
 # Set C++23 standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -65,22 +69,28 @@ set(GRAPHICS_API "GRAPHICS_API_OPENGL_33" CACHE STRING "" FORCE)
 set(PLATFORM "Desktop" CACHE STRING "" FORCE)
 
 ### FetchContent stuff ###
-# Fetch raylib
-FetchContent_Declare(
-    raylib
-    GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG 5.5
-)
+# If not building for Flatpak, fetch dependencies.
+# For Flatpak, dependencies are provided as separate modules.
+if(NOT BUILD_FOR_FLATPAK)
+    # Fetch raylib
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.5
+    )
 
-# Fetch raylib-cpp
-FetchContent_Declare(
-    raylib_cpp
-    GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
-    GIT_TAG v5.5.0
-)
+    # Configure and fetch raylib-cpp
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        raylib_cpp
+        GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
+        GIT_TAG v5.5.0
+    )
 
-# Make both available to all subprojects
-FetchContent_MakeAvailable(raylib raylib_cpp)
+    # Make both available to all subprojects
+    FetchContent_MakeAvailable(raylib raylib_cpp)
+endif()
 
 ###
 

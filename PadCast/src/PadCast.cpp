@@ -1,5 +1,6 @@
 #include "PadCast.h"
 #include "Gamepad.hpp"
+#include <iostream>
 
 GamepadTextures::GamepadTextures()
 : unpressed(PathManager::getResourcePath("images/controller.png"))
@@ -30,14 +31,14 @@ ScalingInfo::ScalingInfo(int currentWidth, int currentHeight,
 
 void CachedButtons::refreshCache(const ButtonMap& buttonMap)
 {
-    //std::println("DEBUG: Starting refreshCache()");
+    //std::cout << "DEBUG: Starting refreshCache()" << std::endl;
     // reset each
     dpadUp = dpadRight = dpadDown = dpadLeft = 0;
     xButton = aButton = bButton = yButton = 0;
     leftTrigger = rightTrigger = selectButton = startButton = 0;
     for (const auto& [raylibButton, displayIndex] : buttonMap.buttonIndex)
     {
-        //std::println("DEBUG: refreshing {} to {}", raylibButton, displayIndex);
+        //std::cout << "DEBUG: refreshing " << raylibButton << " to " << displayIndex << std::endl;
         switch (raylibButton)
         {
         case 1: // D-pad UP display
@@ -297,7 +298,7 @@ void PadCast::findGamepadIndex()
         {
             raylib::Gamepad tempGP(i);
             // testing this
-            std::println("Gamepad found: {} at {}", tempGP.GetName(), tempGP.GetNumber());
+            std::cout << "Gamepad found: " << tempGP.GetName() << " at " << tempGP.GetNumber() << std::endl;
         }
     }
 }
@@ -326,28 +327,28 @@ void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad)
 // this will print what gamepads are available to the log window
 // good for troubleshooting devices on linux
 {
-  std::println("=== Gamepad Debug Info ===");
+  std::cout << "=== Gamepad Debug Info ===" << std::endl;
 
   for (int i = 0; i < 4; ++i) {
     bool available = raylib::Gamepad::IsAvailable(i);
-    std::println("Gamepad {}: Available = {}", i, available);
+    std::cout << "Gamepad " << i << ": Available = " << available << std::endl;
 
     if (available) 
     {
         raylib::Gamepad testPad(i);
-        std::println("  Name: {}", testPad.GetName());
+        std::cout << "  Name: " << testPad.GetName() << std::endl;
 
         // Button test -- press a button on the controller and see if its #0-4
         for (int btn = 0; btn < 16; ++btn) 
         {
             if (testPad.IsButtonDown(btn)) 
             {
-            std::println("  Button {} pressed on gamepad {}", btn, i);
+            std::cout << "  Button " << btn << " pressed on gamepad " << i << std::endl;
             }
         }
     }
   }
-  std::println("========================");
+  std::cout << "========================" << std::endl;
 }
 
 raylib::Color PadCast::getBGColor() const
@@ -427,33 +428,33 @@ raylib::Color PadCast::getBGColor() const
 
 void PadCast::loadButtonsFromConfig()
 {
-    //std::println("DEBUG: Checking if ButtonMap section exists...");
+    //std::cout << "DEBUG: Checking if ButtonMap section exists..." << std::endl;
     // Clear the index
     mButtonMap.buttonIndex.clear();
-    //std::println("DEBUG: Cleared buttonIndex");
+    //std::cout << "DEBUG: Cleared buttonIndex" << std::endl;
 
     if (!mConfig.getIni().has("ButtonMap"))
     {
-        //std::println("DEBUG: ButtonMap section NOT found, using default SNES map");
+        //std::cout << "DEBUG: ButtonMap section NOT found, using default SNES map" << std::endl;
         mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
         mButtonCache.refreshCache(mButtonMap);
         return;
     }
 
-    //std::println("DEBUG: ButtonMap section found, loading mappings...");
+    //std::cout << "DEBUG: ButtonMap section found, loading mappings..." << std::endl;
     const auto& buttonSection = mConfig.getIni().get("ButtonMap");
-    //std::println("DEBUG: ButtonSection size: {}", buttonSection.size());
+    //std::cout << "DEBUG: ButtonSection size: " << buttonSection.size() << std::endl;
 
     for (const auto& [key, value_str] : buttonSection)
     {
-        //std::println("DEBUG: Processing {} = {}", key, value_str);
+        //std::cout << "DEBUG: Processing " << key << " = " << value_str << std::endl;
         int value = 0;
         try {
             value = std::stoi(value_str);
-            //std::println("DEBUG: Converted {} to int: {}", value_str, value);
+            //std::cout << "DEBUG: Converted " << value_str << " to int: " << value << std::endl;
         }
         catch (...) {
-            std::println("DEBUG: Failed to convert {} to int", value_str);
+            std::cerr << "DEBUG: Failed to convert " << value_str << " to int" << std::endl;
             continue;
         }
 
@@ -509,16 +510,16 @@ void PadCast::loadButtonsFromConfig()
         }
     }
 
-    //std::println("DEBUG: Final buttonIndex size: {}", buttonMap.buttonIndex.size());
+    //std::cout << "DEBUG: Final buttonIndex size: " << mButtonMap.buttonIndex.size() << std::endl;
 
     // Safety check - if somehow buttonIndex is still empty, use defaults
     if (mButtonMap.buttonIndex.empty())
     {
-        std::println("DEBUG: WARNING - buttonIndex still empty, using defaults");
+        std::cerr << "DEBUG: WARNING - buttonIndex still empty, using defaults" << std::endl;
         mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
     }
 
     // Refresh the cache after loading
     mButtonCache.refreshCache(mButtonMap);
-    // std::println("DEBUG: Finished loading button mappings");
+    // std::cout << "DEBUG: Finished loading button mappings" << std::endl;
 }

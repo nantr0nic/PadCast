@@ -7,7 +7,7 @@
 
 #include <filesystem>
 #include <string>
-// #include <print> (in pathmanager.h)
+#include <iostream>
 
 class Config
 {
@@ -112,7 +112,7 @@ public:
 	{
 		if (!hasValue(section, key))
 		{
-			std::println("{} or {} doesn't exist, setting with default value.", section, key);
+			std::cout << section << " or " << key << " doesn't exist, setting with default value." << std::endl;
 			return getDefault(section, key);
 		}
 		try
@@ -121,7 +121,7 @@ public:
 		}
 		catch (const std::invalid_argument&)
 		{
-			std::println("Wrong value type {} for {}, using default", key, section);
+			std::cerr << "Wrong value type " << key << " for " << section << ", using default" << std::endl;
 			return getDefault(section, key);
 		}
 	}

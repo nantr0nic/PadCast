@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 #include <cstdlib>
-#include <cstring>
-#include <print>
+//#include <cstring>
+#include <iostream>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -84,28 +84,28 @@ public:
         else
         {
             // System install (Linux): Use XDG Base Directory Specification.
-            const char* xdg_config = std::getenv("XDG_CONFIG_HOME");
-            std::filesystem::path config_dir;
+            std::filesystem::path config_base;
+            const char* xdg_config_home = std::getenv("XDG_CONFIG_HOME");
 
-            if (xdg_config && strlen(xdg_config) > 0)
+            if (xdg_config_home && xdg_config_home[0] != '\0')
             {
-                config_dir = std::filesystem::path(xdg_config) / "padcast";
+                config_base = xdg_config_home;
             }
             else
             {
-                // Fallback if XDG_CONFIG_HOME isn't set.
                 const char* home = std::getenv("HOME");
-                if (home)
+                if (home && home[0] != '\0')
                 {
-                    config_dir = (std::filesystem::path(home) / ".config" / "padcast");
+                    config_base = std::filesystem::path(home) / ".config";
                 }
                 else
                 {
-                    // Unlikely fallback to current directory if HOME is not set.
+                    // Unlikely fallback to current directory if HOME and XDG_CONFIG_HOME are not set.
                     return (std::filesystem::current_path() / "config.ini").string();
                 }
             }
 
+            auto config_dir = config_base / "padcast";
             std::filesystem::create_directories(config_dir);
 
             std::filesystem::path config_file = config_dir / "config.ini";
@@ -121,13 +121,13 @@ public:
                     } 
                     else 
                     {
-                        std::println("ERROR: Default config file not found at {}", padcast_config.string());
+                        std::cerr << "ERROR: Default config file not found at " << padcast_config.string() << std::endl;
                     }
                 }
             }
             catch (const std::filesystem::filesystem_error& e) 
             {
-                 std::println("ERROR: Failed to copy default config file: {}", e.what());
+                 std::cerr << "ERROR: Failed to copy default config file: " << e.what() << std::endl;
             }
 
             return config_file.string();
@@ -154,7 +154,7 @@ public:
     {
         if (!std::filesystem::exists(path))
         {
-            std::println("ERROR: Resource not found: {}", path);
+            std::cerr << "ERROR: Resource not found: " << path << std::endl;
             return false;
         }
         return true;

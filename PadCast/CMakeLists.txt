@@ -66,7 +66,10 @@ target_compile_definitions(PadCast PRIVATE
 # If using vcpkg stuff, add it here vvv
 
 # Link libraries
-target_link_libraries(PadCast PRIVATE raylib raylib_cpp)
+target_link_libraries(PadCast PRIVATE raylib)
+if(NOT BUILD_FOR_FLATPAK)
+    target_link_libraries(PadCast PRIVATE raylib_cpp)
+endif()
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET PadCast PROPERTY CXX_STANDARD 23)
@@ -85,17 +88,17 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/
 ###################
 
 # Install binary
-install(TARGETS PadCast DESTINATION bin)
+install(TARGETS PadCast DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Install resources
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources/
-        DESTINATION share/padcast/resources
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/padcast/resources
         FILES_MATCHING
         PATTERN "*.png")
 
 # Install config template
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config/config.ini 
-        DESTINATION share/padcast/config)
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/padcast/config)
 
 # Create desktop entry for Linux
 if(UNIX AND NOT APPLE)
@@ -105,19 +108,15 @@ if(UNIX AND NOT APPLE)
         @ONLY
     )
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/padcast.desktop"
-            DESTINATION share/applications)
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 endif()
 
 # CPack configuration for packaging
-set(CPACK_GENERATOR "DEB;RPM;TGZ")
+set(CPACK_GENERATOR "RPM;TGZ")
 set(CPACK_PACKAGE_NAME "padcast")
 set(CPACK_PACKAGE_VERSION "0.1.0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "PadCast - Gamepad visualization tool for streamers")
 set(CPACK_PACKAGE_CONTACT "Andrew Khazanovsky <andykhazanovsky@gmail.com>")
-
-# Debian-specific settings
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libraylib-dev")
-set(CPACK_DEBIAN_PACKAGE_SECTION "games")
 
 # RPM-specific settings  
 set(CPACK_RPM_PACKAGE_REQUIRES "raylib-devel")
