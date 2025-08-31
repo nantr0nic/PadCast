@@ -257,9 +257,8 @@ After building, the executable will be located in:
 ### This is a work in progress!
 
 - I'd love to hear from you if you have any thoughts, comments, suggestions, etc.!
-- For now this is meant for SNES controllers, but it should work with any similar controller with the same or fewer
-	number of buttons. You can modify the unpressed.png file appropriately if you'd like to remove any unused
-	buttons for your setup. My goal is for future versions to support N64, GameCube, XBox, PS, etc. controllers. 
+- For now this is meant for USB SNES controllers, but it should work with any similar controller with the same or fewer
+	number of buttons. My goal is for future versions to support NES, N64, GameCube, XBox, and Playstation controllers.
 - Previous versions of this program would be (falsely) flagged by Windows Defender as a trojan but I've since fixed
 	the way this program is compiled and it has (so far...) not been flagged. It is not a trojan. If your Defender
 	DOES flag it, let me know so I can continue troubleshooting it.
@@ -270,7 +269,7 @@ This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICEN
 
 ## Credits
 
-Developed by nantr0nic (Andy Khazanovsky).
+Developed by nantr0nic, with input from [dank_meats](https://www.twitch.tv/dank_meats).
 
 This project uses [raylib](https://github.com/raysan5/raylib), [raylib-cpp](https://github.com/RobLoach/raylib-cpp), 
 and [mINI](https://github.com/metayeti/mINI) -- thank you for making this project possible!
