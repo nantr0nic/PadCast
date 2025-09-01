@@ -90,5 +90,21 @@
               "CMAKE_BUILD_TYPE": "Release"
             }
         }
+    ],
+    "buildPresets": [
+        {
+            "name": "linux-release",
+            "configurePreset": "linux-release",
+            "description": "Build for Linux Release",
+            "hidden": false,
+            "jobs": 0
+        },
+        {
+            "name": "linux-debug",
+            "configurePreset": "linux-debug",
+            "description": "Build for Linux Debug",
+            "hidden": false,
+            "jobs": 0
+        }
     ]
 }

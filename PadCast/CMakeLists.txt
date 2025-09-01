@@ -102,6 +102,11 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config/config.ini
 
 # Create desktop entry for Linux
 if(UNIX AND NOT APPLE)
+    # Install the icon in the standard location
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/padcast.png
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/48x48/apps)
+
+    # Configure and install the desktop file
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/padcast.desktop.in"
         "${CMAKE_CURRENT_BINARY_DIR}/padcast.desktop"
@@ -109,18 +114,38 @@ if(UNIX AND NOT APPLE)
     )
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/padcast.desktop"
             DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    if (NOT BUILD_FOR_FLATPAK)
+        # Install the metainfo file for packages other than flatpak because goddamn...
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/com.github.nantr0nic.PadCast.metainfo.xml
+                DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+    endif()
 endif()
 
 # CPack configuration for packaging
 set(CPACK_GENERATOR "RPM;TGZ")
+
 set(CPACK_PACKAGE_NAME "padcast")
-set(CPACK_PACKAGE_VERSION "0.1.0")
+set(CPACK_PACKAGE_VERSION "0.2.0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "PadCast - Gamepad visualization tool for streamers")
+set(CPACK_PACKAGE_DESCRIPTION "PadCast is a lightweight gamepad visualization tool designed for streamers.
+ It shows a real-time display of gamepad button presses, making it easy for viewers to see 
+ what inputs are being made during gameplay.")
 set(CPACK_PACKAGE_CONTACT "Andrew Khazanovsky <andykhazanovsky@gmail.com>")
+set(CPACK_PACKAGE_VENDOR "Andrew Khazanovsky")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/nantr0nic/PadCast")
 
 # RPM-specific settings  
 set(CPACK_RPM_PACKAGE_REQUIRES "raylib-devel")
-set(CPACK_RPM_PACKAGE_GROUP "Amusements/Games")
+set(CPACK_RPM_PACKAGE_GROUP "Applications/Games")
+set(CPACK_RPM_PACKAGE_LICENSE "BSD")
+set(CPACK_RPM_PACKAGE_VENDOR "Andrew Khazanovsky")
+set(CPACK_RPM_PACKAGE_URL "https://github.com/nantr0nic/PadCast")
+set(CPACK_RPM_PACKAGE_DESCRIPTION "PadCast is a lightweight gamepad visualization tool designed for streamers.
+ It shows a real-time display of gamepad button presses, making it easy for viewers to see 
+ what inputs are being made during gameplay.")
+
+ # Set the package file naming
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 
 set(CPACK_GENERATORS_INSTALL ON)
 include(CPack)

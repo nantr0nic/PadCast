@@ -53,7 +53,8 @@ Download the .zip, extract it, and run PadCast.exe. That's it!
 
 #### Flatpak
 
-Download the flatpak from the releases page. Then, on your system...
+Depending on your system's software, you can click/double-click PadCast.flatpak to open and install it. If that fails,
+you can install the flatpak in the terminal:
 
 ```bash
 # Install the flatpak
@@ -220,7 +221,7 @@ if you keep the shapes WHITE.
 - CMake 3.15+
 - Ninja (recommended for faster builds)
 
-#### CMake Presets using Ninja
+#### CMake Presets using Clang and Ninja
 Using the provided CMake presets:
 ```bash
 git clone https://github.com/nantr0nic/PadCast.git
@@ -236,7 +237,7 @@ cmake --build --preset=linux-debug
 ```
 
 #### Alternative Method
-If you prefer not to use presets or don't have Ninja installed:
+If you prefer not to use presets or don't have Clang/Ninja installed:
 ```bash
 git clone https://github.com/nantr0nic/PadCast.git
 cd PadCast
@@ -265,7 +266,7 @@ After building, the executable will be located in:
 
 ## License
 
-This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE.txt) file for details.
 
 ## Credits
 

@@ -2,9 +2,9 @@
 Type=Application
 Name=PadCast
 Comment=Gamepad visualization tool for streamers
-Exec=@CMAKE_INSTALL_PREFIX@/bin/padcast
-Icon=
-Categories=Game;Utility;AudioVideo;
+Exec=@CMAKE_INSTALL_PREFIX@/bin/PadCast
+Icon=padcast
+Categories=Game;Utility;
 Terminal=false
 StartupWMClass=PadCast
 Keywords=gamepad;controller;streaming;twitch;obs;

@@ -2,7 +2,6 @@ app-id: com.github.nantr0nic.PadCast
 runtime: org.freedesktop.Platform
 runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
-
 command: PadCast
 
 finish-args:
@@ -71,6 +70,12 @@ modules:
       - -DCMAKE_INSTALL_PREFIX=/app
       - -DBUILD_FOR_FLATPAK=ON
       - -DCMAKE_PREFIX_PATH=/app
+    #post-install:
+    ## Fix the AppStream icon lookup bug by creating symlinks
+    #  - mkdir -p /app/usr/share
+    #  - ln -sf ../../share/icons /app/usr/share/icons
+    #  - ln -sf ../../share/applications /app/usr/share/applications
+    #  - ln -sf ../../share/metainfo /app/usr/share/metainfo
     sources:
       - type: dir
         path: ..

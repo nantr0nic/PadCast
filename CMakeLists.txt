@@ -14,7 +14,7 @@ endif()
 
 project ("PadCast")
 
-if (UNIX)
+if (UNIX AND NOT BUILD_FOR_FLATPAK)
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
 endif()
 
@@ -97,3 +97,20 @@ endif()
 
 # Include sub-projects.
 add_subdirectory ("PadCast")
+
+# Install documentation files
+include(GNUInstallDirs)
+
+if(WIN32)
+    # Put docs directly in install root on Windows
+    install(FILES ${CMAKE_SOURCE_DIR}/README.txt 
+            DESTINATION .)
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt 
+            DESTINATION .)
+else()
+    # Use standard Unix paths on Linux
+    install(FILES ${CMAKE_SOURCE_DIR}/README.txt 
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME})
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt 
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME})
+endif()
