@@ -29,8 +29,8 @@ private:
 		static constexpr int CUSTOM_BG_BLUE{ 0 };
 		static constexpr int USE_CUSTOM_BG{ 0 };
 		// Image defaults
-		static constexpr int IMAGE_CANVAS_WIDTH{ 1280 };
-		static constexpr int IMAGE_CANVAS_HEIGHT{ 720 };
+		static constexpr int IMAGE_CANVAS_WIDTH{ 960 };
+		static constexpr int IMAGE_CANVAS_HEIGHT{ 540 };
 		static constexpr int USE_CUSTOM_TINT{ 0 };
 		static constexpr int IMAGE_TINT_RED{ 255 };
 		static constexpr int IMAGE_TINT_GREEN{ 255 };

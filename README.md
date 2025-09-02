@@ -205,12 +205,17 @@ The images must:
 - use a transparent background
 - button push shapes must match their respective location on the base controller
 
-The default image/canvas resolution is 1280x720. If you change the resolution of the images used
+The default image/canvas resolution is 960x540. If you change the resolution of the images used
 by the program, update the following values in config.ini to match the resolution of your modified .png's:
 ```
-IMAGE_CANVAS_WIDTH=1280
-IMAGE_CANVAS_HEIGHT=720
+IMAGE_CANVAS_WIDTH=960
+IMAGE_CANVAS_HEIGHT=540
 ```
+If you want to scale above 960x540, there is a /resources/1280x720_images/ folder with
+higher resolution .png files you can use for better scaling. If you want to use them,
+rename the current /resources/images folder to something like ""960x540_images"" and then
+rename the 1280x720_images folder to "images" for the program to use those instead.
+
 If you modify the pressed-button images in /resources/images/pressed/, the tints will still work as expected
 if you keep the shapes WHITE.
 
