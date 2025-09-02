@@ -1,7 +1,7 @@
 # To Do...
 ### Next
-- [ ] Get current version (v0.10) to work on Linux.
-- [ ] Adjust image canvas resolution for better scaling.
+- [ ] Work on the "Performance" to-do's
+- [ ] Begin developing N64/GC controller support.
 
 ### Performance
 - [ ] Enable VSync support. Provide option to enable in menu.
@@ -24,7 +24,7 @@
 issue between raylib and what it can hook into in Windows. Setting aside for now and
 will come back to later.
 
-#### Completed
+#### Completed (from first to last)
 - [X] Resolution saves between open/close
 - [X] Use .ini file for configuration
 - [X] Stop log window from opening
@@ -35,3 +35,5 @@ will come back to later.
 - [X] Add pressed button tint color options
 - [X] Use a main.cpp file and separate out PadCast.cpp features.
 - [X] Refactor. Clean up. Simplify. Make style consistent.
+- [X] Get current version (v0.10) to work on Linux. (Released as v0.2.0)
+- [X] Adjust image canvas resolution for better scaling.
