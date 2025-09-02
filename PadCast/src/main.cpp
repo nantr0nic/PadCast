@@ -29,6 +29,9 @@ int main()
 		mainConfig.getInitWinHeight(),
 		"PadCast"
 	};
+    raylib::Image icon(PathManager::getResourcePath("padcast.png"));
+    window.SetIcon(icon);
+
 	window.SetTargetFPS(mainConfig.getFPS());
 
 	PadCast padcast{ mainConfig };
