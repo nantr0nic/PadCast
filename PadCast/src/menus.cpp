@@ -1,6 +1,8 @@
 #include "menus.h"
 #include "debounce.h"
 
+#include <string>
+
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
 {
 	return { label, action };
@@ -61,6 +63,13 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back({
 		"Remap Buttons",
 		[&params]() { SetupRemapMenu(params); }
+		});
+	params.menu.items.push_back({
+		"Load Controller",
+		[&params]() {
+			params.menu.active = Menu::Gamepad;
+			SetupGamepadMenu(params);
+		}
 		});
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back({
@@ -280,6 +289,38 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.selectedIndex = 0;
 }
 
+void SetupGamepadMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	for (int i = 0; i < 4; ++i)
+	{
+		if (raylib::Gamepad::IsAvailable(i))
+		{
+			std::string menuListing = std::to_string(i) + " > " + params.padcast.getGamepadName(i);
+			params.menu.items.push_back({
+				menuListing,
+				[&params, i]() { 
+					params.padcast.setGamepadIndex(i);
+					params.gamepadIndex = i;
+				}
+			});
+		}
+		else
+		{
+			params.menu.items.push_back({
+				"No Gamepads Detected",
+				[]() {}
+			});
+		}
+	}
+
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+
+	params.menu.selectedIndex = 0;
+}
+
 void HandleMenuInput(MenuContext::MenuParams& params)
 {
 	// ----- Menu open/close ----- //
@@ -366,6 +407,11 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	int scaledLineHeight = static_cast<int>(30 * menuScale);
 	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
 	int scaledPadding = static_cast<int>(10 * menuScale);
+
+	if (menu.active == Menu::Gamepad)
+	{
+		scaledWidth = 470;
+	}
 
 	// Draw semi-transparent background
 	DrawRectangle(scaledX - scaledPadding, scaledY - scaledPadding,

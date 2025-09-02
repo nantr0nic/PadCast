@@ -3,9 +3,11 @@
 #define MINI_CASE_SENSITIVE
 
 #include "mini/ini.h"
+#include "pathmanager.h"
+
 #include <filesystem>
 #include <string>
-#include <print>
+#include <iostream>
 
 class Config
 {
@@ -36,6 +38,7 @@ private:
 		static constexpr int IMAGE_TINT_PALETTE{ 0 };
 		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
+		static constexpr int GAMEPAD_INDEX{ 0 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -72,7 +75,7 @@ public:
 	// this assumes that the executable is in the root directory
 	std::string getConfigFilePath() const
 	{
-		return (std::filesystem::current_path() / "config" / "config.ini").string();
+		return PathManager::getConfigFilePath();
 	}
 
 	void loadConfig();
@@ -109,7 +112,7 @@ public:
 	{
 		if (!hasValue(section, key))
 		{
-			std::println("{} or {} doesn't exist, setting with default value.", section, key);
+			std::cout << section << " or " << key << " doesn't exist, setting with default value." << std::endl;
 			return getDefault(section, key);
 		}
 		try
@@ -118,7 +121,7 @@ public:
 		}
 		catch (const std::invalid_argument&)
 		{
-			std::println("Wrong value type {} for {}, using default", key, section);
+			std::cerr << "Wrong value type " << key << " for " << section << ", using default" << std::endl;
 			return getDefault(section, key);
 		}
 	}
@@ -154,6 +157,10 @@ public:
 	int getBGColor() const
 	{
 		return getValue("Window", "BACKGROUND_COLOR");
+	}
+	int getGPIndex() const
+	{
+		return getValue("Gamepad", "GAMEPAD_INDEX");
 	}
 	int getDebugMode() const
 	{
@@ -195,6 +202,10 @@ public:
 	void updateImageTintPalette(int paletteIndex)
 	{
 		config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(paletteIndex);
+	}
+	void updateGamepadIndex(int gpIndex)
+	{
+		config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(gpIndex);
 	}
 
 //$ ----- Reset -----

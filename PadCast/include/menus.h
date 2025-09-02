@@ -1,9 +1,22 @@
 #ifndef PADCAST_MENUS_H
 #define PADCAST_MENUS_H
 
+#ifdef _WIN32
+	#define NOGDI
+	#define NOUSER
+	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
+#endif
+
+#include <PadCast.h>
+
+#ifdef _WIN32
+	#undef NOGDI
+	#undef NOUSER
+#endif
+
 #include <functional>
 #include <vector>
-#include <PadCast.h>
 
 enum class Menu
 {
@@ -13,7 +26,8 @@ enum class Menu
 	FPS,
 	BGColor,
 	Tint,
-	RemapButtons
+	RemapButtons,
+	Gamepad
 };
 
 struct MenuItem
@@ -36,9 +50,11 @@ struct MenuContext
 		Config& config;
 		PadCast& padcast;
 		ScalingInfo& scaling;
+		int& gamepadIndex;
 
-		MenuParams(MenuContext& men, raylib::Window& win, Config& con, PadCast& pad, ScalingInfo& sca)
-			: menu(men), window(win), config(con), padcast(pad), scaling(sca)
+		MenuParams(MenuContext& men, raylib::Window& win, Config& con, 
+				   PadCast& pad, ScalingInfo& sca, int& gpIndex)
+			: menu(men), window(win), config(con), padcast(pad), scaling(sca), gamepadIndex(gpIndex)
 		{
 		}
 	};
@@ -63,6 +79,8 @@ void SetupBGColorMenu(MenuContext::MenuParams& params);
 void SetupTintMenu(MenuContext::MenuParams& params);
 
 void SetupRemapMenu(MenuContext::MenuParams& params);
+
+void SetupGamepadMenu(MenuContext::MenuParams& params);
 
 void HandleMenuInput(MenuContext::MenuParams& params);
 

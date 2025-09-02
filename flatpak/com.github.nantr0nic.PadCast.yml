@@ -1,0 +1,81 @@
+app-id: com.github.nantr0nic.PadCast
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: PadCast
+
+finish-args:
+  # Permissions needed for a graphical app to display a window
+  - "--socket=x11"
+  - "--socket=wayland"
+  - "--share=ipc" # Needed for X11 communication
+  - "--device=dri"
+  - "--device=input"
+  - "--filesystem=xdg-config/padcast:create"
+
+modules:
+  - name: raylib
+    buildsystem: cmake
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_EXAMPLES=OFF
+      - -DBUILD_GAMES=OFF
+      - -DSUPPORT_MODULE_RSHAPES=ON
+      - -DSUPPORT_MODULE_RTEXTURES=ON
+      - -DSUPPORT_MODULE_RTEXT=ON
+      - -DSUPPORT_MODULE_RMODELS=OFF
+      - -DSUPPORT_MODULE_RAUDIO=OFF
+      - -DSUPPORT_FILEFORMAT_PNG=ON
+      - -DSUPPORT_FILEFORMAT_JPG=OFF
+      - -DSUPPORT_FILEFORMAT_BMP=OFF
+      - -DSUPPORT_FILEFORMAT_TGA=OFF
+      - -DSUPPORT_FILEFORMAT_DDS=OFF
+      - -DSUPPORT_FILEFORMAT_HDR=OFF
+      - -DSUPPORT_FILEFORMAT_KTX=OFF
+      - -DSUPPORT_FILEFORMAT_ASTC=OFF
+      - -DSUPPORT_FILEFORMAT_PKM=OFF
+      - -DSUPPORT_FILEFORMAT_PVR=OFF
+      - -DSUPPORT_FILEFORMAT_SVG=OFF
+      - -DSUPPORT_FILEFORMAT_FNT=OFF
+      - -DSUPPORT_FILEFORMAT_TTF=ON
+      - -DSUPPORT_FILEFORMAT_WAV=OFF
+      - -DSUPPORT_FILEFORMAT_OGG=OFF
+      - -DSUPPORT_FILEFORMAT_XM=OFF
+      - -DSUPPORT_FILEFORMAT_MOD=OFF
+      - -DSUPPORT_FILEFORMAT_FLAC=OFF
+      - -DSUPPORT_FILEFORMAT_MP3=OFF
+      - -DGRAPHICS_API=GRAPHICS_API_OPENGL_33
+      - -DPLATFORM=Desktop
+    sources:
+      - type: archive
+        url: file:///home/nantr0nic/code/PadCast/flatpak/5.5.tar.gz
+        sha256: aea98ecf5bc5c5e0b789a76de0083a21a70457050ea4cc2aec7566935f5e258e
+
+  - name: raylib-cpp
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DBUILD_RAYLIB_CPP_EXAMPLES=OFF
+    sources:
+      - type: archive
+        url: file:///home/nantr0nic/code/PadCast/flatpak/v5.5.0.tar.gz
+        sha256: bcb4a4e241a95376e8562aa77c29976ed0921235a9f5326822130a7bcf4860a5
+
+  - name: padcast
+    buildsystem: cmake
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DBUILD_FOR_FLATPAK=ON
+      - -DCMAKE_PREFIX_PATH=/app
+    #post-install:
+    ## Fix the AppStream icon lookup bug by creating symlinks
+    #  - mkdir -p /app/usr/share
+    #  - ln -sf ../../share/icons /app/usr/share/icons
+    #  - ln -sf ../../share/applications /app/usr/share/applications
+    #  - ln -sf ../../share/metainfo /app/usr/share/metainfo
+    sources:
+      - type: dir
+        path: ..
