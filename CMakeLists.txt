@@ -1,7 +1,10 @@
 ﻿# CMakeList.txt : Top-level CMake project file, do global configuration
 # and include sub-projects here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.15)
+
+# Set to OFF as a default for Windows builds. The flatpak-builder YAML file sets this to ON explicitly.
+option(BUILD_FOR_FLATPAK "Build for Flatpak packaging" OFF)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -11,10 +14,17 @@ endif()
 
 project ("PadCast")
 
+if (UNIX AND NOT BUILD_FOR_FLATPAK)
+    set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install path prefix" FORCE)
+endif()
+
 # Set C++23 standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Export compile commands (for VSCode/Clangd)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Include FetchContent module
 include(FetchContent)
@@ -62,24 +72,45 @@ set(GRAPHICS_API "GRAPHICS_API_OPENGL_33" CACHE STRING "" FORCE)
 set(PLATFORM "Desktop" CACHE STRING "" FORCE)
 
 ### FetchContent stuff ###
-# Fetch raylib
-FetchContent_Declare(
-    raylib
-    GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG 5.5
-)
+# If not building for Flatpak, fetch dependencies.
+# For Flatpak, dependencies are provided as separate modules.
+if(WIN32 OR NOT BUILD_FOR_FLATPAK)
+    # Fetch raylib
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.5
+    )
+    
+    # Fetch raylib-cpp
+    FetchContent_Declare(
+        raylib_cpp
+        GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
+        GIT_TAG v5.5.0
+    )
 
-# Fetch raylib-cpp
-FetchContent_Declare(
-    raylib_cpp
-    GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
-    GIT_TAG v5.5.0
-)
-
-# Make both available to all subprojects
-FetchContent_MakeAvailable(raylib raylib_cpp)
+    # Make both available to all subprojects
+    FetchContent_MakeAvailable(raylib raylib_cpp)
+endif()
 
 ###
 
 # Include sub-projects.
 add_subdirectory ("PadCast")
+
+# Install documentation files
+include(GNUInstallDirs)
+
+if(WIN32)
+    # Put docs directly in install root on Windows
+    install(FILES ${CMAKE_SOURCE_DIR}/README.txt 
+            DESTINATION .)
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt 
+            DESTINATION .)
+else()
+    # Use standard Unix paths on Linux
+    install(FILES ${CMAKE_SOURCE_DIR}/README.txt 
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME})
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt 
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}/${CMAKE_PROJECT_NAME})
+endif()

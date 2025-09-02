@@ -1,10 +1,22 @@
 #ifndef PADCAST_H
 #define PADCAST_H
 
+#ifdef _WIN32
+	#define NOGDI             // hide GDI: Rectangle, DrawText, etc.
+	#define NOUSER            // hide USER32: CloseWindow, ShowCursor, etc.
+	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
+#endif
+
 #include <raylib.h>
+
+#ifdef _WIN32
+	#undef NOGDI
+	#undef NOUSER
+#endif
+
 #include <raylib-cpp.hpp>
 #include "config.h"
-
 #include <unordered_map>
 
 struct GamepadTextures
@@ -110,11 +122,19 @@ public:
 	bool isDebugOn() const { return mDebugMode; }
 
 public:
-	// Gamepad display functions
+	// Gamepad functions
 	bool updateGamepadConnection(bool currentlyAvailable);
 	void drawGamepadButtons(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
 	void drawNoGamepadMessage(const ScalingInfo& scaling);
+	// USB gamepads seem to be 0 by default on Windows, might require finding on Linux
+	void findGamepadIndex();
+	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
+	int getGamepadIndex() { return gamepadIndex; }
+	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+
+	// Gamepad debug functions
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
+	void debugGamepadInfo(const raylib::Gamepad& gamepad);
 
 	// Background color functions
 	bool isValidBackgroundColor(int value) const
@@ -149,6 +169,7 @@ private:
 
 	bool mGamepadWasConnected{ false };
 	int mStabilityCounter{ 0 };
+	int gamepadIndex{ 0 };
 
 	// Cache values for optimization
 	mutable Color mCachedBGColor{ BLACK };

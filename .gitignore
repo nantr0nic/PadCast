@@ -114,11 +114,19 @@ rules.ninja
 # Common build dirs (keep your sources clean)
 build/
 build-/
+build_native/
 out/
 out-/
 dist/
 bin/
 lib/
+
+# Flatpak stuff
+.flatpak-builder
+repo/
+
+# CPack stuff
+_CPack_*
 
 # Generators and toolchains
 Makefile

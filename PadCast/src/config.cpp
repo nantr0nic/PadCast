@@ -1,4 +1,7 @@
 #include "config.h"
+#include <string>
+#include <iostream>
+#include <filesystem>
 
 void Config::loadConfig()
 {
@@ -11,22 +14,22 @@ void Config::loadConfig()
 
 		if (!std::filesystem::exists(configDir))
 		{
-			std::println("Creating config directory: {}", configDir.string());
+			std::cout << "Creating config directory: " << configDir.string() << std::endl;
 			std::filesystem::create_directories(configDir);
 		}
 	}
 	catch (const std::filesystem::filesystem_error& e)
 	{
-		std::println("Error: Cannot create config directory - {}", e.what());
+		std::cerr << "Error: Cannot create config directory - " << e.what() << std::endl;
 		// Fallback: try to use current directory
 		mConfigPath = "config.ini";
-		std::println("Falling back to current directory");
+		std::cout << "Falling back to current directory" << std::endl;
 	}
 
 	if (!mConfigFile.read(config_ini))
 	{
 		// config.ini doesn't exist so we'll create one with default values
-		std::println("config.ini doesn't exist at {}, creating a default one.", mConfigPath);
+		std::cout << "config.ini doesn't exist at " << mConfigPath << ", creating a default one." << std::endl;
 		std::filesystem::create_directories(std::filesystem::path{ mConfigPath }.parent_path());
 		validateConfig();
 		saveConfig();
@@ -34,6 +37,7 @@ void Config::loadConfig()
 	validateConfig();
 }
 
+//! [!!!] Rewrite this as a template! [!!!]
 void Config::validateConfig()
 {
 	bool needsSave{ false };
@@ -283,6 +287,21 @@ void Config::validateConfig()
         }
     }
 
+    if (!hasValue("Gamepad", "GAMEPAD_INDEX"))
+    {
+        config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
+        needsSave = true;
+    }
+    else 
+    {
+        int val = getValue("Gamepad", "GAMEPAD_INDEX");
+        if (val < 0 || val > 3)
+        {
+            config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
+            needsSave = true;
+        }
+    }
+
     // Check Font section
     if (!hasValue("Font", "MIN_FONT_SIZE"))
     {
@@ -528,7 +547,7 @@ void Config::validateConfig()
 
     if (needsSave)
     {
-        std::println("Adding missing or invalid config values...");
+        std::cout << "Adding missing or invalid config values..." << std::endl;
         saveConfig();
     }
 }
@@ -575,6 +594,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 	{
 		if (key == "STABILITY_THRESHOLD") 
 			return DefaultValues::STABILITY_THRESHOLD;
+        if (key == "GAMEPAD_INDEX")
+            return DefaultValues::GAMEPAD_INDEX;
 	}
 	if (section == "Font")
 	{
