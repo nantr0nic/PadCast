@@ -19,7 +19,7 @@ This is a patch release focused entirely on internal improvements to enhance per
 - [ ] Optimize rendering by drawing the base controller from a cached texture.
 - [ ] Refactor data structures to be more cache-friendly.
 - [ ] Measure impact of the `-ffast-math` CMake flag.
-
+- [ ] Refactor code and begin setting up new controller support.
 ---
 
 ### **`v0.3.0`** - N64 Controller Support
