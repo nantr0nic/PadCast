@@ -22,6 +22,9 @@ enum class Menu
 {
 	None,
 	Main,
+	Video,
+	Visuals,
+	Controller,
 	Resolution,
 	FPS,
 	BGColor,
@@ -69,6 +72,12 @@ MenuItem createCloseMenuItem(MenuContext& menu);
 MenuItem createSpacer();
 
 void SetupMainMenu(MenuContext::MenuParams& params);
+
+void SetupVideoMenu(MenuContext::MenuParams& params);
+
+void SetupVisualsMenu(MenuContext::MenuParams& params);
+
+void SetupControllerMenu(MenuContext::MenuParams& params);
 
 void SetupResolutionMenu(MenuContext::MenuParams& params);
 
