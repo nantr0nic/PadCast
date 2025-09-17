@@ -31,44 +31,25 @@ MenuItem createSpacer()
 void SetupMainMenu(MenuContext::MenuParams& params)
 {
 	params.menu.items.clear();
-	// push_back all menu items for active menu
 	params.menu.items.push_back({
-		"Resolution Menu",
+		"Video",
 		[&params]() { 
-			params.menu.active = Menu::Resolution; 
-			SetupResolutionMenu(params); 
+			params.menu.active = Menu::Video; 
+			SetupVideoMenu(params); 
 		}
 		});
 	params.menu.items.push_back({
-		"FPS",
+		"Visuals",
 		[&params]() { 
-			params.menu.active = Menu::FPS; 					
-			SetupFPSMenu(params); 
+			params.menu.active = Menu::Visuals; 
+			SetupVisualsMenu(params); 
 		}
 		});
 	params.menu.items.push_back({
-		"Background Color",
+		"Controller",
 		[&params]() { 
-			params.menu.active = Menu::BGColor;
-			SetupBGColorMenu(params); 
-		}
-		});
-	params.menu.items.push_back({
-		"Button Tint Color",
-		[&params]() {
-			params.menu.active = Menu::Tint;
-			SetupTintMenu(params);
-		}
-		});
-	params.menu.items.push_back({
-		"Remap Buttons",
-		[&params]() { SetupRemapMenu(params); }
-		});
-	params.menu.items.push_back({
-		"Load Controller",
-		[&params]() {
-			params.menu.active = Menu::Gamepad;
-			SetupGamepadMenu(params);
+			params.menu.active = Menu::Controller; 
+			SetupControllerMenu(params); 
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -83,6 +64,75 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
+	params.menu.selectedIndex = 0;
+}
+
+void SetupVideoMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Resolution",
+		[&params]() { 
+			params.menu.active = Menu::Resolution; 
+			SetupResolutionMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Target FPS",
+		[&params]() { 
+			params.menu.active = Menu::FPS; 
+			SetupFPSMenu(params); 
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupVisualsMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Background Color",
+		[&params]() { 
+			params.menu.active = Menu::BGColor; 
+			SetupBGColorMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Image Tint",
+		[&params]() { 
+			params.menu.active = Menu::Tint; 
+			SetupTintMenu(params); 
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupControllerMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Select Gamepad",
+		[&params]() { 
+			params.menu.active = Menu::Gamepad; 
+			SetupGamepadMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Remap Buttons",
+		[&params]() { 
+			params.menu.active = Menu::RemapButtons; 
+			SetupRemapMenu(params); 
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 	params.menu.selectedIndex = 0;
 }
 

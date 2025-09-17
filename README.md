@@ -12,6 +12,7 @@
 	- [In-program Menu](#in-program-menu)
 	- [Using config.ini](#config.ini)
 - [Custom Images](#custom-images)
+- [Known Issues](#known-issues)
 - [Building from Source](#building-from-source)
 - [License](#license)
 - [Credits](#credits)
@@ -89,18 +90,24 @@ or hit spacebar or "M".
 You can navigate the menu using the mouse as expected, or use W/S and arrow-keys to navigate and Enter to select.
 
 The following settings can be accessed and changed via the in-program menu:
+
+#### Video Settings
 - Resolution
 > The window can be manually resized by dragging the window borders, but there are resolution
 presets available in the menu. If you require specific dimensions, it can be manually set in config.ini
 - Target FPS of the program (e.g. 30, 60, 90, 120). 
 > This should usually be set to 60, but it can be changed to match the FPS of the game/emulator you are
 running. If you require a specific target FPS, it can be manually set in config.ini
+
+#### Visual Settings
 - Background Color
 > Generic background colors can be set in the menu. You can set a custom background color in config.ini
 (see below)
 - Button Tint Color
 > This changes the color of the shapes that appear when a button is pressed. Generic colors can be set
 in the menu, but you can set a custom tint color in config.ini (see below)
+
+#### Controller Settings
 - Remap Buttons
 > Clicking "Start Remap" will begin a remap sequence where the program will go through a series of prompts
 to register correct button pushes. The button map will be saved in config.ini and will be used each time
@@ -110,6 +117,8 @@ you load PadCast. "Reset to Default" will reset the button map to the SNES defau
 default, use this to select the controller you wish to use. If you have more than one controller connected,
 you can use this menu to select the controller you wish to use. If no inputs are detected, the menu will
 print "No Gamepads Detected"
+
+#### Other
 - Reload Config File
 > If you edit the config.ini file while the program is running, click "Reload Config File" to enable the
 changes you've made (make sure to save config.ini first!). For example, if you want to try out different
@@ -218,6 +227,10 @@ rename the 1280x720_images folder to "images" for the program to use those inste
 
 If you modify the pressed-button images in /resources/images/pressed/, the tints will still work as expected
 if you keep the shapes WHITE.
+
+## Known Issues
+- Some controllers may be mislabeled by the OS or the underlying gamepad library (GLFW/SDL_GameControllerDB). 
+	For example, my USB GameCube controller is labeled as "XBox Controller".
 
 ## Building from Source
 
