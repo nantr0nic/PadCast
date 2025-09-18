@@ -18,7 +18,7 @@ This is a patch release focused entirely on internal improvements to enhance per
 - [ ] Test using event waiting to reduce idle CPU usage.
 - [ ] Optimize rendering by drawing the base controller from a cached texture.
 - [ ] Refactor data structures to be more cache-friendly.
-- [ ] Measure impact of the `-ffast-math` CMake flag.
+- [X] Measure impact of the `-ffast-math` CMake flag.
 - [ ] Refactor code and begin setting up new controller support.
 - [X] Restructure Menu system to accommodate future features.
 - [ ] Test using SDL2 backend for better gamepad compatibility.
@@ -38,6 +38,7 @@ This minor release introduces the first new controller type.
 This minor release adds support for another classic controller.
 
 - [ ] Add support for GameCube controller visualization.
+- [ ] Test '-ffast-math' and '/fp:fast' flags for floating-point calculation optimizations.
 
 ---
 
