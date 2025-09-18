@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - v0.2.5
 ### Added
-- (Work in progress)
+- Commented out section in CMakeLists.txt for future floating-point calculation optimizations.
 
 ### Changed
 - Restructured menu system to Video/Visuals/Controller. This is to make space for

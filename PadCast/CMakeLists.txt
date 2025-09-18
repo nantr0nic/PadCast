@@ -7,7 +7,7 @@ add_executable (PadCast
     "src/menus.cpp"
  )
 
-# MSVC-specific optimizations to reduce false positives
+### MSVC-specific optimizations to reduce false positives ###
 if(MSVC)
     # Force Zi instead of ZI (Edit and Continue debug)
     target_compile_options(PadCast PRIVATE /Zi)
@@ -35,6 +35,24 @@ if(MSVC)
         version.rc
     )
 endif()
+### End MSVC false positive mitigation section ###
+
+### Cross-platform floating-point optimizations ###
+
+# Save this for testing later when doing floating-point heavy stuff
+# (e.g. animating joystick positions etc.)
+
+#if(MSVC)
+#    target_compile_options(PadCast PRIVATE
+#        $<$<CONFIG:Release>:/fp:fast>
+#    )
+#elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#    target_compile_options(PadCast PRIVATE
+#        $<$<CONFIG:Release>:-ffast-math>
+#        $<$<CONFIG:Release>:-march=native>
+#    )
+#endif()
+
 
 # Suppress Log window for non-debug builds
 set_target_properties(PadCast PROPERTIES

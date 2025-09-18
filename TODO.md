@@ -4,7 +4,9 @@
 - [ ] Test using event waiting to see if it lowers CPU usage.
 - [ ] Draw base controller from cached texture. Measure impact.
 - [ ] See if there's data that can be structured to be more cache-friendly.
-- [ ] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
+- [X] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
+> This will only positively impact performance when floating-point calculations are being done.
+> Save for later version when animating two joysticks (GameCube Controller).
 - [ ] Test using SDL2 backend for better gamepad compatibility.
 - [ ] Restructure code to begin supporting next controllers.
 
