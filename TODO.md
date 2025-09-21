@@ -1,7 +1,7 @@
 # To Do...
 ### Next
-- [ ] Enable VSync support. Provide option to enable in menu.
-- [ ] Test using event waiting to see if it lowers CPU usage.
+- [X] Enable VSync support. Provide option to enable in menu.
+- [X] Test using event waiting to see if it lowers CPU usage.
 - [ ] Draw base controller from cached texture. Measure impact.
 - [ ] See if there's data that can be structured to be more cache-friendly.
 - [X] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
