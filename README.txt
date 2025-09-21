@@ -23,7 +23,7 @@ Table of Contents
 
 1.  Features
 
--   Can change FPS to 30, 60, 90, 120 (or set custom FPS in config.ini)
+-   Can set FPS (30, 60, 90, 120 or custom value in config.ini) or use VSync.
 -   Can change background color. Can set custom background color in config.ini file.
 -   Can change color of the button presses. They can be tinted from the menu or a
     custom tint color can be set in config.ini file.
@@ -116,6 +116,11 @@ dimensions, it can be manually set in config.ini
     > This should usually be set to 60, but it can be changed to
 match the FPS of the game/emulator you are running. If you require a specific target
 FPS, it can be manually set in config.ini
+
+    ==> Enable/Disable VSync <==
+    > This will enable/disable VSync. While VSync is enabled, the Target FPS setting
+will be ignored. Please note that VSync may increase CPU usage depending on your 
+specific hardware and GPU driver settings.
 
                     Visuals Settings
     ==> Background Color <==

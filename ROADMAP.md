@@ -14,7 +14,7 @@ This is the baseline version from which the roadmap begins.
 
 This is a patch release focused entirely on internal improvements to enhance performance and efficiency without adding new user-facing features.
 
-- [ ] Enable VSync support with a menu option.
+- [X] Enable VSync support with a menu option.
 - [ ] Test using event waiting to reduce idle CPU usage.
 - [ ] Optimize rendering by drawing the base controller from a cached texture.
 - [ ] Refactor data structures to be more cache-friendly.

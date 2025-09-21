@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - v0.2.5
 ### Added
 - Commented out section in CMakeLists.txt for future floating-point calculation optimizations.
+- Added VSync option to menu (disabled by default).
 
 ### Changed
 - Restructured menu system to Video/Visuals/Controller. This is to make space for
 future features to be added to the menu.
+- Target FPS will be ignored if VSync is enabled.
 
 ### Fixed
 - (Work in progress)

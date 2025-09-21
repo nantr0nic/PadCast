@@ -22,6 +22,7 @@ private:
 		static constexpr int INITIAL_WINDOW_WIDTH{ 960 };
 		static constexpr int INITIAL_WINDOW_HEIGHT{ 540 };
 		static constexpr int TARGET_FPS{ 60 };
+		static constexpr int USE_VSYNC{ 0 };
 		// Background color defaults
 		static constexpr int BACKGROUND_COLOR{ 0 };
 		static constexpr int CUSTOM_BG_RED{ 0 };
@@ -154,6 +155,10 @@ public:
 	{
 		return getValue("Window", "TARGET_FPS");
 	}
+	int getVSYNC() const
+	{
+		return getValue("Window", "USE_VSYNC");
+	}
 	int getBGColor() const
 	{
 		return getValue("Window", "BACKGROUND_COLOR");
@@ -182,6 +187,10 @@ public:
 	void updateTargetFPS(int fps)
 	{
 		config_ini["Window"]["TARGET_FPS"] = std::to_string(fps);
+	}
+	void updateUseVSYNC(int vsync)
+	{
+		config_ini["Window"]["USE_VSYNC"] = std::to_string(vsync);
 	}
 	void updateBGColor(int background_int)
 	{

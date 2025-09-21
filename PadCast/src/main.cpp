@@ -32,7 +32,19 @@ int main()
     raylib::Image icon(PathManager::getResourcePath("padcast.png"));
     window.SetIcon(icon);
 
-	window.SetTargetFPS(mainConfig.getFPS());
+	// window.SetTargetFPS(mainConfig.getFPS());
+
+    if (mainConfig.getVSYNC())
+    {
+        SetWindowState(FLAG_VSYNC_HINT);  // Enable vsync
+        window.SetTargetFPS(0);  // Remove FPS cap when vsync is on
+    }
+    else
+    {
+        ClearWindowState(FLAG_VSYNC_HINT);  // Disable vsync
+        window.SetTargetFPS(mainConfig.getFPS());  // Use fixed FPS when vsync is off
+    }
+    
 
 	PadCast padcast{ mainConfig };
 	MenuContext menu;
