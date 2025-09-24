@@ -35,7 +35,9 @@ int main()
     if (mainConfig.getVSYNC())
     {
         SetWindowState(FLAG_VSYNC_HINT);
-        window.SetTargetFPS(0);
+        int currentMonitor = GetCurrentMonitor();
+        int refreshRate = GetMonitorRefreshRate(currentMonitor);
+        window.SetTargetFPS(refreshRate);
     }
     else
     {
