@@ -99,8 +99,10 @@ void SetupVideoMenu(MenuContext::MenuParams& params)
 			}
 			else
 			{
+				int currentMonitor = GetCurrentMonitor();
+				int refreshRate = GetMonitorRefreshRate(currentMonitor);
 				SetWindowState(FLAG_VSYNC_HINT);  
-				params.window.SetTargetFPS(0);
+				params.window.SetTargetFPS(refreshRate);
 				params.config.updateUseVSYNC(1);
 				SetupVideoMenu(params);
 			}

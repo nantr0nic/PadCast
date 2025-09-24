@@ -99,8 +99,11 @@ presets available in the menu. If you require specific dimensions, it can be man
 > This should usually be set to 60, but it can be changed to match the FPS of the game/emulator you are
 running. If you require a specific target FPS, it can be manually set in config.ini
 - Enable/Disable VSync
-> This will enable/disable VSync. While VSync is enabled, the Target FPS setting will be ignored. Please
-note that VSync may increase CPU usage depending on your specific hardware and GPU driver settings.
+> This will enable/disable VSync. While VSync is enabled, the Target FPS setting will be ignored. If you
+enable VSync, the program will limit the FPS to match your monitor's refresh rate. If you change your
+monitor's refresh rate while the program is running, you will need to toggle VSync off and back on to match
+the new refresh rate. Please note that VSync may increase CPU usage depending on your specific hardware
+and GPU driver settings; generally the higher refresh rate your monitor is set to, the more CPU usage.
 
 #### Visual Settings
 - Background Color
