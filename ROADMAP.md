@@ -16,8 +16,8 @@ This is a patch release focused entirely on internal improvements to enhance per
 
 - [X] Enable VSync support with a menu option.
 - [X] Test using event waiting to reduce idle CPU usage.
-- [ ] Optimize rendering by drawing the base controller from a cached texture.
-- [ ] Refactor data structures to be more cache-friendly.
+- [X] Optimize rendering by drawing the base controller from a cached texture.
+- [X] Refactor data structures to be more cache-friendly.
 - [X] Measure impact of the `-ffast-math` CMake flag.
 - [ ] Refactor code and begin setting up new controller support.
 - [X] Restructure Menu system to accommodate future features.
