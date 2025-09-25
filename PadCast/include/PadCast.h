@@ -19,25 +19,6 @@
 #include "config.h"
 #include <unordered_map>
 
-struct GamepadTextures
-{
-	raylib::Texture2D unpressed;
-	raylib::Texture2D pressedA;
-	raylib::Texture2D pressedB;
-	raylib::Texture2D pressedX;
-	raylib::Texture2D pressedY;
-	raylib::Texture2D pressedUp;
-	raylib::Texture2D pressedLeft;
-	raylib::Texture2D pressedDown;
-	raylib::Texture2D pressedRight;
-	raylib::Texture2D pressedStart;
-	raylib::Texture2D pressedSelect;
-	raylib::Texture2D pressedLBump;
-	raylib::Texture2D pressedRBump;
-
-	GamepadTextures();
-};
-
 struct ScalingInfo
 {
 	float scale{};
@@ -56,6 +37,46 @@ enum class BackgroundColor
 	Blue
 };
 
+enum class GamepadLayout
+{
+	Unknown,
+	SNES,
+	N64,
+	Gamecube,
+	Xbox,
+	PlayStation
+};
+
+struct GamepadTextures
+{
+	GamepadTextures();
+
+	void loadTextures(const GamepadLayout& layout);
+
+	raylib::Texture2D controller;
+	raylib::Texture2D pressedA;
+	raylib::Texture2D pressedB;
+	raylib::Texture2D pressedX;
+	raylib::Texture2D pressedY;
+	raylib::Texture2D pressedCup;		// N64
+	raylib::Texture2D pressedCdown;		// N64
+	raylib::Texture2D pressedCleft;		// N64
+	raylib::Texture2D pressedCright;	// N64
+	raylib::Texture2D pressedZ;			// N64
+	raylib::Texture2D pressedUp;
+	raylib::Texture2D pressedLeft;
+	raylib::Texture2D pressedDown;
+	raylib::Texture2D pressedRight;
+	raylib::Texture2D pressedStart;
+	raylib::Texture2D pressedSelect;
+	raylib::Texture2D pressedLBump;
+	raylib::Texture2D pressedRBump;
+	raylib::Texture2D pressedLTrigger;
+	raylib::Texture2D pressedRTrigger;
+	raylib::Texture2D joystickLeft;
+	raylib::Texture2D joystickRight;
+};
+
 struct ButtonMap
 {
 	std::unordered_map<int, int> buttonIndex;
@@ -72,6 +93,21 @@ struct ButtonMap
 		{GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11},// Right shoulder
 		{GAMEPAD_BUTTON_MIDDLE_LEFT, 13},    // Select
 		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
+	};
+	std::unordered_map<int, int> defaultN64Index {
+		{GAMEPAD_BUTTON_LEFT_FACE_UP, 1},     // D-pad UP
+		{GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2},  // D-pad RIGHT
+		{GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},   // D-pad DOWN
+		{GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},   // D-pad LEFT
+		{GAMEPAD_BUTTON_RIGHT_FACE_UP, 15},   // C-UP
+		{GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, 13},// C-RIGHT
+		{GAMEPAD_BUTTON_RIGHT_FACE_DOWN, 5},  // C-DOWN
+		{GAMEPAD_BUTTON_RIGHT_FACE_LEFT, 8},  // C-LEFT
+		{GAMEPAD_BUTTON_MIDDLE_LEFT, 7},	  // B
+		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 6},	  // A
+		{GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},   // Left shoulder
+		{GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11}, // Right shoulder
+		{GAMEPAD_BUTTON_MIDDLE, 15}			  // Start
 	};
 
 	ButtonMap()
@@ -96,8 +132,15 @@ struct CachedButtons
 	int aButton{};        // RIGHT_FACE_RIGHT
 	int bButton{};        // RIGHT_FACE_DOWN
 	int yButton{};        // RIGHT_FACE_LEFT
+	int cUp{};            // N64 C-UP
+	int cRight{};         // N64 C-RIGHT
+	int cDown{};          // N64 C-DOWN
+	int cLeft{};          // N64 C-LEFT
+	// int zButton{};        // N64 Z
 	int leftTrigger{};
 	int rightTrigger{};
+	int leftBumper{};
+	int rightBumper{};
 	int selectButton{};   // MIDDLE_LEFT
 	int startButton{};    // MIDDLE_RIGHT
 
@@ -129,8 +172,8 @@ public:
 	// USB gamepads seem to be 0 by default on Windows, might require finding on Linux
 	void findGamepadIndex();
 	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
-	int getGamepadIndex() { return gamepadIndex; }
-	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+	int getGamepadIndex() { return mGamepadIndex; }
+	void setGamepadIndex(int i) { mGamepadIndex = i;  mConfig.updateGamepadIndex(i); }
 
 	// Gamepad debug functions
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
@@ -162,6 +205,7 @@ public:
 	}
 
 private:
+	GamepadLayout mLayout;
 	GamepadTextures mTextures;
 	Config& mConfig;
 	ButtonMap mButtonMap;
@@ -169,7 +213,7 @@ private:
 
 	bool mGamepadWasConnected{ false };
 	int mStabilityCounter{ 0 };
-	int gamepadIndex{ 0 };
+	int mGamepadIndex{ 0 };
 
 	// Cache values for optimization
 	mutable Color mCachedBGColor{ BLACK };

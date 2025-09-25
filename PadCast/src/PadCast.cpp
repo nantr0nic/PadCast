@@ -15,23 +15,6 @@
 
 #include <iostream>
 
-GamepadTextures::GamepadTextures()
-: unpressed(PathManager::getResourcePath("images/controller.png"))
-, pressedA(PathManager::getResourcePath("images/pressed/A.png"))
-, pressedB(PathManager::getResourcePath("images/pressed/B.png"))
-, pressedX(PathManager::getResourcePath("images/pressed/X.png"))
-, pressedY(PathManager::getResourcePath("images/pressed/Y.png"))
-, pressedUp(PathManager::getResourcePath("images/pressed/up.png"))
-, pressedLeft(PathManager::getResourcePath("images/pressed/left.png"))
-, pressedDown(PathManager::getResourcePath("images/pressed/down.png"))
-, pressedRight(PathManager::getResourcePath("images/pressed/right.png"))
-, pressedStart(PathManager::getResourcePath("images/pressed/start.png"))
-, pressedSelect(PathManager::getResourcePath("images/pressed/select.png"))
-, pressedLBump(PathManager::getResourcePath("images/pressed/L-bumper.png"))
-, pressedRBump(PathManager::getResourcePath("images/pressed/R-bumper.png"))
-{
-}
-
 ScalingInfo::ScalingInfo(int currentWidth, int currentHeight, 
                          int originalWidth, int originalHeight)
 {
@@ -42,13 +25,93 @@ ScalingInfo::ScalingInfo(int currentWidth, int currentHeight,
     offsetY = (currentHeight - (originalHeight * scale)) / 2.0f;
 }
 
+GamepadTextures::GamepadTextures()
+{
+}
+
+void GamepadTextures::loadTextures(const GamepadLayout& layout)
+{
+    if (layout == GamepadLayout::SNES)
+    {
+        controller = raylib::Texture2D(PathManager::getResourcePath("images/SNES/controller.png"));
+        pressedA = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/A.png"));
+        pressedB = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/B.png"));
+        pressedX = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/X.png"));
+        pressedY = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/Y.png"));
+        pressedUp = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/up.png"));
+        pressedLeft = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/left.png"));
+        pressedDown = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/down.png"));
+        pressedRight = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/right.png"));
+        pressedStart = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/start.png"));
+        pressedSelect = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/select.png"));
+        pressedLBump = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/L-bumper.png"));
+        pressedRBump = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/R-bumper.png"));
+    }
+    else if (layout == GamepadLayout::N64)
+    {
+        controller = raylib::Texture2D(PathManager::getResourcePath("images/N64/controller.png"));
+        pressedA = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/A.png"));
+        pressedB = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/B.png"));
+        pressedCdown = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/C-down.png"));
+        pressedCleft = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/C-left.png"));
+        pressedCright = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/C-right.png"));
+        pressedCup = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/C-up.png"));
+        pressedZ = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/Z.png"));
+        pressedUp = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/up.png"));
+        pressedLeft = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/left.png"));
+        pressedDown = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/down.png"));
+        pressedRight = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/right.png"));
+        pressedStart = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/start.png"));
+        joystickLeft = raylib::Texture2D(PathManager::getResourcePath("images/N64/pressed/joystick.png"));
+    }
+    else if (layout == GamepadLayout::Gamecube)
+    {
+        controller = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/controller.png"));
+        pressedA = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/A.png"));
+        pressedB = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/B.png"));
+        pressedX = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/X.png"));
+        pressedY = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/Y.png"));
+        pressedUp = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/up.png"));
+        pressedLeft = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/left.png"));
+        pressedDown = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/down.png"));
+        pressedRight = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/right.png"));
+        pressedStart = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/start.png"));
+        pressedLTrigger = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/L-bumper.png"));
+        pressedRTrigger = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/R-bumper.png"));
+        pressedLBump = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/Z-left.png"));
+        pressedRBump = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/Z-right.png"));
+        joystickLeft = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/joystick.png"));
+        joystickRight = raylib::Texture2D(PathManager::getResourcePath("images/Gamecube/pressed/C-stick.png"));
+    }
+    else
+    {
+        std::cout << "Something went wrong with layout selection.";
+        std::cout << "\nFalling back to SNES textures." << std::endl;
+        controller = raylib::Texture2D(PathManager::getResourcePath("images/SNES/controller.png"));
+        pressedA = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/A.png"));
+        pressedB = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/B.png"));
+        pressedX = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/X.png"));
+        pressedY = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/Y.png"));
+        pressedUp = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/up.png"));
+        pressedLeft = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/left.png"));
+        pressedDown = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/down.png"));
+        pressedRight = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/right.png"));
+        pressedStart = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/start.png"));
+        pressedSelect = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/select.png"));
+        pressedLBump = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/L-bumper.png"));
+        pressedRBump = raylib::Texture2D(PathManager::getResourcePath("images/SNES/pressed/R-bumper.png"));
+    }
+}
+
 void CachedButtons::refreshCache(const ButtonMap& buttonMap)
 {
     //std::cout << "DEBUG: Starting refreshCache()" << std::endl;
     // reset each
     dpadUp = dpadRight = dpadDown = dpadLeft = 0;
     xButton = aButton = bButton = yButton = 0;
-    leftTrigger = rightTrigger = selectButton = startButton = 0;
+	cUp = cRight = cDown = cLeft = 0;
+	leftTrigger = rightTrigger = leftBumper = rightBumper = 0;
+    selectButton = startButton = 0;
     for (const auto& [raylibButton, displayIndex] : buttonMap.buttonIndex)
     {
         //std::cout << "DEBUG: refreshing " << raylibButton << " to " << displayIndex << std::endl;
@@ -79,21 +142,17 @@ void CachedButtons::refreshCache(const ButtonMap& buttonMap)
             yButton = displayIndex;
             break;
         case 9: // Left shoulder display
-            leftTrigger = displayIndex;
+            leftBumper = displayIndex;
             break;
-        /* For future non-SNES controller use:
         case 10: // Left trigger display
-            leftTrigger2 = displayIndex;
-            break;
-            */
+            leftTrigger = displayIndex;
+			break;
         case 11: // Right shoulder display
+            rightBumper = displayIndex;
+            break;
+        case 12: // Right trigger display
             rightTrigger = displayIndex;
-            break;
-        /* For future non-SNES controller use:
-        case 12: // Left trigger display
-            leftTrigger2 = displayIndex;
-            break;
-            */
+			break;
         case 13: // Select display
             selectButton = displayIndex;
             break;
@@ -114,7 +173,9 @@ PadCast::PadCast(Config& mainConfig)
         mDebugMode = true;
     }
 
-    gamepadIndex = mainConfig.getGPIndex();
+    mGamepadIndex = mainConfig.getGPIndex();
+
+	mTextures.loadTextures(static_cast<GamepadLayout>(mainConfig.getGPLayout()));
 
     loadButtonsFromConfig();
     mButtonCache.refreshCache(mButtonMap);
@@ -262,13 +323,21 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     }
 
     // Shoulder buttons
-    if (gamepad.IsButtonDown(mButtonCache.leftTrigger))
+    if (gamepad.IsButtonDown(mButtonCache.leftBumper))
     {
         mTextures.pressedLBump.Draw(position, 0.0f, scale, texture_tint);
     }
-    if (gamepad.IsButtonDown(mButtonCache.rightTrigger))
+    if (gamepad.IsButtonDown(mButtonCache.rightBumper))
     {
         mTextures.pressedRBump.Draw(position, 0.0f, scale, texture_tint);
+    }
+    if (gamepad.IsButtonDown(mButtonCache.leftTrigger))
+    {
+        mTextures.pressedLTrigger.Draw(position, 0.0f, scale, texture_tint);
+	}
+    if (gamepad.IsButtonDown(mButtonCache.rightTrigger))
+    {
+        mTextures.pressedRTrigger.Draw(position, 0.0f, scale, texture_tint);
     }
 
     // Select / Start
@@ -479,47 +548,47 @@ void PadCast::loadButtonsFromConfig()
         }
         else if (key == "DPAD_RIGHT") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
         }
         else if (key == "DPAD_DOWN") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
         }
         else if (key == "DPAD_LEFT") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
         }
         else if (key == "X_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
         }
         else if (key == "A_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
         }
         else if (key == "B_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
         }
         else if (key == "Y_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
         }
         else if (key == "L_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
         }
         else if (key == "R_BUTTON") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
         }
         else if (key == "SELECT") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
         }
         else if (key == "START") 
         {
-                mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
+            mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
         }
     }
 

@@ -40,6 +40,7 @@ private:
 		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		static constexpr int GAMEPAD_INDEX{ 0 };
+		static constexpr int GAMEPAD_LAYOUT{ 1 };	// Layout #'s match enum class in PadCast.h
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -167,6 +168,10 @@ public:
 	{
 		return getValue("Gamepad", "GAMEPAD_INDEX");
 	}
+	int getGPLayout() const
+	{
+		return getValue("Gamepad", "GAMEPAD_LAYOUT");
+	}
 	int getDebugMode() const
 	{
 		return getValue("Debug", "MODE");
@@ -215,6 +220,10 @@ public:
 	void updateGamepadIndex(int gpIndex)
 	{
 		config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(gpIndex);
+	}
+	void updateGamepadLayout(int layout)
+	{
+		config_ini["Gamepad"]["GAMEPAD_LAYOUT"] = std::to_string(layout);
 	}
 
 //$ ----- Reset -----

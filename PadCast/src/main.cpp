@@ -99,7 +99,7 @@ int main()
         HandleMenuInput(menuParams);
 
         // Draw base controller
-        padcast.getTextures().unpressed.Draw(
+        padcast.getTextures().controller.Draw(
             raylib::Vector2{ scaling.offsetX, scaling.offsetY },
             0.0f,
             scaling.scale,

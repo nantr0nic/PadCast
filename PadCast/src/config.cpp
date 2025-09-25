@@ -317,6 +317,21 @@ void Config::validateConfig()
         }
     }
 
+    if (!hasValue("Gamepad", "GAMEPAD_LAYOUT"))
+    {
+        config_ini["Gamepad"]["GAMEPAD_LAYOUT"] = std::to_string(DefaultValues::GAMEPAD_LAYOUT);
+        needsSave = true;
+    }
+    else
+    {
+        int val = getValue("Gamepad", "GAMEPAD_LAYOUT");
+        if (val < 1 || val > 3) // Currently only 3 layouts are supported
+        {
+            config_ini["Gamepad"]["GAMEPAD_LAYOUT"] = std::to_string(DefaultValues::GAMEPAD_LAYOUT);
+            needsSave = true;
+        }
+	}
+
     // Check Font section
     if (!hasValue("Font", "MIN_FONT_SIZE"))
     {
@@ -613,6 +628,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::STABILITY_THRESHOLD;
         if (key == "GAMEPAD_INDEX")
             return DefaultValues::GAMEPAD_INDEX;
+		if (key == "GAMEPAD_LAYOUT")
+			return DefaultValues::GAMEPAD_LAYOUT;
 	}
 	if (section == "Font")
 	{
