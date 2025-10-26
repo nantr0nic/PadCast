@@ -89,6 +89,21 @@ void Config::validateConfig()
         }
     }
 
+    if (!hasValue("Window", "USE_VSYNC"))
+    {
+        config_ini["Window"]["USE_VSYNC"] = std::to_string(DefaultValues::USE_VSYNC);
+        needsSave = true;
+    }
+    else
+    {
+        int existingVsync = getValue("Window", "USE_VSYNC");
+        if (existingVsync != 0 && existingVsync != 1)
+        {
+            config_ini["Window"]["USE_VSYNC"] = std::to_string(DefaultValues::USE_VSYNC);
+            needsSave = true;
+        }
+	}
+
     if (!hasValue("Window", "BACKGROUND_COLOR"))
     {
         config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(DefaultValues::BACKGROUND_COLOR);
@@ -562,6 +577,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 			return DefaultValues::INITIAL_WINDOW_HEIGHT;
 		if (key == "TARGET_FPS")
 			return DefaultValues::TARGET_FPS;
+		if (key == "USE_VSYNC")
+			return DefaultValues::USE_VSYNC;
 		if (key == "BACKGROUND_COLOR")
 			return DefaultValues::BACKGROUND_COLOR;
 		if (key == "CUSTOM_BG_RED")

@@ -32,7 +32,18 @@ int main()
     raylib::Image icon(PathManager::getResourcePath("padcast.png"));
     window.SetIcon(icon);
 
-	window.SetTargetFPS(mainConfig.getFPS());
+    if (mainConfig.getVSYNC())
+    {
+        SetWindowState(FLAG_VSYNC_HINT);
+        int currentMonitor = GetCurrentMonitor();
+        int refreshRate = GetMonitorRefreshRate(currentMonitor);
+        window.SetTargetFPS(refreshRate);
+    }
+    else
+    {
+        ClearWindowState(FLAG_VSYNC_HINT);
+        window.SetTargetFPS(mainConfig.getFPS());
+    }
 
 	PadCast padcast{ mainConfig };
 	MenuContext menu;

@@ -31,44 +31,25 @@ MenuItem createSpacer()
 void SetupMainMenu(MenuContext::MenuParams& params)
 {
 	params.menu.items.clear();
-	// push_back all menu items for active menu
 	params.menu.items.push_back({
-		"Resolution Menu",
+		"Video",
 		[&params]() { 
-			params.menu.active = Menu::Resolution; 
-			SetupResolutionMenu(params); 
+			params.menu.active = Menu::Video; 
+			SetupVideoMenu(params); 
 		}
 		});
 	params.menu.items.push_back({
-		"FPS",
+		"Visuals",
 		[&params]() { 
-			params.menu.active = Menu::FPS; 					
-			SetupFPSMenu(params); 
+			params.menu.active = Menu::Visuals; 
+			SetupVisualsMenu(params); 
 		}
 		});
 	params.menu.items.push_back({
-		"Background Color",
+		"Controller",
 		[&params]() { 
-			params.menu.active = Menu::BGColor;
-			SetupBGColorMenu(params); 
-		}
-		});
-	params.menu.items.push_back({
-		"Button Tint Color",
-		[&params]() {
-			params.menu.active = Menu::Tint;
-			SetupTintMenu(params);
-		}
-		});
-	params.menu.items.push_back({
-		"Remap Buttons",
-		[&params]() { SetupRemapMenu(params); }
-		});
-	params.menu.items.push_back({
-		"Load Controller",
-		[&params]() {
-			params.menu.active = Menu::Gamepad;
-			SetupGamepadMenu(params);
+			params.menu.active = Menu::Controller; 
+			SetupControllerMenu(params); 
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -83,6 +64,100 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
 
+	params.menu.selectedIndex = 0;
+}
+
+void SetupVideoMenu(MenuContext::MenuParams& params)
+{
+	std::string current_vsync = (std::to_string(params.config.getValue("Window", "USE_VSYNC")) == "1") ? "On" : "Off";
+	std::string vsync_string = "Toggle VSync \n(Currently: " + current_vsync + ")";
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Resolution",
+		[&params]() { 
+			params.menu.active = Menu::Resolution; 
+			SetupResolutionMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Target FPS",
+		[&params]() { 
+			params.menu.active = Menu::FPS; 
+			SetupFPSMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		vsync_string,
+		[&params]() { 
+			bool vsync = params.config.getVSYNC();
+			if (vsync)
+			{
+				ClearWindowState(FLAG_VSYNC_HINT);
+				params.window.SetTargetFPS(params.config.getValue("Window", "TARGET_FPS"));
+				params.config.updateUseVSYNC(0);
+				SetupVideoMenu(params);
+			}
+			else
+			{
+				int currentMonitor = GetCurrentMonitor();
+				int refreshRate = GetMonitorRefreshRate(currentMonitor);
+				SetWindowState(FLAG_VSYNC_HINT);  
+				params.window.SetTargetFPS(refreshRate);
+				params.config.updateUseVSYNC(1);
+				SetupVideoMenu(params);
+			}
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupVisualsMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Background Color",
+		[&params]() { 
+			params.menu.active = Menu::BGColor; 
+			SetupBGColorMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Image Tint",
+		[&params]() { 
+			params.menu.active = Menu::Tint; 
+			SetupTintMenu(params); 
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupControllerMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+	params.menu.items.push_back({
+		"Select Gamepad",
+		[&params]() { 
+			params.menu.active = Menu::Gamepad; 
+			SetupGamepadMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Remap Buttons",
+		[&params]() { 
+			params.menu.active = Menu::RemapButtons; 
+			SetupRemapMenu(params); 
+		}
+		});
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
 	params.menu.selectedIndex = 0;
 }
 
@@ -114,6 +189,23 @@ void SetupResolutionMenu(MenuContext::MenuParams& params)
 
 void SetupFPSMenu(MenuContext::MenuParams& params)
 {
+	bool vsync = params.config.getVSYNC();
+	if (vsync)
+	{
+		params.menu.items.clear();
+		params.menu.items.push_back({
+			"Can't change FPS\nwhile VSync is on!",
+			[&params]() { params.menu.active = Menu::Video; SetupVideoMenu(params); }
+			});
+		params.menu.items.push_back(createSpacer());
+		params.menu.items.push_back(createSpacer());
+		params.menu.items.push_back(createBackMenuItem(params));
+		params.menu.items.push_back(createCloseMenuItem(params.menu));
+		params.menu.selectedIndex = 0;
+		return;
+	}
+	else
+	{
 	std::string current_fps = std::to_string(params.config.getValue("Window", "TARGET_FPS"));
 	std::string current_string = "Current FPS: " + current_fps;
 	params.menu.items.clear();
@@ -156,6 +248,7 @@ void SetupFPSMenu(MenuContext::MenuParams& params)
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	}
 
 	params.menu.selectedIndex = 0;
 }

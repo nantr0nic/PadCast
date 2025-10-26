@@ -10,22 +10,25 @@ This is the baseline version from which the roadmap begins.
 
 ---
 
-### **`v0.2.5`** - Performance Update
+### **`v0.2.5`** - "Under the Hood" Update
 
 This is a patch release focused entirely on internal improvements to enhance performance and efficiency without adding new user-facing features.
 
-- [ ] Enable VSync support with a menu option.
-- [ ] Test using event waiting to reduce idle CPU usage.
-- [ ] Optimize rendering by drawing the base controller from a cached texture.
-- [ ] Refactor data structures to be more cache-friendly.
-- [ ] Measure impact of the `-ffast-math` CMake flag.
-- [ ] Refactor code and begin setting up new controller support.
+- [X] Enable VSync support with a menu option.
+- [X] Test using event waiting to reduce idle CPU usage.
+- [X] Optimize rendering by drawing the base controller from a cached texture.
+- [X] Refactor data structures to be more cache-friendly.
+- [X] Measure impact of the `-ffast-math` CMake flag.
+- [X] Restructure Menu system to accommodate future features.
+- [X] Test using SDL2 backend for better gamepad compatibility.
+
 ---
 
 ### **`v0.3.0`** - N64 Controller Support
 
 This minor release introduces the first new controller type.
 
+- [ ] Refactor code and begin setting up new controller support.
 - [ ] Add support for N64 controller visualization.
 
 ---
@@ -35,6 +38,7 @@ This minor release introduces the first new controller type.
 This minor release adds support for another classic controller.
 
 - [ ] Add support for GameCube controller visualization.
+- [ ] Test '-ffast-math' and '/fp:fast' flags for floating-point calculation optimizations.
 
 ---
 

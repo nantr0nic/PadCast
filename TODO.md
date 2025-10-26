@@ -1,20 +1,20 @@
 # To Do...
 ### Next
-- [ ] Work on the "Performance" to-do's
-- [ ] Begin developing N64/GC controller support.
+- [X] Enable VSync support. Provide option to enable in menu.
+- [X] Test using event waiting to see if it lowers CPU usage.
+- [X] Draw base controller from cached texture. Measure impact.
+- [X] See if there's data that can be structured to be more cache-friendly.
+- [X] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
+> This will only positively impact performance when floating-point calculations are being done.
+> Save for later version when animating two joysticks (GameCube Controller).
+- [X] Test using SDL2 backend for better gamepad compatibility.
+- [ ] Restructure code to begin supporting next controllers.
 
-### Performance
-- [ ] Enable VSync support. Provide option to enable in menu.
-- [ ] Test using event waiting to see if it lowers CPU usage.
-- [ ] Draw base controller from cached texture. Measure impact.
-- [ ] See if there's data that can be structured to be more cache-friendly.
-- [ ] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
-
-### Short term:
+### Then
 - [ ] N64 Controller Support
 - [ ] GameCube Controller Support
 
-### Medium term:
+### Finally
 - [ ] Work on XBox, PS, NES, and WASD-layout support.
 - [ ] Add support for simultaneously displaying two controllers.
 

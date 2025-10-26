@@ -1,4 +1,4 @@
-PadCast v0.2.0
+PadCast v0.2.5
 
 A lightweight gamepad visualization tool that shows controller activity.
 Geared towards streamers.
@@ -23,7 +23,7 @@ Table of Contents
 
 1.  Features
 
--   Can change FPS to 30, 60, 90, 120 (or set custom FPS in config.ini)
+-   Can set FPS (30, 60, 90, 120 or custom value in config.ini) or use VSync.
 -   Can change background color. Can set custom background color in config.ini file.
 -   Can change color of the button presses. They can be tinted from the menu or a
     custom tint color can be set in config.ini file.
@@ -104,7 +104,9 @@ The menu can be accessed by mouse or keyboard: right-click in the window to
 open/close the menu, or hit spacebar or "M". You can navigate the menu using the
 mouse as expected, or use W/S and arrow-keys to navigate and Enter to select.
 
-The following settings can be accessed and changed via the in-program menu: -
+The following settings can be accessed and changed via the in-program menu:
+
+                    Video Settings
     ==> Resolution <==
     > The window can be manually resized by dragging the window borders, but
 there are resolution presets available in the menu. If you require specific
@@ -115,6 +117,17 @@ dimensions, it can be manually set in config.ini
 match the FPS of the game/emulator you are running. If you require a specific target
 FPS, it can be manually set in config.ini
 
+    ==> Enable/Disable VSync <==
+    > This will enable/disable VSync. While VSync is enabled, the Target FPS setting
+will be ignored. This will enable/disable VSync. While VSync is enabled, the Target FPS 
+setting will be ignored. If you enable VSync, the program will limit the FPS to match 
+your monitor's refresh rate. If you change your monitor's refresh rate while the program 
+is running, you will need to toggle VSync off and back on to match the new refresh rate.
+Please note that VSync may increase CPU usage depending on your specific hardware and GPU 
+driver settings; generally the higher refresh rate your monitor is set to, the more CPU 
+usage.
+
+                    Visuals Settings
     ==> Background Color <==
     > Generic background colors can be set in the menu. You can set a custom
 background color in config.ini (see below)
@@ -124,6 +137,7 @@ background color in config.ini (see below)
 Generic colors can be set in the menu, but you can set a custom tint color in 
 config.ini (see below)
 
+                    Controller Settings
     ==> Remap Buttons <==
     > Clicking "Start Remap" will begin a remap sequence where the program will go
 through a series of prompts to register correct button pushes. The button map will
@@ -137,7 +151,8 @@ controller isn't detected by default, use this to select the controller you wish
 use. If you have more than one controller connected, you can use this menu to select
 the controller you wish to use. If no inputs are detected, the menu will print 
 "No Gamepads Detected"
-    
+
+                    Other Settings  
     ==> Reload Config File <==
     > If you edit the config.ini file while the program is running, click "Reload
 Config File" to enable the changes you've made (make sure to save config.ini first!).
@@ -268,7 +283,15 @@ still work as expected if you keep the shapes WHITE.
 
 -------------------------------------------------------------------------------------
 
-7. Building from Source
+7. Known Issues
+
+- Some controllers may be mislabeled by the OS or the underlying gamepad library 
+(GLFW/SDL_GameControllerDB). For example, my USB GameCube controller is labeled 
+as "XBox Controller".
+
+-------------------------------------------------------------------------------------
+
+8. Building from Source
 
  -== Prerequisites ==-
 
@@ -311,7 +334,7 @@ significantly faster for incremental rebuilds
 
 -------------------------------------------------------------------------------------
 
-8. This is a work in progress!
+9. This is a work in progress!
 
 -   I'd love to hear from you if you have any thoughts, comments, suggestions, etc.!
 -   For now this is meant for USB SNES controllers, but it should work with any
@@ -324,14 +347,14 @@ significantly faster for incremental rebuilds
 
 -------------------------------------------------------------------------------------
 
-9. License
+10. License
 
 This project is licensed under the BSD 3-Clause License. See the LICENSE file for
 details.
 
 -------------------------------------------------------------------------------------
 
-10. Credits
+11. Credits
 
 Developed by nantr0nic, with input from dank_meats.
 
