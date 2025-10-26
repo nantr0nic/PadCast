@@ -19,9 +19,8 @@ This is a patch release focused entirely on internal improvements to enhance per
 - [X] Optimize rendering by drawing the base controller from a cached texture.
 - [X] Refactor data structures to be more cache-friendly.
 - [X] Measure impact of the `-ffast-math` CMake flag.
-- [ ] Refactor code and begin setting up new controller support.
 - [X] Restructure Menu system to accommodate future features.
-- [ ] Test using SDL2 backend for better gamepad compatibility.
+- [X] Test using SDL2 backend for better gamepad compatibility.
 
 ---
 
@@ -29,6 +28,7 @@ This is a patch release focused entirely on internal improvements to enhance per
 
 This minor release introduces the first new controller type.
 
+- [ ] Refactor code and begin setting up new controller support.
 - [ ] Add support for N64 controller visualization.
 
 ---

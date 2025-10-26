@@ -5,7 +5,7 @@ All notable changes to PadCast will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - v0.2.5
+## v0.2.5 - 2025-10-26
 ### Added
 - Commented out section in CMakeLists.txt for future floating-point calculation optimizations.
 - Added VSync option to menu (disabled by default).
@@ -16,7 +16,7 @@ future features to be added to the menu.
 - Target FPS will be ignored if VSync is enabled.
 
 ### Fixed
-- (Work in progress)
+
 
 ## [0.2.0] - 2025-09-01
 > I didn't keep a changelog for the <v0.2.0 releases, so changelog documentation will start here.

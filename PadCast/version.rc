@@ -3,8 +3,8 @@
 IDI_ICON1 ICON "padcast.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,2,0
- PRODUCTVERSION 1,0,2,0
+ FILEVERSION 1,0,2,5
+ PRODUCTVERSION 1,0,2,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -21,12 +21,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Andrew Khazanovsky"
             VALUE "FileDescription", "PadCast - Gamepad Display for Streamers"
-            VALUE "FileVersion", "1.0.2.0"
+            VALUE "FileVersion", "1.0.2.5"
             VALUE "InternalName", "PadCast"
             VALUE "LegalCopyright", "Copyright (C) 2025 Andrew Khazanovsky"
             VALUE "OriginalFilename", "PadCast.exe"
             VALUE "ProductName", "PadCast"
-            VALUE "ProductVersion", "1.0.2.0"
+            VALUE "ProductVersion", "1.0.2.5"
             VALUE "Comments", "Displays gamepad input for live streaming applications"
         END
     END

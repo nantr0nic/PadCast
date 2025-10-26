@@ -7,7 +7,7 @@
 - [X] Measure impact of CMake flag "-ffast-math" on performance. (May be negligible.)
 > This will only positively impact performance when floating-point calculations are being done.
 > Save for later version when animating two joysticks (GameCube Controller).
-- [ ] Test using SDL2 backend for better gamepad compatibility.
+- [X] Test using SDL2 backend for better gamepad compatibility.
 - [ ] Restructure code to begin supporting next controllers.
 
 ### Then
