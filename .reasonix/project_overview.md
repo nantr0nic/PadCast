@@ -3,7 +3,7 @@
 > A lightweight gamepad visualization tool for streamers. Displays a real-time
 > overlay of controller button presses on screen.
 >
-> **Current version:** v0.2.5 | **License:** BSD 3-Clause
+> **Current version:** v0.2.6 | **License:** BSD 3-Clause
 
 ---
 
@@ -20,39 +20,29 @@ software to show their inputs to viewers.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                     main.cpp                         │
-│  ● Window setup (raylib)                             │
-│  ● Main loop (poll input → draw → swap buffers)      │
-│  ● Cached frame-to-frame state                       │
-└──────┬──────────────────────────────────────────────┘
-       │ owns
-┌──────▼──────────────────────────────────────────────┐
-│                   PadCast (class)                    │
-│  ● Owns GamepadTextures (all PNGs loaded as textures)│
-│  ● Owns ButtonMap + CachedButtons (remap support)    │
-│  ● drawGamepadButtons() — per-frame button drawing   │
-│  ● Background color caching (getBGColor)             │
-│  ● Tint color caching (drawGamepadButtons internal)  │
-│  ● Gamepad connection stability logic                │
-└──────┬──────────────────────────────────────────────┘
-       │ reads
-┌──────▼──────────────────────────────────────────────┐
-│                   Config (class)                     │
-│  ● Reads/writes config.ini via mINI library          │
-│  ● Provides typed getters for every setting          │
-│  ● Validates all values on load                      │
-│  ● Setters update INI structure in memory            │
-│  ● saveConfig() writes to disk                       │
-└──────┬──────────────────────────────────────────────┘
-       │ renders
-┌──────▼──────────────────────────────────────────────┐
-│                  Menu system                         │
-│  ● Right-click / Space / M to open                   │
-│  ● Stack of Menu enum states (Main→Video→Resolution) │
-│  ● Each SetupXxxMenu() rebuilds menu.items vector    │
-│  ● Keyboard (W/S, arrows) and mouse navigation       │
-│  ● Lambda-based actions mutate Config + PadCast      │
-└─────────────────────────────────────────────────────┘
+│                   main.cpp (8 lines)                 │
+│  ● Create Config                                    │
+│  ● Create App(config) → app.run()                   │
+│  ● return 0                                         │
+└──────────────────────┬──────────────────────────────┘
+                       │ creates
+┌──────────────────────▼──────────────────────────────┐
+│                   App (class)                        │
+│  ● Constructor: createWindow(), PadCast, MenuParams │
+│  ● Destructor: saveConfig()                         │
+│  ● run() — the main loop                            │
+│  ● Owns: Window, PadCast, MenuContext, ScalingInfo  │
+│  ● Tracks: window dims, gamepad polling state       │
+└──────┬──────────────┬──────────────┬────────────────┘
+       │ owns          │ reads        │ delegates
+┌──────▼──────────┐ ┌──▼──────────┐ ┌▼─────────────────┐
+│ PadCast (class) │ │Config(class)│ │ Menu system       │
+│ ● Textures/BNs  │ │ ● INI r/w   │ │ ● MenuContext     │
+│ ● CachedButtons │ │ ● getters   │ │ ● SetupXxxMenu()  │
+│ ● drawButtons() │ │ ● validate  │ │ ● HandleMenuInput │
+│ ● getBGColor()  │ │ ● save/load │ │ ● DrawMenu()      │
+│ ● gamepad conn  │ └────────────┘ │ ● RemapButtonScren│
+└─────────────────┘                └───────────────────┘
 ```
 
 ---
@@ -67,11 +57,17 @@ PadCast/
 │   │   ├── PadCast.h               # Core class + textures/cache structs
 │   │   ├── config.h                # Config class + default values
 │   │   ├── menus.h                 # Menu system (enum, structs, setup funcs)
+│   │   ├── App.h                   # App class (owns all state, frame loop)
+│   │   ├── PadCast.h               # Core class + textures + CachedButtons
+│   │   ├── config.h                # Config class + default values
+│   │   ├── menus.h                 # Menu system (enum, structs, setup funcs)
+│   │   ├── benchmark.h             # FrameTimer for ad-hoc benchmarking
 │   │   ├── debounce.h              # DebounceTimer helper class
 │   │   ├── pathmanager.h           # Exec path / resource path resolution
 │   │   └── mini/ini.h              # mINI library (vendored)
 │   ├── src/                        # Implementation files
-│   │   ├── main.cpp                # Entry point, main loop
+│   │   ├── App.cpp                 # App: setup, destructor, run() loop
+│   │   ├── main.cpp                # Entry point (8 lines)
 │   │   ├── PadCast.cpp             # Core drawing/input logic
 │   │   ├── config.cpp              # Config load/validate/save
 │   │   ├── menus.cpp               # All menu definitions & input handling
@@ -114,28 +110,32 @@ where they're separate modules).
 
 ---
 
-## Main Loop Flow (main.cpp)
+## Main Loop Flow (App::run())
 
 ```
-1. Create Config → loads/validates config.ini
-2. Create raylib::Window (resizable)
-3. Set icon from padcast.png
-4. Configure VSync or target FPS
-5. Create PadCast instance (loads button maps, caches)
-6. Sleep 500ms (let controller connections stabilize)
-7. Main loop:
-   a. Check window resize → update Config
-   b. BeginDrawing → ClearBackground
-   c. Compute scaling (aspect-ratio-preserving)
-   d. HandleMenuInput (open/close, navigate)
-   e. Draw base controller texture
-   f. Every 15 frames, check gamepad connection
-   g. If connected + not remapping → drawGamepadButtons()
-   h. Else → drawNoGamepadMessage()
-   i. If RemapButtons menu active → RemapButtonScreens()
-   j. If menu active → DrawMenu()
-   k. EndDrawing
-8. Save window size to config, saveConfig(), exit
+Setup (App constructor):
+  1. Create raylib::Window via createWindow() helper
+  2. Set icon from padcast.png
+  3. Configure VSync or target FPS
+  4. Construct PadCast, MenuContext, MenuParams
+  5. Sleep 500ms (let controller connections stabilize)
+
+run() — each frame:
+  a. Check window resize → update Config, track mWinDimensionsChanged
+  b. BeginDrawing → ClearBackground(mPadcast.getBGColor())
+  c. Compute scaling (aspect-ratio-preserving, every frame)
+  d. HandleMenuInput (open/close, navigate)
+  e. Draw base controller texture
+  f. Every 15 frames, check gamepad connection
+  g. If connected + not remapping → drawGamepadButtons()
+  h. Else → drawNoGamepadMessage()
+  i. If RemapButtons menu active → RemapButtonScreens()
+  j. If menu active → DrawMenu()
+  k. EndDrawing
+
+Teardown (~App):
+  - updateInitWinSizes() if dimensions changed
+  - saveConfig()
 ```
 
 ---
@@ -273,7 +273,8 @@ builds which use the YAML manifest).
 
 ## Current State & Roadmap
 
-- **v0.2.5** — current release ("Under the Hood" update)
+- **v0.2.6** — current release (refactoring: App class, RemapState, removed caches)
+- **v0.2.5** — previous release ("Under the Hood" update)
 - **Next planned:** v0.3.0 (N64 Controller Support)
 - Remote branch `feature/refactor-gamepad` exists with unmerged work
 - Currently on the `develop` branch
@@ -289,6 +290,28 @@ builds which use the YAML manifest).
 - Wireless gamepads untested on Linux
 - Codebase is currently **SNES-hardcoded** — `GamepadTextures` loads SNES-
   specific PNGs, `CachedButtons` only has SNES button fields
-- The `validateConfig()` method in config.cpp is extremely repetitive
-  (lots of copy-paste per key) — marked with a TODO to rewrite as a template
 - Debug mode logs button/axis data to raylib's trace log and stdout
+
+## Recent Refactoring (v0.2.6)
+
+- **App class** — extracted from main.cpp: setup in constructor, loop in `run()`,
+  teardown in destructor. main.cpp is now 8 lines.
+- **RemapState struct** — replaced 7 static locals in `RemapButtonScreens()`
+  with a proper state struct + `init()`/`cleanup()` methods. `ResetRemapState()`
+  deleted (was dead code).
+- **Caches removed** — hand-rolled cache invalidation (BG color, tint, font size)
+  removed after benchmarking confirmed ~3μs/frame difference (noise at 60 FPS).
+  Config values read directly each frame.
+- **validateConfig() templated** — ~400 lines of repetitive validation replaced
+  with a `validateInt<T>()` template; now ~38 lines.
+- **getDefault() simplified** — 82-line if/else ladder replaced with a
+  `static unordered_map` lookup.
+- **Duplicate save flags consolidated** — `needsSave` (local) + `mIsDirty`
+  (member) merged into single `mNeedsSave`.
+- **Boilerplate setters unified** — 9 individual setter blocks replaced by
+  `setValue()` template.
+- **Button keys enum** — `updateButtonConfig()` now takes `ButtonConfigKey`
+  enum instead of raw string keys, eliminating typo-prone INI key names.
+- **Font cache leak fixed** — static locals in `DrawMenu()` replaced with
+  file-scope cache + validity flag + `InvalidateFontCache()`.
+- **FrameTimer** — `benchmark.h` provides reusable ad-hoc benchmarking.
