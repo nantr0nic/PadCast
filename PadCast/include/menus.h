@@ -97,8 +97,6 @@ void HandleMenuInput(MenuContext::MenuParams& params);
 void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config& config,
 	int baseX, int baseY);
 
-void ResetRemapState();
-
 void RemapButtonScreens(MenuContext::MenuParams& params);
 
 void InvalidateFontCache();

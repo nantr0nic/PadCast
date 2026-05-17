@@ -6,6 +6,37 @@
 #include <string>
 
 namespace {
+    
+    // Remap state — extracted from static locals in RemapButtonScreens().
+    // Lifetime is program duration (same as the old function-local statics).
+    struct RemapState
+    {
+    	bool isRemapping = false;
+    	bool waitingForInput = false;
+    	int buttonPromptIndex = 0;
+    	raylib::Gamepad gamepad{ 0 };
+    	DebounceTimer buttonDebounce{ 0.5f };
+    	float lastAttemptTime = 0.0f;
+    
+    	void init()
+    	{
+    		isRemapping = true;
+    		waitingForInput = true;
+    		buttonPromptIndex = 0;
+    		buttonDebounce.Reset();
+    		lastAttemptTime = 0.0f;
+    	}
+    
+    	void cleanup()
+    	{
+    		isRemapping = false;
+    		waitingForInput = false;
+    		buttonPromptIndex = 0;
+    	}
+    };
+    
+    RemapState gRemapState;
+
 	// Font size cache — avoids re-reading config every frame.
 	// Invalidated via InvalidateFontCache() when config is reloaded.
 	int gCachedDefaultFontSize{ 35 };
@@ -376,7 +407,6 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 		"Start Remap",
 		[&params]() { 
 			params.menu.active = Menu::RemapButtons; 
-			ResetRemapState(); 
 		}
 		});
 	params.menu.items.push_back({
@@ -533,14 +563,6 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 }
 
-void ResetRemapState()
-{
-	// instead of making the static variables global...
-	// not a great solution
-	static bool resetRequested = false;
-	resetRequested = true;
-}
-
 void InvalidateFontCache()
 {
 	gFontCacheValid = false;
@@ -548,22 +570,11 @@ void InvalidateFontCache()
 
 void RemapButtonScreens(MenuContext::MenuParams& params)
 {
-	static bool isRemapping = false;
-	static bool waitingForInput = false;
-	static int buttonPromptIndex = 0;
-	static raylib::Gamepad remapGamepad(0);
-	static DebounceTimer buttonDebounce(0.5f);
-	static float lastAttemptTime = 0.0f;
+	auto& state = gRemapState;
 
-	static bool resetRequested = false;
-	if (resetRequested || !isRemapping)
+	if (!state.isRemapping)
 	{
-		isRemapping = true;
-		waitingForInput = true;
-		buttonPromptIndex = 0;
-		resetRequested = false;
-		buttonDebounce.Reset();
-		lastAttemptTime = 0.0f;
+		state.init();
 		return; // let main loop call us again next frame
 	}
 
@@ -594,7 +605,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	int currentRaylibButton = 0;
 	Config::ButtonConfigKey currentButtonConfig;
 
-	switch (buttonPromptIndex)
+	switch (state.buttonPromptIndex)
 	{
 		// case #'s match order of buttons in unordered_map buttonIndex
 	case 0:
@@ -659,9 +670,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		break;
 	default:
 		// Finished remapping
-		isRemapping = false;
-		waitingForInput = false;
-		buttonPromptIndex = 0;
+		state.cleanup();
 		return;
 	}
 
@@ -672,28 +681,28 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	int textY = rectY + (rectHeight - textHeight) / 2;
 	DrawText(promptText, textX, textY, fontSize, WHITE);
 
-	if (waitingForInput)
+	if (state.waitingForInput)
 	{
-		int newButtonPress = remapGamepad.GetButtonPressed();
+		int newButtonPress = state.gamepad.GetButtonPressed();
 		if (newButtonPress > 0)
 		{
-			if (buttonDebounce.CanAcceptInput())
+			if (state.buttonDebounce.CanAcceptInput())
 			{
 				// Accept the input
 				params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
 				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
-				buttonPromptIndex++;
-				waitingForInput = true;
+				state.buttonPromptIndex++;
+				state.waitingForInput = true;
 			}
 			else
 			{
-				lastAttemptTime = GetTime();
+				state.lastAttemptTime = GetTime();
 			}
 		}
 
 		// Draw "Wait..." message if user pressed too quickly
-		float timeSinceAttempt = GetTime() - lastAttemptTime;
-		if (timeSinceAttempt < 1.0f && lastAttemptTime > 0.0f)
+		float timeSinceAttempt = GetTime() - state.lastAttemptTime;
+		if (timeSinceAttempt < 1.0f && state.lastAttemptTime > 0.0f)
 		{
 			const char* waitText = "Wait...";
 			int waitWidth = MeasureText(waitText, static_cast<int>(fontSize * 0.7f));
@@ -705,20 +714,16 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		// Escape keymap if needed
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			isRemapping = false;
-			waitingForInput = false;
-			buttonPromptIndex = 0;
+			state.cleanup();
 			params.menu.active = Menu::Main;
 			SetupMainMenu(params);
 		}
 	}
 
 	// When finished, return to main menu
-	if (buttonPromptIndex >= 12)
+	if (state.buttonPromptIndex >= 12)
 	{
-		isRemapping = false;
-		waitingForInput = false;
-		buttonPromptIndex = 0;
+		state.cleanup();
 		params.menu.active = Menu::Main;
 		params.config.saveConfig();
 		SetupMainMenu(params);

@@ -1,5 +1,6 @@
 ﻿# Add source to this project's executable.
 add_executable (PadCast
+    "src/App.cpp"
     "src/main.cpp"
     "src/PadCast.cpp" 
     "src/config.cpp"
