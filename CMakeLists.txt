@@ -87,6 +87,7 @@ if(WIN32 OR NOT BUILD_FOR_FLATPAK)
         raylib_cpp
         GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
         GIT_TAG v5.5.0
+        PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_SOURCE_DIR}/patches/apply-patch.cmake"
     )
 
     # Make both available to all subprojects
