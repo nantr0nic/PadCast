@@ -375,18 +375,11 @@ enum class ControllerLayout { SNES, N64, GameCube };
 
 ### Low Priority
 
-10. **PathManager error handling** — some paths silently fall back to current
-   directory when resolution fails
-
 11. **Debug mode commented code** — N64 axis-reading code is commented out in
    production code (in `drawGamepadButtons()`)
 
-12. **mINI vendoring** — `mini/ini.h` is currently copied into the source tree;
-    could be fetched via CMake FetchContent like other dependencies
-
-13. **Font static cache leak** — `defaultFontSize` and `minFontSize` are `static`
-    in `DrawMenu()` and `RemapButtonScreens()`, meaning they won't update if
-    config is reloaded (minor, since font changes require restart)
+13. ~~**Font static cache leak** — replaced static locals with file-scope cache
+    + validity flag + `InvalidateFontCache()`, wired into Reload Config File.~~ ✅
 
 ### Completed This Session
 

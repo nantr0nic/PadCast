@@ -1,7 +1,17 @@
 #include "menus.h"
+#include "PadCast.h"
+#include "config.h"
 #include "debounce.h"
 
 #include <string>
+
+namespace {
+	// Font size cache — avoids re-reading config every frame.
+	// Invalidated via InvalidateFontCache() when config is reloaded.
+	int gCachedDefaultFontSize{ 35 };
+	int gCachedMinFontSize{ 10 };
+	bool gFontCacheValid{ false };
+}
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
 {
@@ -59,6 +69,7 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 			params.config.reloadConfig();
 			params.padcast.invalidateBGCache();
 			params.padcast.invalidateTintCache();
+			InvalidateFontCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -456,20 +467,14 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
 		// Scaling setup for collision box
-		float menuScale = std::max(params.scaling.scale, 0.7f); // don't scale collision box below 70%
-		int baseX = 50;
-		int baseY = 50;
-		int scaledX = static_cast<int>(baseX * menuScale + params.scaling.offsetX);
-		int scaledY = static_cast<int>(baseY * menuScale + params.scaling.offsetY);
-		int scaledWidth = static_cast<int>(340 * menuScale);
-		int scaledLineHeight = static_cast<int>(30 * menuScale);
+		MenuScaling ms(params.scaling, 0.7f, 50, 50, 340, 30);
 		for (size_t i = 0; i < params.menu.items.size(); ++i)
 		{
 			Rectangle itemRect = {
-				static_cast<float>(scaledX),
-				static_cast<float>(scaledY + static_cast<int>(i) * scaledLineHeight),
-				static_cast<float>(scaledWidth),
-				static_cast<float>(scaledLineHeight - 5) // Slight padding
+				static_cast<float>(ms.x),
+				static_cast<float>(ms.y + static_cast<int>(i) * ms.lineHeight),
+				static_cast<float>(ms.width),
+				static_cast<float>(ms.lineHeight - 5) // Slight padding
 			};
 			// Detect mouse clicking menu item
 			if (CheckCollisionPointRec(mousePos, itemRect))
@@ -493,37 +498,37 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 
 	// Scaling setup
-	float menuScale = std::max(scaling.scale, 0.7f); // don't scale menu font/positions below 70%
-	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
-	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(340 * menuScale);
-	int scaledLineHeight = static_cast<int>(30 * menuScale);
-	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
-	int scaledPadding = static_cast<int>(10 * menuScale);
+	MenuScaling ms(scaling, 0.7f, baseX, baseY, 340, 30);
+	int scaledMenuHeight = static_cast<int>(menu.items.size() * ms.lineHeight + 20 * ms.scale);
+	int scaledPadding = static_cast<int>(10 * ms.scale);
 
 	if (menu.active == Menu::Gamepad)
 	{
-		scaledWidth = 470;
+		ms.width = 470;
 	}
 
 	// Draw semi-transparent background
-	DrawRectangle(scaledX - scaledPadding, scaledY - scaledPadding,
-		scaledWidth, scaledMenuHeight,
+	DrawRectangle(ms.x - scaledPadding, ms.y - scaledPadding,
+		ms.width, scaledMenuHeight,
 		Fade(BLACK, 0.7f)); // %70 opacity
 
-	// Cached font sizes
-	static int defaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
-	static int minFontSize = config.getValue("Font", "MIN_FONT_SIZE");
+	// Cached font sizes (invalidated via InvalidateFontCache())
+	if (!gFontCacheValid)
+	{
+		gCachedDefaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
+		gCachedMinFontSize = config.getValue("Font", "MIN_FONT_SIZE");
+		gFontCacheValid = true;
+	}
 
 	// Scaled font size
-	int fontSize = std::max(static_cast<int>(defaultFontSize * menuScale), minFontSize);
+	int fontSize = std::max(static_cast<int>(gCachedDefaultFontSize * ms.scale), gCachedMinFontSize);
 
 	// Draw menu items
 	for (size_t i = 0; i < menu.items.size(); ++i)
 	{
 		Color color = (i == menu.selectedIndex ? WHITE : Fade(RAYWHITE, 0.7f));
 		DrawText(menu.items[i].label.c_str(),
-			scaledX, scaledY + static_cast<int>(i) * scaledLineHeight,
+			ms.x, ms.y + static_cast<int>(i) * ms.lineHeight,
 			fontSize, color);
 	}
 }
@@ -534,6 +539,11 @@ void ResetRemapState()
 	// not a great solution
 	static bool resetRequested = false;
 	resetRequested = true;
+}
+
+void InvalidateFontCache()
+{
+	gFontCacheValid = false;
 }
 
 void RemapButtonScreens(MenuContext::MenuParams& params)
@@ -558,7 +568,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	}
 
 	// Scaling and drawing setup
-	float rectScale = std::max(params.scaling.scale, 0.8f);
+	float rectScale = params.scaling.effectiveScale(0.8f);
 	int rectWidth = static_cast<int>(420 * rectScale);
 	int rectHeight = static_cast<int>(200 * rectScale);
 	int rectX = static_cast<int>(
@@ -568,9 +578,14 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY
 		);
 
-	static int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
-	static int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
-	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
+	// Cached font sizes (invalidated via InvalidateFontCache())
+	if (!gFontCacheValid)
+	{
+		gCachedDefaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+		gCachedMinFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+		gFontCacheValid = true;
+	}
+	int fontSize = std::max(static_cast<int>(gCachedDefaultFontSize * rectScale), gCachedMinFontSize);
 
 	// Draw the background rectangle
 	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));

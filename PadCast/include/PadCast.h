@@ -17,6 +17,7 @@
 
 #include <raylib-cpp.hpp>
 #include "config.h"
+#include "scaling.h"
 #include <unordered_map>
 
 struct GamepadTextures
@@ -36,15 +37,6 @@ struct GamepadTextures
 	raylib::Texture2D pressedRBump;
 
 	GamepadTextures();
-};
-
-struct ScalingInfo
-{
-	float scale{};
-	float offsetX{};
-	float offsetY{};
-
-	ScalingInfo(int currentWidth, int currentHeight, int originalWidth, int originalHeight);
 };
 
 enum class BackgroundColor

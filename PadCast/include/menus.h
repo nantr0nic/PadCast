@@ -8,15 +8,16 @@
 	#define NOMINMAX
 #endif
 
-#include <PadCast.h>
-
-#ifdef _WIN32
-	#undef NOGDI
-	#undef NOUSER
-#endif
+#include "scaling.h"
 
 #include <functional>
+#include <string>
 #include <vector>
+
+// Forward declarations (full definitions needed only at call sites)
+class Config;
+class PadCast;
+namespace raylib { class Window; }
 
 enum class Menu
 {
@@ -99,5 +100,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 void ResetRemapState();
 
 void RemapButtonScreens(MenuContext::MenuParams& params);
+
+void InvalidateFontCache();
 
 #endif
