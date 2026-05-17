@@ -5,6 +5,30 @@ All notable changes to PadCast will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.6 - 2026-05-17
+### Added
+- App class (`App.h`/`App.cpp`) — encapsulates setup, main loop, and teardown; main.cpp reduced to 8 lines.
+- `RemapState` struct — replaces 7 static locals in `RemapButtonScreens()` with `init()`/`cleanup()` methods.
+- `FrameTimer` utility (`benchmark.h`) — reusable ad-hoc benchmarking for the draw loop.
+- Explicit includes policy — every file now directly includes headers for symbols it uses.
+
+### Changed
+- `validateConfig()` — rewritten from ~400 lines of repetitive validation to ~38 lines via `validateInt<T>()` template.
+- `getDefault()` — replaced 82-line if/else ladder with `static unordered_map` lookup.
+- `RemapButtonScreens()` — state machine cleaned up; `ResetRemapState()` deleted (was dead code — set a different static than the one read).
+- `ButtonConfigKey` enum — `updateButtonConfig()` now takes the enum instead of raw string keys.
+
+### Removed
+- Hand-rolled cache invalidation for BG color, tint, and font size — benchmarked at ~3μs/frame difference (below measurement noise at 60 FPS). Config values are read directly each frame (in-memory mINI hash lookup).
+- `invalidateBGCache()`, `invalidateTintCache()`, `InvalidateFontCache()` and all their call sites.
+- 14 mutable cache member variables from `PadCast.h`.
+- `ResetRemapState()` function — was dead code.
+
+### Fixed
+- Font static cache leak — `DrawMenu()` static locals replaced with file-scope cache + validity flag.
+- Duplicate save flags — `needsSave` (local) + `mIsDirty` (member) consolidated into single `mNeedsSave`.
+- Boilerplate setters — 9 individual blocks replaced by `setValue()` template.
+
 ## v0.2.5 - 2025-10-26
 ### Added
 - Commented out section in CMakeLists.txt for future floating-point calculation optimizations.
