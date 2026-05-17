@@ -17,6 +17,7 @@
 
 #include <raylib-cpp.hpp>
 #include "config.h"
+#include "scaling.h"
 #include <unordered_map>
 
 struct GamepadTextures
@@ -36,15 +37,6 @@ struct GamepadTextures
 	raylib::Texture2D pressedRBump;
 
 	GamepadTextures();
-};
-
-struct ScalingInfo
-{
-	float scale{};
-	float offsetX{};
-	float offsetY{};
-
-	ScalingInfo(int currentWidth, int currentHeight, int originalWidth, int originalHeight);
 };
 
 enum class BackgroundColor
@@ -141,11 +133,7 @@ public:
 	{
 		return (value >= 0 && value <= static_cast<int>(BackgroundColor::Blue));
 	}
-	void invalidateBGCache() { mBGCacheValid = false; }
 	raylib::Color getBGColor() const;
-
-	// Tint
-	void invalidateTintCache() { mTintCacheValid = false; }
 
 	// Button Map Functions
 	void loadButtonsFromConfig();
@@ -172,27 +160,7 @@ private:
 	int gamepadIndex{ 0 };
 
 	// Cache values for optimization
-	mutable Color mCachedBGColor{ BLACK };
-	mutable int mLastBGColorValue{ -1 };
-	mutable int mLastUseCustomBG{ -1 };
-	mutable int mLastCustomRed{ -1 };
-	mutable int mLastCustomGreen{ -1 };
-	mutable int mLastCustomBlue{ -1 };
 	mutable int mCachedStabilityThreshold{ -1 };
-	// Custom BG Color cache
-	mutable int mCachedUseCustomBG{ -1 };
-	mutable int mCachedCustomRed{ -1 };
-	mutable int mCachedCustomGreen{ -1 };
-	mutable int mCachedCustomBlue{ -1 };
-	mutable int mCachedBGColorValue{ -1 };
-	mutable bool mBGCacheValid{ false };
-	// Custom pressed tint cache
-	mutable bool mTintCacheValid{ false };
-	mutable int mCachedUseCustomTint{ -1 };
-	mutable int mCachedTintR{ -1 };
-	mutable int mCachedTintG{ -1 };
-	mutable int mCachedTintB{ -1 };
-	mutable Color mCachedPressedTint{ WHITE };
 
 	bool mDebugMode{ false };
 };

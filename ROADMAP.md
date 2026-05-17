@@ -4,7 +4,7 @@ This document outlines the planned development path for PadCast leading up to th
 
 ---
 
-### **`v0.2.0`** - Current Release
+### **`v0.2.0`** 
 
 This is the baseline version from which the roadmap begins.
 
@@ -21,6 +21,10 @@ This is a patch release focused entirely on internal improvements to enhance per
 - [X] Measure impact of the `-ffast-math` CMake flag.
 - [X] Restructure Menu system to accommodate future features.
 - [X] Test using SDL2 backend for better gamepad compatibility.
+
+---
+
+### **`v0.2.6`** - Current (refactoring: App class, RemapState, removed caches)
 
 ---
 

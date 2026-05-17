@@ -1,7 +1,43 @@
 #include "menus.h"
+#include "PadCast.h"
+#include "config.h"
 #include "debounce.h"
 
 #include <string>
+
+namespace {
+    
+    // Remap state — extracted from static locals in RemapButtonScreens().
+    // Lifetime is program duration (same as the old function-local statics).
+    struct RemapState
+    {
+    	bool isRemapping = false;
+    	bool waitingForInput = false;
+    	int buttonPromptIndex = 0;
+    	raylib::Gamepad gamepad{ 0 };
+    	DebounceTimer buttonDebounce{ 0.5f };
+    	float lastAttemptTime = 0.0f;
+    
+    	void init()
+    	{
+    		isRemapping = true;
+    		waitingForInput = true;
+    		buttonPromptIndex = 0;
+    		buttonDebounce.Reset();
+    		lastAttemptTime = 0.0f;
+    	}
+    
+    	void cleanup()
+    	{
+    		isRemapping = false;
+    		waitingForInput = false;
+    		buttonPromptIndex = 0;
+    	}
+    };
+    
+    RemapState gRemapState;
+
+}
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
 {
@@ -57,8 +93,6 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		"Reload Config File",
 		[&params]() {
 			params.config.reloadConfig();
-			params.padcast.invalidateBGCache();
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -261,7 +295,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -269,7 +302,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -277,7 +309,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -285,7 +316,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
 			params.config.updateUseCustomBG(0); 
-			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
@@ -293,14 +323,12 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
 			params.config.updateUseCustomBG(0); 
-			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
 		"Custom Color",
 		[&params]() { 
 			params.config.updateUseCustomBG(1);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -318,7 +346,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(0);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -326,7 +353,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(1);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -334,7 +360,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(2);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -342,14 +367,12 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(3);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
 		"Custom Tint",
 		[&params]() {
 			params.config.updateUseCustomTint(1);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -365,7 +388,6 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 		"Start Remap",
 		[&params]() { 
 			params.menu.active = Menu::RemapButtons; 
-			ResetRemapState(); 
 		}
 		});
 	params.menu.items.push_back({
@@ -456,20 +478,14 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		// Mouse navigation
 		Vector2 mousePos = GetMousePosition();
 		// Scaling setup for collision box
-		float menuScale = std::max(params.scaling.scale, 0.7f); // don't scale collision box below 70%
-		int baseX = 50;
-		int baseY = 50;
-		int scaledX = static_cast<int>(baseX * menuScale + params.scaling.offsetX);
-		int scaledY = static_cast<int>(baseY * menuScale + params.scaling.offsetY);
-		int scaledWidth = static_cast<int>(340 * menuScale);
-		int scaledLineHeight = static_cast<int>(30 * menuScale);
+		MenuScaling ms(params.scaling, 0.7f, 50, 50, 340, 30);
 		for (size_t i = 0; i < params.menu.items.size(); ++i)
 		{
 			Rectangle itemRect = {
-				static_cast<float>(scaledX),
-				static_cast<float>(scaledY + static_cast<int>(i) * scaledLineHeight),
-				static_cast<float>(scaledWidth),
-				static_cast<float>(scaledLineHeight - 5) // Slight padding
+				static_cast<float>(ms.x),
+				static_cast<float>(ms.y + static_cast<int>(i) * ms.lineHeight),
+				static_cast<float>(ms.width),
+				static_cast<float>(ms.lineHeight - 5) // Slight padding
 			};
 			// Detect mouse clicking menu item
 			if (CheckCollisionPointRec(mousePos, itemRect))
@@ -493,72 +509,48 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 
 	// Scaling setup
-	float menuScale = std::max(scaling.scale, 0.7f); // don't scale menu font/positions below 70%
-	int scaledX = static_cast<int>(baseX * menuScale + scaling.offsetX);
-	int scaledY = static_cast<int>(baseY * menuScale + scaling.offsetY);
-	int scaledWidth = static_cast<int>(340 * menuScale);
-	int scaledLineHeight = static_cast<int>(30 * menuScale);
-	int scaledMenuHeight = static_cast<int>(menu.items.size() * scaledLineHeight + 20 * menuScale);
-	int scaledPadding = static_cast<int>(10 * menuScale);
+	MenuScaling ms(scaling, 0.7f, baseX, baseY, 340, 30);
+	int scaledMenuHeight = static_cast<int>(menu.items.size() * ms.lineHeight + 20 * ms.scale);
+	int scaledPadding = static_cast<int>(10 * ms.scale);
 
 	if (menu.active == Menu::Gamepad)
 	{
-		scaledWidth = 470;
+		ms.width = 470;
 	}
 
 	// Draw semi-transparent background
-	DrawRectangle(scaledX - scaledPadding, scaledY - scaledPadding,
-		scaledWidth, scaledMenuHeight,
+	DrawRectangle(ms.x - scaledPadding, ms.y - scaledPadding,
+		ms.width, scaledMenuHeight,
 		Fade(BLACK, 0.7f)); // %70 opacity
 
-	// Cached font sizes
-	static int defaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
-	static int minFontSize = config.getValue("Font", "MIN_FONT_SIZE");
-
-	// Scaled font size
-	int fontSize = std::max(static_cast<int>(defaultFontSize * menuScale), minFontSize);
+	int defaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * ms.scale), minFontSize);
 
 	// Draw menu items
 	for (size_t i = 0; i < menu.items.size(); ++i)
 	{
 		Color color = (i == menu.selectedIndex ? WHITE : Fade(RAYWHITE, 0.7f));
 		DrawText(menu.items[i].label.c_str(),
-			scaledX, scaledY + static_cast<int>(i) * scaledLineHeight,
+			ms.x, ms.y + static_cast<int>(i) * ms.lineHeight,
 			fontSize, color);
 	}
 }
 
-void ResetRemapState()
-{
-	// instead of making the static variables global...
-	// not a great solution
-	static bool resetRequested = false;
-	resetRequested = true;
-}
+// Font cache removed — config reads inlined
 
 void RemapButtonScreens(MenuContext::MenuParams& params)
 {
-	static bool isRemapping = false;
-	static bool waitingForInput = false;
-	static int buttonPromptIndex = 0;
-	static raylib::Gamepad remapGamepad(0);
-	static DebounceTimer buttonDebounce(0.5f);
-	static float lastAttemptTime = 0.0f;
+	auto& state = gRemapState;
 
-	static bool resetRequested = false;
-	if (resetRequested || !isRemapping)
+	if (!state.isRemapping)
 	{
-		isRemapping = true;
-		waitingForInput = true;
-		buttonPromptIndex = 0;
-		resetRequested = false;
-		buttonDebounce.Reset();
-		lastAttemptTime = 0.0f;
+		state.init();
 		return; // let main loop call us again next frame
 	}
 
 	// Scaling and drawing setup
-	float rectScale = std::max(params.scaling.scale, 0.8f);
+	float rectScale = params.scaling.effectiveScale(0.8f);
 	int rectWidth = static_cast<int>(420 * rectScale);
 	int rectHeight = static_cast<int>(200 * rectScale);
 	int rectX = static_cast<int>(
@@ -568,8 +560,8 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY
 		);
 
-	static int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
-	static int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+	int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
 	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
 
 	// Draw the background rectangle
@@ -577,76 +569,74 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	const char* promptText = ""; // cuz raylib's DrawText() argument asks for a const char*
 	int currentRaylibButton = 0;
-	std::string currentButtonConfig;
+	Config::ButtonConfigKey currentButtonConfig;
 
-	switch (buttonPromptIndex)
+	switch (state.buttonPromptIndex)
 	{
 		// case #'s match order of buttons in unordered_map buttonIndex
 	case 0:
 		promptText = "Press D-pad UP";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
-		currentButtonConfig = "DPAD_UP";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
 		break;
 	case 1:
 		promptText = "Press D-pad RIGHT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-		currentButtonConfig = "DPAD_RIGHT";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_RIGHT;
 		break;
 	case 2:
 		promptText = "Press D-pad DOWN";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-		currentButtonConfig = "DPAD_DOWN";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_DOWN;
 		break;
 	case 3:
 		promptText = "Press D-pad LEFT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-		currentButtonConfig = "DPAD_LEFT";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_LEFT;
 		break;
 	case 4:
 		promptText = "Press X";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
-		currentButtonConfig = "X_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::X_BUTTON;
 		break;
 	case 5:
 		promptText = "Press A";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-		currentButtonConfig = "A_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::A_BUTTON;
 		break;
 	case 6:
 		promptText = "Press B";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
-		currentButtonConfig = "B_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::B_BUTTON;
 		break;
 	case 7:
 		promptText = "Press Y";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
-		currentButtonConfig = "Y_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::Y_BUTTON;
 		break;
 	case 8:
 		promptText = "Press LEFT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
-		currentButtonConfig = "L_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::L_BUTTON;
 		break;
 	case 9:
 		promptText = "Press RIGHT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
-		currentButtonConfig = "R_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::R_BUTTON;
 		break;
 	case 10:
 		promptText = "Press Select";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
-		currentButtonConfig = "SELECT";
+		currentButtonConfig = Config::ButtonConfigKey::SELECT;
 		break;
 	case 11:
 		promptText = "Press Start";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
-		currentButtonConfig = "START";
+		currentButtonConfig = Config::ButtonConfigKey::START;
 		break;
 	default:
 		// Finished remapping
-		isRemapping = false;
-		waitingForInput = false;
-		buttonPromptIndex = 0;
+		state.cleanup();
 		return;
 	}
 
@@ -657,28 +647,28 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	int textY = rectY + (rectHeight - textHeight) / 2;
 	DrawText(promptText, textX, textY, fontSize, WHITE);
 
-	if (waitingForInput)
+	if (state.waitingForInput)
 	{
-		int newButtonPress = remapGamepad.GetButtonPressed();
+		int newButtonPress = state.gamepad.GetButtonPressed();
 		if (newButtonPress > 0)
 		{
-			if (buttonDebounce.CanAcceptInput())
+			if (state.buttonDebounce.CanAcceptInput())
 			{
 				// Accept the input
 				params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
 				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
-				buttonPromptIndex++;
-				waitingForInput = true;
+				state.buttonPromptIndex++;
+				state.waitingForInput = true;
 			}
 			else
 			{
-				lastAttemptTime = GetTime();
+				state.lastAttemptTime = GetTime();
 			}
 		}
 
 		// Draw "Wait..." message if user pressed too quickly
-		float timeSinceAttempt = GetTime() - lastAttemptTime;
-		if (timeSinceAttempt < 1.0f && lastAttemptTime > 0.0f)
+		float timeSinceAttempt = GetTime() - state.lastAttemptTime;
+		if (timeSinceAttempt < 1.0f && state.lastAttemptTime > 0.0f)
 		{
 			const char* waitText = "Wait...";
 			int waitWidth = MeasureText(waitText, static_cast<int>(fontSize * 0.7f));
@@ -690,20 +680,16 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		// Escape keymap if needed
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
-			isRemapping = false;
-			waitingForInput = false;
-			buttonPromptIndex = 0;
+			state.cleanup();
 			params.menu.active = Menu::Main;
 			SetupMainMenu(params);
 		}
 	}
 
 	// When finished, return to main menu
-	if (buttonPromptIndex >= 12)
+	if (state.buttonPromptIndex >= 12)
 	{
-		isRemapping = false;
-		waitingForInput = false;
-		buttonPromptIndex = 0;
+		state.cleanup();
 		params.menu.active = Menu::Main;
 		params.config.saveConfig();
 		SetupMainMenu(params);

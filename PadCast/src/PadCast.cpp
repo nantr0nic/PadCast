@@ -151,45 +151,30 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     auto scale = scaling.scale;
 
     // pressed texture tint
-    if (!mTintCacheValid)
+    raylib::Color texture_tint;
+    if (mConfig.getValue("Image", "USE_CUSTOM_TINT") == 1)
     {
-        mCachedUseCustomTint
-            = mConfig.getValue("Image", "USE_CUSTOM_TINT");
-        mCachedTintR = mConfig.getValue("Image", "IMAGE_TINT_RED");
-        mCachedTintG = mConfig.getValue("Image", "IMAGE_TINT_GREEN");
-        mCachedTintB = mConfig.getValue("Image", "IMAGE_TINT_BLUE");
-        if (mCachedUseCustomTint == 1)
-        {
-            mCachedPressedTint = Color { 
-                (unsigned char)mCachedTintR,
-                (unsigned char)mCachedTintG,
-                (unsigned char)mCachedTintB,
-                255
-            };
-        }
-        else
-        {
-            int sel = mConfig.getValue("Image", "IMAGE_TINT_PALETTE");
-            switch (sel)
-            {
-            case 1:
-                mCachedPressedTint = RED;
-                break;
-            case 2:
-                mCachedPressedTint = GREEN;
-                break;
-            case 3:
-                mCachedPressedTint = BLUE;
-                break;
-            default:
-                mCachedPressedTint = WHITE;
-                break;
-            }
-        }
-        mTintCacheValid = true;
+        int r = mConfig.getValue("Image", "IMAGE_TINT_RED");
+        int g = mConfig.getValue("Image", "IMAGE_TINT_GREEN");
+        int b = mConfig.getValue("Image", "IMAGE_TINT_BLUE");
+        texture_tint = Color{
+            static_cast<unsigned char>(r),
+            static_cast<unsigned char>(g),
+            static_cast<unsigned char>(b),
+            255
+        };
     }
-
-    auto texture_tint = mCachedPressedTint;
+    else
+    {
+        int sel = mConfig.getValue("Image", "IMAGE_TINT_PALETTE");
+        switch (sel)
+        {
+        case 1:  texture_tint = RED;    break;
+        case 2:  texture_tint = GREEN;  break;
+        case 3:  texture_tint = BLUE;   break;
+        default: texture_tint = WHITE;  break;
+        }
+    }
 
     if (mDebugMode)
     {
@@ -366,77 +351,34 @@ void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad)
 
 raylib::Color PadCast::getBGColor() const
 {
-    if (!mBGCacheValid)
+    if (mConfig.getValue("Window", "USE_CUSTOM_BG") == 1)
     {
-        // Read all config values once and cache them
-        mCachedUseCustomBG = mConfig.getValue("Window", "USE_CUSTOM_BG");
-        mCachedCustomRed = mConfig.getValue("Window", "CUSTOM_BG_RED");
-        mCachedCustomGreen = mConfig.getValue("Window", "CUSTOM_BG_GREEN");
-        mCachedCustomBlue = mConfig.getValue("Window", "CUSTOM_BG_BLUE");
-        mCachedBGColorValue = mConfig.getBGColor();
-        mBGCacheValid = true;
+        int r = mConfig.getValue("Window", "CUSTOM_BG_RED");
+        int g = mConfig.getValue("Window", "CUSTOM_BG_GREEN");
+        int b = mConfig.getValue("Window", "CUSTOM_BG_BLUE");
+        return Color{
+            static_cast<unsigned char>(r),
+            static_cast<unsigned char>(g),
+            static_cast<unsigned char>(b),
+            255
+        };
     }
 
-    if (mCachedUseCustomBG == 1)
+    int bgValue = mConfig.getBGColor();
+    if (!isValidBackgroundColor(bgValue))
     {
-        if (mCachedUseCustomBG != mLastUseCustomBG ||
-            mCachedCustomRed != mLastCustomRed ||
-            mCachedCustomGreen != mLastCustomGreen ||
-            mCachedCustomBlue != mLastCustomBlue)
-        {
-            mLastUseCustomBG = mCachedUseCustomBG;
-            mLastCustomRed = mCachedCustomRed;
-            mLastCustomGreen = mCachedCustomGreen;
-            mLastCustomBlue = mCachedCustomBlue;
-
-            mCachedBGColor = Color{
-                static_cast<unsigned char>(mCachedCustomRed),
-                static_cast<unsigned char>(mCachedCustomGreen),
-                static_cast<unsigned char>(mCachedCustomBlue),
-                255
-            };
-        }
-    }
-    else
-    {
-        // Palette mode
-        if (mCachedUseCustomBG != mLastUseCustomBG || mCachedBGColorValue != mLastBGColorValue)
-        {
-            mLastUseCustomBG = mCachedUseCustomBG;
-            mLastBGColorValue = mCachedBGColorValue;
-
-            // Validate and update cached color
-            int currentBGValue = mCachedBGColorValue;
-            if (!isValidBackgroundColor(currentBGValue))
-            {
-                currentBGValue = 0;
-            }
-
-            switch (static_cast<BackgroundColor>(currentBGValue))
-            {
-            case BackgroundColor::Black:
-                mCachedBGColor = BLACK;
-                break;
-            case BackgroundColor::White:
-                mCachedBGColor = WHITE;
-                break;
-            case BackgroundColor::Red:
-                mCachedBGColor = RED;
-                break;
-            case BackgroundColor::Green:
-                mCachedBGColor = GREEN;
-                break;
-            case BackgroundColor::Blue:
-                mCachedBGColor = BLUE;
-                break;
-            default:
-                mCachedBGColor = BLACK;
-                break;
-            }
-        }
+        bgValue = 0;
     }
 
-    return mCachedBGColor;
+    switch (static_cast<BackgroundColor>(bgValue))
+    {
+    case BackgroundColor::Black:  return BLACK;
+    case BackgroundColor::White:  return WHITE;
+    case BackgroundColor::Red:    return RED;
+    case BackgroundColor::Green:  return GREEN;
+    case BackgroundColor::Blue:   return BLUE;
+    default:                      return BLACK;
+    }
 }
 
 void PadCast::loadButtonsFromConfig()
