@@ -365,29 +365,29 @@ enum class ControllerLayout { SNES, N64, GameCube };
    (e.g. `ButtonMap_N64`, `ButtonMap_GC`). Default values should come from
    per-layout structs, not repeated inline.
 
-7. **Static locals in RemapButtonScreens()** — these persist across calls and
+6. **Static locals in RemapButtonScreens()** — these persist across calls and
    complicate state management. Could be refactored into a class or struct
 
-8. ~~**getDefault()** — giant if/else ladder, could use a map or template approach~~ ✅ DONE (static `unordered_map`)
+7. ~~**getDefault()** — giant if/else ladder, could use a map or template approach~~ ✅ DONE (static `unordered_map`)
 
-9. **Caching system** — replace hand-rolled cache invalidation with a more
+8. **Caching system** — replace hand-rolled cache invalidation with a more
    structured approach (or verify it's worth keeping given raylib's performance)
 
 ### Low Priority
 
-11. **Debug mode commented code** — N64 axis-reading code is commented out in
+9. **Debug mode commented code** — N64 axis-reading code is commented out in
    production code (in `drawGamepadButtons()`)
 
-13. ~~**Font static cache leak** — replaced static locals with file-scope cache
-    + validity flag + `InvalidateFontCache()`, wired into Reload Config File.~~ ✅
+10. ~~**Font static cache leak** — replaced static locals with file-scope cache
+    and validity flag and `InvalidateFontCache()`, wired into Reload Config File.~~ ✅ DONE
 
 ### Completed This Session
 
-14. ~~**`validateConfig()`** — ~400 lines → template-driven, ~38 lines.~~ ✅
-15. ~~**`getDefault()`** — 82-line if/else ladder → static `unordered_map` lookup.~~ ✅
-16. ~~**Duplicate save flags** — `needsSave` (local) + `mIsDirty` (member) consolidated into single `mNeedsSave`.~~ ✅
-17. ~~**Boilerplate setters** — 9 individual blocks replaced by `setValue()` template.~~ ✅
-18. ~~**Raw string button keys** — `updateButtonConfig()` now takes `ButtonConfigKey` enum.~~ ✅
+11. ~~**`validateConfig()`** — ~400 lines → template-driven, ~38 lines.~~ ✅
+12. ~~**`getDefault()`** — 82-line if/else ladder → static `unordered_map` lookup.~~ ✅
+13. ~~**Duplicate save flags** — `needsSave` (local) + `mIsDirty` (member) consolidated into single `mNeedsSave`.~~ ✅
+14. ~~**Boilerplate setters** — 9 individual blocks replaced by `setValue()` template.~~ ✅
+15. ~~**Raw string button keys** — `updateButtonConfig()` now takes `ButtonConfigKey` enum.~~ ✅
 
 ---
 

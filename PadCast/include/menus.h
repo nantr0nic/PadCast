@@ -99,6 +99,4 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 
 void RemapButtonScreens(MenuContext::MenuParams& params);
 
-void InvalidateFontCache();
-
 #endif

@@ -37,11 +37,6 @@ namespace {
     
     RemapState gRemapState;
 
-	// Font size cache — avoids re-reading config every frame.
-	// Invalidated via InvalidateFontCache() when config is reloaded.
-	int gCachedDefaultFontSize{ 35 };
-	int gCachedMinFontSize{ 10 };
-	bool gFontCacheValid{ false };
 }
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
@@ -98,9 +93,6 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 		"Reload Config File",
 		[&params]() {
 			params.config.reloadConfig();
-			params.padcast.invalidateBGCache();
-			params.padcast.invalidateTintCache();
-			InvalidateFontCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -303,7 +295,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -311,7 +302,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -319,7 +309,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
 			params.config.updateUseCustomBG(0);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -327,7 +316,6 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
 			params.config.updateUseCustomBG(0); 
-			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
@@ -335,14 +323,12 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
 			params.config.updateUseCustomBG(0); 
-			params.padcast.invalidateBGCache(); 
 		}
 		});
 	params.menu.items.push_back({
 		"Custom Color",
 		[&params]() { 
 			params.config.updateUseCustomBG(1);
-			params.padcast.invalidateBGCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -360,7 +346,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(0);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -368,7 +353,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(1);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
@@ -376,7 +360,6 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(2);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({
@@ -384,14 +367,12 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 		[&params]() {
 			params.config.updateImageTintPalette(3);
 			params.config.updateUseCustomTint(0);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back({ 
 		"Custom Tint",
 		[&params]() {
 			params.config.updateUseCustomTint(1);
-			params.padcast.invalidateTintCache();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -542,16 +523,9 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 		ms.width, scaledMenuHeight,
 		Fade(BLACK, 0.7f)); // %70 opacity
 
-	// Cached font sizes (invalidated via InvalidateFontCache())
-	if (!gFontCacheValid)
-	{
-		gCachedDefaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
-		gCachedMinFontSize = config.getValue("Font", "MIN_FONT_SIZE");
-		gFontCacheValid = true;
-	}
-
-	// Scaled font size
-	int fontSize = std::max(static_cast<int>(gCachedDefaultFontSize * ms.scale), gCachedMinFontSize);
+	int defaultFontSize = config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * ms.scale), minFontSize);
 
 	// Draw menu items
 	for (size_t i = 0; i < menu.items.size(); ++i)
@@ -563,10 +537,7 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	}
 }
 
-void InvalidateFontCache()
-{
-	gFontCacheValid = false;
-}
+// Font cache removed — config reads inlined
 
 void RemapButtonScreens(MenuContext::MenuParams& params)
 {
@@ -589,14 +560,9 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY
 		);
 
-	// Cached font sizes (invalidated via InvalidateFontCache())
-	if (!gFontCacheValid)
-	{
-		gCachedDefaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
-		gCachedMinFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
-		gFontCacheValid = true;
-	}
-	int fontSize = std::max(static_cast<int>(gCachedDefaultFontSize * rectScale), gCachedMinFontSize);
+	int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
 
 	// Draw the background rectangle
 	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));

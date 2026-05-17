@@ -1,6 +1,10 @@
 #include "App.h"
 #include "pathmanager.h"
 
+// Uncomment to benchmark: #include "benchmark.h" 
+// and add FrameTimer + recordFrame() in run()
+// instructions are in benchmark.h
+
 #include <thread>
 #include <chrono>
 
