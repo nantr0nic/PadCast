@@ -1,7 +1,9 @@
 #include "config.h"
+
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <unordered_map>
 
 void Config::loadConfig()
 {
@@ -37,625 +39,117 @@ void Config::loadConfig()
 	validateConfig();
 }
 
-//! [!!!] Rewrite this as a template! [!!!]
 void Config::validateConfig()
 {
-	bool needsSave{ false };
+	mNeedsSave = false;
 
-    //$ ----- Check Window section ----- //
+	//$ ----- Window section ----- //
+	validateInt("Window", "INITIAL_WINDOW_WIDTH",  DefaultValues::INITIAL_WINDOW_WIDTH,  [](int val) { return val > 0; });
+	validateInt("Window", "INITIAL_WINDOW_HEIGHT", DefaultValues::INITIAL_WINDOW_HEIGHT, [](int val) { return val > 0; });
+	validateInt("Window", "TARGET_FPS",            DefaultValues::TARGET_FPS,            [](int val) { return val >= 1 && val <= 250; });
+	validateInt("Window", "USE_VSYNC",             DefaultValues::USE_VSYNC,             [](int val) { return val == 0 || val == 1; });
+	validateInt("Window", "BACKGROUND_COLOR",      DefaultValues::BACKGROUND_COLOR,      [](int val) { return val >= 0 && val <= 4; });
+	validateInt("Window", "CUSTOM_BG_RED",         DefaultValues::CUSTOM_BG_RED,         [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Window", "CUSTOM_BG_GREEN",       DefaultValues::CUSTOM_BG_GREEN,       [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Window", "CUSTOM_BG_BLUE",        DefaultValues::CUSTOM_BG_BLUE,        [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Window", "USE_CUSTOM_BG",         DefaultValues::USE_CUSTOM_BG,         [](int val) { return val == 0 || val == 1; });
 
-    if (!hasValue("Window", "INITIAL_WINDOW_WIDTH"))
-    {
-        config_ini["Window"]["INITIAL_WINDOW_WIDTH"] = std::to_string(DefaultValues::INITIAL_WINDOW_WIDTH);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Window", "INITIAL_WINDOW_WIDTH");
-        if (val < 1)
-        {
-            config_ini["Window"]["INITIAL_WINDOW_WIDTH"] = std::to_string(DefaultValues::INITIAL_WINDOW_WIDTH);
-            needsSave = true;
-        }
-    }
+	//$ ----- Image section ----- //
+	validateInt("Image", "IMAGE_CANVAS_WIDTH",  DefaultValues::IMAGE_CANVAS_WIDTH,  [](int val) { return val > 0; });
+	validateInt("Image", "IMAGE_CANVAS_HEIGHT", DefaultValues::IMAGE_CANVAS_HEIGHT, [](int val) { return val > 0; });
+	validateInt("Image", "USE_CUSTOM_TINT",     DefaultValues::USE_CUSTOM_TINT,     [](int val) { return val == 0 || val == 1; });
+	validateInt("Image", "IMAGE_TINT_RED",      DefaultValues::IMAGE_TINT_RED,      [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Image", "IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN,    [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Image", "IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE,     [](int val) { return val >= 0 && val <= 255; });
+	validateInt("Image", "IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE,  [](int val) { return val >= 0 && val <= 3; });
 
-    if (!hasValue("Window", "INITIAL_WINDOW_HEIGHT"))
-    {
-        config_ini["Window"]["INITIAL_WINDOW_HEIGHT"] = std::to_string(DefaultValues::INITIAL_WINDOW_HEIGHT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Window", "INITIAL_WINDOW_HEIGHT");
-        if (val < 1)
-        {
-            config_ini["Window"]["INITIAL_WINDOW_HEIGHT"] = std::to_string(DefaultValues::INITIAL_WINDOW_HEIGHT);
-            needsSave = true;
-        }
-    }
+	//$ ----- Gamepad section ----- //
+	validateInt("Gamepad", "STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD, [](int val) { return val > 0; });
+	validateInt("Gamepad", "GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX,       [](int val) { return val >= 0 && val <= 3; });
 
-    if (!hasValue("Window", "TARGET_FPS"))
-    {
-        config_ini["Window"]["TARGET_FPS"] = std::to_string(DefaultValues::TARGET_FPS);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Window", "TARGET_FPS");
-        if (val < 1 || val > 250) // idk why anyone would need more than 250 but if so I'll change this
-        {
-            config_ini["Window"]["TARGET_FPS"] = std::to_string(DefaultValues::TARGET_FPS);
-            needsSave = true;
-        }
-    }
+	//$ ----- Font section ----- //
+	validateInt("Font", "MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE,     [](int val) { return val > 0; });
+	validateInt("Font", "DEFAULT_FONT_SIZE",  DefaultValues::DEFAULT_FONT_SIZE,  [](int val) { return val > 0; });
+	validateInt("Font", "TEXT_OFFSET",        DefaultValues::TEXT_OFFSET,        [](int val) { return val >= 0; });
 
-    if (!hasValue("Window", "USE_VSYNC"))
-    {
-        config_ini["Window"]["USE_VSYNC"] = std::to_string(DefaultValues::USE_VSYNC);
-        needsSave = true;
-    }
-    else
-    {
-        int existingVsync = getValue("Window", "USE_VSYNC");
-        if (existingVsync != 0 && existingVsync != 1)
-        {
-            config_ini["Window"]["USE_VSYNC"] = std::to_string(DefaultValues::USE_VSYNC);
-            needsSave = true;
-        }
+	//$ ----- ButtonMap section ----- //
+	validateInt("ButtonMap", "DPAD_UP",    SNESMapDefaults::DPAD_UP,    [](int val) { return val > 0; });
+	validateInt("ButtonMap", "DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT, [](int val) { return val > 0; });
+	validateInt("ButtonMap", "DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN,  [](int val) { return val > 0; });
+	validateInt("ButtonMap", "DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT,  [](int val) { return val > 0; });
+	validateInt("ButtonMap", "X_BUTTON",   SNESMapDefaults::X_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "A_BUTTON",   SNESMapDefaults::A_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "B_BUTTON",   SNESMapDefaults::B_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "Y_BUTTON",   SNESMapDefaults::Y_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "L_BUTTON",   SNESMapDefaults::L_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "R_BUTTON",   SNESMapDefaults::R_BUTTON,   [](int val) { return val > 0; });
+	validateInt("ButtonMap", "SELECT",     SNESMapDefaults::SELECT,     [](int val) { return val > 0; });
+	validateInt("ButtonMap", "START",      SNESMapDefaults::START,      [](int val) { return val > 0; });
+
+	//$ ----- Debug section ----- //
+	validateInt("Debug", "MODE", DefaultValues::DEBUG_MODE, [](int val) { return val == 0 || val == 1; });
+
+	if (mNeedsSave)
+	{
+		std::cout << "Adding missing or invalid config values..." << std::endl;
+		saveConfig();
 	}
-
-    if (!hasValue("Window", "BACKGROUND_COLOR"))
-    {
-        config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(DefaultValues::BACKGROUND_COLOR);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Window", "BACKGROUND_COLOR");
-        if (val < 0 || val > 4)
-        {
-            config_ini["Window"]["BACKGROUND_COLOR"] = std::to_string(DefaultValues::BACKGROUND_COLOR);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Window", "CUSTOM_BG_RED"))
-    {
-        config_ini["Window"]["CUSTOM_BG_RED"] = std::to_string(DefaultValues::CUSTOM_BG_RED);
-        needsSave = true;
-    }
-    else
-    {
-        int existingRed = getValue("Window", "CUSTOM_BG_RED");
-        if (existingRed < 0 || existingRed > 255)
-        {
-            config_ini["Window"]["CUSTOM_BG_RED"] = std::to_string(DefaultValues::CUSTOM_BG_RED);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Window", "CUSTOM_BG_GREEN"))
-    {
-        config_ini["Window"]["CUSTOM_BG_GREEN"] = std::to_string(DefaultValues::CUSTOM_BG_GREEN);
-        needsSave = true;
-    }
-    else
-    {
-        int existingGreen = getValue("Window", "CUSTOM_BG_GREEN");
-        if (existingGreen < 0 || existingGreen > 255)
-        {
-            config_ini["Window"]["CUSTOM_BG_GREEN"] = std::to_string(DefaultValues::CUSTOM_BG_GREEN);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Window", "CUSTOM_BG_BLUE"))
-    {
-        config_ini["Window"]["CUSTOM_BG_BLUE"] = std::to_string(DefaultValues::CUSTOM_BG_BLUE);
-        needsSave = true;
-    }
-    else
-    {
-        int existingBlue = getValue("Window", "CUSTOM_BG_BLUE");
-        if (existingBlue < 0 || existingBlue > 255)
-        {
-            config_ini["Window"]["CUSTOM_BG_BLUE"] = std::to_string(DefaultValues::CUSTOM_BG_BLUE);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Window", "USE_CUSTOM_BG"))
-    {
-        config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(DefaultValues::USE_CUSTOM_BG);
-        needsSave = true;
-    }
-    else
-    {
-        int existingUseCustom = getValue("Window", "USE_CUSTOM_BG");
-        if (existingUseCustom != 0 && existingUseCustom != 1)
-        {
-            config_ini["Window"]["USE_CUSTOM_BG"] = std::to_string(DefaultValues::USE_CUSTOM_BG);
-            needsSave = true;
-        }
-    }
-
-    //$ ----- Check Image section ----- //
-
-    if (!hasValue("Image", "IMAGE_CANVAS_WIDTH"))
-    {
-        config_ini["Image"]["IMAGE_CANVAS_WIDTH"] = std::to_string(DefaultValues::IMAGE_CANVAS_WIDTH);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_CANVAS_WIDTH");
-        if (val < 1)
-        {
-            config_ini["Image"]["IMAGE_CANVAS_WIDTH"] = std::to_string(DefaultValues::IMAGE_CANVAS_WIDTH);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "IMAGE_CANVAS_HEIGHT"))
-    {
-        config_ini["Image"]["IMAGE_CANVAS_HEIGHT"] = std::to_string(DefaultValues::IMAGE_CANVAS_HEIGHT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_CANVAS_HEIGHT");
-        if (val < 1)
-        {
-            config_ini["Image"]["IMAGE_CANVAS_HEIGHT"] = std::to_string(DefaultValues::IMAGE_CANVAS_HEIGHT);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "USE_CUSTOM_TINT"))
-    {
-        config_ini["Image"]["USE_CUSTOM_TINT"] = std::to_string(DefaultValues::USE_CUSTOM_TINT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "USE_CUSTOM_TINT");
-        if (val != 0 && val != 1)
-        {
-            config_ini["Image"]["USE_CUSTOM_TINT"] = std::to_string(DefaultValues::USE_CUSTOM_TINT);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "IMAGE_TINT_RED"))
-    {
-        config_ini["Image"]["IMAGE_TINT_RED"] = std::to_string(DefaultValues::IMAGE_TINT_RED);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_TINT_RED");
-        if (val < 0 || val > 255)
-        {
-            config_ini["Image"]["IMAGE_TINT_RED"] = std::to_string(DefaultValues::IMAGE_TINT_RED);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "IMAGE_TINT_GREEN"))
-    {
-        config_ini["Image"]["IMAGE_TINT_GREEN"] = std::to_string(DefaultValues::IMAGE_TINT_GREEN);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_TINT_GREEN");
-        if (val < 0 || val > 255)
-        {
-            config_ini["Image"]["IMAGE_TINT_GREEN"] = std::to_string(DefaultValues::IMAGE_TINT_GREEN);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "IMAGE_TINT_BLUE"))
-    {
-        config_ini["Image"]["IMAGE_TINT_BLUE"] = std::to_string(DefaultValues::IMAGE_TINT_BLUE);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_TINT_BLUE");
-        if (val < 0 || val > 255)
-        {
-            config_ini["Image"]["IMAGE_TINT_BLUE"] = std::to_string(DefaultValues::IMAGE_TINT_BLUE);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Image", "IMAGE_TINT_PALETTE"))
-    {
-        config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(DefaultValues::IMAGE_TINT_PALETTE);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Image", "IMAGE_TINT_PALETTE");
-        if (val < 0 || val > 3)
-        {
-            config_ini["Image"]["IMAGE_TINT_PALETTE"] = std::to_string(DefaultValues::IMAGE_TINT_PALETTE);
-            needsSave = true;
-        }
-    }
-
-    // Check Gamepad section
-    if (!hasValue("Gamepad", "STABILITY_THRESHOLD"))
-    {
-        config_ini["Gamepad"]["STABILITY_THRESHOLD"] = std::to_string(DefaultValues::STABILITY_THRESHOLD);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Gamepad", "STABILITY_THRESHOLD");
-        if (val < 1)
-        {
-            config_ini["Gamepad"]["STABILITY_THRESHOLD"] = std::to_string(DefaultValues::STABILITY_THRESHOLD);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Gamepad", "GAMEPAD_INDEX"))
-    {
-        config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
-        needsSave = true;
-    }
-    else 
-    {
-        int val = getValue("Gamepad", "GAMEPAD_INDEX");
-        if (val < 0 || val > 3)
-        {
-            config_ini["Gamepad"]["GAMEPAD_INDEX"] = std::to_string(DefaultValues::GAMEPAD_INDEX);
-            needsSave = true;
-        }
-    }
-
-    // Check Font section
-    if (!hasValue("Font", "MIN_FONT_SIZE"))
-    {
-        config_ini["Font"]["MIN_FONT_SIZE"] = std::to_string(DefaultValues::MIN_FONT_SIZE);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Font", "MIN_FONT_SIZE");
-        if (val < 1)
-        {
-            config_ini["Font"]["MIN_FONT_SIZE"] = std::to_string(DefaultValues::MIN_FONT_SIZE);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Font", "DEFAULT_FONT_SIZE"))
-    {
-        config_ini["Font"]["DEFAULT_FONT_SIZE"] = std::to_string(DefaultValues::DEFAULT_FONT_SIZE);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Font", "DEFAULT_FONT_SIZE");
-        if (val < 1)
-        {
-            config_ini["Font"]["DEFAULT_FONT_SIZE"] = std::to_string(DefaultValues::DEFAULT_FONT_SIZE);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("Font", "TEXT_OFFSET"))
-    {
-        config_ini["Font"]["TEXT_OFFSET"] = std::to_string(DefaultValues::TEXT_OFFSET);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Font", "TEXT_OFFSET");
-        if (val < 0) // Text offset can be 0 (no offset)
-        {
-            config_ini["Font"]["TEXT_OFFSET"] = std::to_string(DefaultValues::TEXT_OFFSET);
-            needsSave = true;
-        }
-    }
-
-    // Check ButtonMap section
-    if (!hasValue("ButtonMap", "DPAD_UP"))
-    {
-        config_ini["ButtonMap"]["DPAD_UP"] = std::to_string(SNESMapDefaults::DPAD_UP);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "DPAD_UP");
-        if (val < 1) // Button indices should be positive
-        {
-            config_ini["ButtonMap"]["DPAD_UP"] = std::to_string(SNESMapDefaults::DPAD_UP);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "DPAD_RIGHT"))
-    {
-        config_ini["ButtonMap"]["DPAD_RIGHT"] = std::to_string(SNESMapDefaults::DPAD_RIGHT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "DPAD_RIGHT");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["DPAD_RIGHT"] = std::to_string(SNESMapDefaults::DPAD_RIGHT);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "DPAD_DOWN"))
-    {
-        config_ini["ButtonMap"]["DPAD_DOWN"] = std::to_string(SNESMapDefaults::DPAD_DOWN);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "DPAD_DOWN");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["DPAD_DOWN"] = std::to_string(SNESMapDefaults::DPAD_DOWN);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "DPAD_LEFT"))
-    {
-        config_ini["ButtonMap"]["DPAD_LEFT"] = std::to_string(SNESMapDefaults::DPAD_LEFT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "DPAD_LEFT");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["DPAD_LEFT"] = std::to_string(SNESMapDefaults::DPAD_LEFT);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "X_BUTTON"))
-    {
-        config_ini["ButtonMap"]["X_BUTTON"] = std::to_string(SNESMapDefaults::X_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "X_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["X_BUTTON"] = std::to_string(SNESMapDefaults::X_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "A_BUTTON"))
-    {
-        config_ini["ButtonMap"]["A_BUTTON"] = std::to_string(SNESMapDefaults::A_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "A_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["A_BUTTON"] = std::to_string(SNESMapDefaults::A_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "B_BUTTON"))
-    {
-        config_ini["ButtonMap"]["B_BUTTON"] = std::to_string(SNESMapDefaults::B_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "B_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["B_BUTTON"] = std::to_string(SNESMapDefaults::B_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "Y_BUTTON"))
-    {
-        config_ini["ButtonMap"]["Y_BUTTON"] = std::to_string(SNESMapDefaults::Y_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "Y_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["Y_BUTTON"] = std::to_string(SNESMapDefaults::Y_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "L_BUTTON"))
-    {
-        config_ini["ButtonMap"]["L_BUTTON"] = std::to_string(SNESMapDefaults::L_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "L_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["L_BUTTON"] = std::to_string(SNESMapDefaults::L_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "R_BUTTON"))
-    {
-        config_ini["ButtonMap"]["R_BUTTON"] = std::to_string(SNESMapDefaults::R_BUTTON);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "R_BUTTON");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["R_BUTTON"] = std::to_string(SNESMapDefaults::R_BUTTON);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "SELECT"))
-    {
-        config_ini["ButtonMap"]["SELECT"] = std::to_string(SNESMapDefaults::SELECT);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "SELECT");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["SELECT"] = std::to_string(SNESMapDefaults::SELECT);
-            needsSave = true;
-        }
-    }
-
-    if (!hasValue("ButtonMap", "START"))
-    {
-        config_ini["ButtonMap"]["START"] = std::to_string(SNESMapDefaults::START);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("ButtonMap", "START");
-        if (val < 1)
-        {
-            config_ini["ButtonMap"]["START"] = std::to_string(SNESMapDefaults::START);
-            needsSave = true;
-        }
-    }
-
-    // Check Debug section
-    if (!hasValue("Debug", "MODE"))
-    {
-        config_ini["Debug"]["MODE"] = std::to_string(DefaultValues::DEBUG_MODE);
-        needsSave = true;
-    }
-    else
-    {
-        int val = getValue("Debug", "MODE");
-        if (val != 0 && val != 1)
-        {
-            config_ini["Debug"]["MODE"] = std::to_string(DefaultValues::DEBUG_MODE);
-            needsSave = true;
-        }
-    }
-
-    if (needsSave)
-    {
-        std::cout << "Adding missing or invalid config values..." << std::endl;
-        saveConfig();
-    }
 }
 
 int Config::getDefault(const std::string& section, const std::string& key) const
 {
-	if (section == "Window")
+	// Composite key is "SectionName:KEY_NAME" — neither sections nor keys contain colons.
+	static const std::unordered_map<std::string, int> defaultsLookup{
+		{"Window:INITIAL_WINDOW_WIDTH",  DefaultValues::INITIAL_WINDOW_WIDTH},
+		{"Window:INITIAL_WINDOW_HEIGHT", DefaultValues::INITIAL_WINDOW_HEIGHT},
+		{"Window:TARGET_FPS",            DefaultValues::TARGET_FPS},
+		{"Window:USE_VSYNC",             DefaultValues::USE_VSYNC},
+		{"Window:BACKGROUND_COLOR",      DefaultValues::BACKGROUND_COLOR},
+		{"Window:CUSTOM_BG_RED",         DefaultValues::CUSTOM_BG_RED},
+		{"Window:CUSTOM_BG_GREEN",       DefaultValues::CUSTOM_BG_GREEN},
+		{"Window:CUSTOM_BG_BLUE",        DefaultValues::CUSTOM_BG_BLUE},
+		{"Window:USE_CUSTOM_BG",         DefaultValues::USE_CUSTOM_BG},
+
+		{"Image:IMAGE_CANVAS_WIDTH",  DefaultValues::IMAGE_CANVAS_WIDTH},
+		{"Image:IMAGE_CANVAS_HEIGHT", DefaultValues::IMAGE_CANVAS_HEIGHT},
+		{"Image:USE_CUSTOM_TINT",     DefaultValues::USE_CUSTOM_TINT},
+		{"Image:IMAGE_TINT_RED",      DefaultValues::IMAGE_TINT_RED},
+		{"Image:IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN},
+		{"Image:IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE},
+		{"Image:IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE},
+
+		{"Gamepad:STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD},
+		{"Gamepad:GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX},
+
+		{"Font:MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE},
+		{"Font:DEFAULT_FONT_SIZE", DefaultValues::DEFAULT_FONT_SIZE},
+		{"Font:TEXT_OFFSET",       DefaultValues::TEXT_OFFSET},
+
+		{"ButtonMap:DPAD_UP",    SNESMapDefaults::DPAD_UP},
+		{"ButtonMap:DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT},
+		{"ButtonMap:DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN},
+		{"ButtonMap:DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT},
+		{"ButtonMap:X_BUTTON",   SNESMapDefaults::X_BUTTON},
+		{"ButtonMap:A_BUTTON",   SNESMapDefaults::A_BUTTON},
+		{"ButtonMap:B_BUTTON",   SNESMapDefaults::B_BUTTON},
+		{"ButtonMap:Y_BUTTON",   SNESMapDefaults::Y_BUTTON},
+		{"ButtonMap:L_BUTTON",   SNESMapDefaults::L_BUTTON},
+		{"ButtonMap:R_BUTTON",   SNESMapDefaults::R_BUTTON},
+		{"ButtonMap:SELECT",     SNESMapDefaults::SELECT},
+		{"ButtonMap:START",      SNESMapDefaults::START},
+
+		{"Debug:MODE", DefaultValues::DEBUG_MODE},
+	};
+
+	std::string compositeKey = section + ":" + key;
+	auto lookupIter = defaultsLookup.find(compositeKey);
+	if (lookupIter != defaultsLookup.end())
 	{
-		if (key == "INITIAL_WINDOW_WIDTH")
-			return DefaultValues::INITIAL_WINDOW_WIDTH;
-		if (key == "INITIAL_WINDOW_HEIGHT")
-			return DefaultValues::INITIAL_WINDOW_HEIGHT;
-		if (key == "TARGET_FPS")
-			return DefaultValues::TARGET_FPS;
-		if (key == "USE_VSYNC")
-			return DefaultValues::USE_VSYNC;
-		if (key == "BACKGROUND_COLOR")
-			return DefaultValues::BACKGROUND_COLOR;
-		if (key == "CUSTOM_BG_RED")
-			return DefaultValues::CUSTOM_BG_RED;
-		if (key == "CUSTOM_BG_GREEN")
-			return DefaultValues::CUSTOM_BG_GREEN;
-		if (key == "CUSTOM_BG_BLUE")
-			return DefaultValues::CUSTOM_BG_BLUE;
-		if (key == "USE_CUSTOM_BG")
-			return DefaultValues::USE_CUSTOM_BG;
+		return lookupIter->second;
 	}
-	if (section == "Image")
-	{
-		if (key == "IMAGE_CANVAS_WIDTH")
-			return DefaultValues::IMAGE_CANVAS_WIDTH;
-		if (key == "IMAGE_CANVAS_HEIGHT")
-			return DefaultValues::IMAGE_CANVAS_HEIGHT;
-		if (key == "USE_CUSTOM_TINT")   
-			return DefaultValues::USE_CUSTOM_TINT;
-		if (key == "IMAGE_TINT_RED")    
-			return DefaultValues::IMAGE_TINT_RED;
-		if (key == "IMAGE_TINT_GREEN")  
-			return DefaultValues::IMAGE_TINT_GREEN;
-		if (key == "IMAGE_TINT_BLUE")   
-			return DefaultValues::IMAGE_TINT_BLUE;
-		if (key == "IMAGE_TINT_PALETTE")
-			return DefaultValues::IMAGE_TINT_PALETTE;
-	}
-	if (section == "Gamepad") 
-	{
-		if (key == "STABILITY_THRESHOLD") 
-			return DefaultValues::STABILITY_THRESHOLD;
-        if (key == "GAMEPAD_INDEX")
-            return DefaultValues::GAMEPAD_INDEX;
-	}
-	if (section == "Font")
-	{
-		if (key == "MIN_FONT_SIZE")
-			return DefaultValues::MIN_FONT_SIZE;
-		if (key == "DEFAULT_FONT_SIZE")
-			return DefaultValues::DEFAULT_FONT_SIZE;
-		if (key == "TEXT_OFFSET")
-			return DefaultValues::TEXT_OFFSET;
-	}
-	if (section == "ButtonMap")
-	{
-		if (key == "DPAD_UP")
-			return SNESMapDefaults::DPAD_UP;
-		if (key == "DPAD_RIGHT")
-			return SNESMapDefaults::DPAD_RIGHT;
-		if (key == "DPAD_DOWN")
-			return SNESMapDefaults::DPAD_DOWN;
-		if (key == "DPAD_LEFT")
-			return SNESMapDefaults::DPAD_LEFT;
-		if (key == "X_BUTTON")
-			return SNESMapDefaults::X_BUTTON;
-		if (key == "A_BUTTON")
-			return SNESMapDefaults::A_BUTTON;
-		if (key == "B_BUTTON")
-			return SNESMapDefaults::B_BUTTON;
-		if (key == "Y_BUTTON")
-			return SNESMapDefaults::Y_BUTTON;
-		if (key == "L_BUTTON")
-			return SNESMapDefaults::L_BUTTON;
-		if (key == "R_BUTTON")
-			return SNESMapDefaults::R_BUTTON;
-		if (key == "SELECT")
-			return SNESMapDefaults::SELECT;
-		if (key == "START")
-			return SNESMapDefaults::START;
-	}
-	if (section == "Debug") 
-	{
-		if (key == "MODE") 
-			return DefaultValues::DEBUG_MODE;
-	}
-	// Fallback if unknown
+
+	// Fallback if unknown section/key combination
+	std::cerr << "Warning: no default for [" << section << "] " << key << std::endl;
 	return 0;
 }
 
@@ -675,5 +169,6 @@ void Config::resetButtonMap()
 		{"SELECT",     "13"},
 		{"START",      "15"}
 	});
+	mNeedsSave = true;
 	saveConfig();
 }

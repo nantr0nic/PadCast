@@ -577,7 +577,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	const char* promptText = ""; // cuz raylib's DrawText() argument asks for a const char*
 	int currentRaylibButton = 0;
-	std::string currentButtonConfig;
+	Config::ButtonConfigKey currentButtonConfig;
 
 	switch (buttonPromptIndex)
 	{
@@ -585,62 +585,62 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	case 0:
 		promptText = "Press D-pad UP";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
-		currentButtonConfig = "DPAD_UP";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
 		break;
 	case 1:
 		promptText = "Press D-pad RIGHT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-		currentButtonConfig = "DPAD_RIGHT";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_RIGHT;
 		break;
 	case 2:
 		promptText = "Press D-pad DOWN";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-		currentButtonConfig = "DPAD_DOWN";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_DOWN;
 		break;
 	case 3:
 		promptText = "Press D-pad LEFT";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-		currentButtonConfig = "DPAD_LEFT";
+		currentButtonConfig = Config::ButtonConfigKey::DPAD_LEFT;
 		break;
 	case 4:
 		promptText = "Press X";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
-		currentButtonConfig = "X_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::X_BUTTON;
 		break;
 	case 5:
 		promptText = "Press A";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-		currentButtonConfig = "A_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::A_BUTTON;
 		break;
 	case 6:
 		promptText = "Press B";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
-		currentButtonConfig = "B_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::B_BUTTON;
 		break;
 	case 7:
 		promptText = "Press Y";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
-		currentButtonConfig = "Y_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::Y_BUTTON;
 		break;
 	case 8:
 		promptText = "Press LEFT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
-		currentButtonConfig = "L_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::L_BUTTON;
 		break;
 	case 9:
 		promptText = "Press RIGHT Shoulder";
 		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
-		currentButtonConfig = "R_BUTTON";
+		currentButtonConfig = Config::ButtonConfigKey::R_BUTTON;
 		break;
 	case 10:
 		promptText = "Press Select";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
-		currentButtonConfig = "SELECT";
+		currentButtonConfig = Config::ButtonConfigKey::SELECT;
 		break;
 	case 11:
 		promptText = "Press Start";
 		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
-		currentButtonConfig = "START";
+		currentButtonConfig = Config::ButtonConfigKey::START;
 		break;
 	default:
 		// Finished remapping
