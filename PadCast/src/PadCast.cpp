@@ -15,20 +15,20 @@
 
 #include <iostream>
 
-GamepadTextures::GamepadTextures()
-: unpressed(PathManager::getResourcePath("images/controller.png"))
-, pressedA(PathManager::getResourcePath("images/pressed/A.png"))
-, pressedB(PathManager::getResourcePath("images/pressed/B.png"))
-, pressedX(PathManager::getResourcePath("images/pressed/X.png"))
-, pressedY(PathManager::getResourcePath("images/pressed/Y.png"))
-, pressedUp(PathManager::getResourcePath("images/pressed/up.png"))
-, pressedLeft(PathManager::getResourcePath("images/pressed/left.png"))
-, pressedDown(PathManager::getResourcePath("images/pressed/down.png"))
-, pressedRight(PathManager::getResourcePath("images/pressed/right.png"))
-, pressedStart(PathManager::getResourcePath("images/pressed/start.png"))
-, pressedSelect(PathManager::getResourcePath("images/pressed/select.png"))
-, pressedLBump(PathManager::getResourcePath("images/pressed/L-bumper.png"))
-, pressedRBump(PathManager::getResourcePath("images/pressed/R-bumper.png"))
+GamepadTextures::GamepadTextures(Config::ControllerLayout layout)
+: unpressed(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/controller.png"))
+, pressedA(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/A.png"))
+, pressedB(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/B.png"))
+, pressedX(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/X.png"))
+, pressedY(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/Y.png"))
+, pressedUp(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/up.png"))
+, pressedLeft(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/left.png"))
+, pressedDown(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/down.png"))
+, pressedRight(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/right.png"))
+, pressedStart(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/start.png"))
+, pressedSelect(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/select.png"))
+, pressedLBump(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/L-bumper.png"))
+, pressedRBump(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/R-bumper.png"))
 {
 }
 

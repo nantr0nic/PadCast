@@ -36,7 +36,7 @@ struct GamepadTextures
 	raylib::Texture2D pressedLBump;
 	raylib::Texture2D pressedRBump;
 
-	GamepadTextures();
+	explicit GamepadTextures(Config::ControllerLayout layout = Config::ControllerLayout::SNES);
 };
 
 enum class BackgroundColor

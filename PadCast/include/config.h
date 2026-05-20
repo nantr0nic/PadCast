@@ -114,6 +114,15 @@ public:
 		return "SNES_ButtonMap";
 	}
 
+	static std::string resourcesSubdir(ControllerLayout layout)
+	{
+		switch (layout)
+		{
+			case ControllerLayout::SNES: return "SNES";
+		}
+		return "SNES";
+	}
+
 	//$ ----- Button config key enum (future: layout-aware) ----- //
 	// When adding controller layouts, extend this enum or create per-layout
 	// mappings that translate these logical buttons to the correct INI keys.
