@@ -383,38 +383,20 @@ raylib::Color PadCast::getBGColor() const
 
 void PadCast::loadButtonsFromConfig()
 {
-    //std::cout << "DEBUG: Checking if ButtonMap section exists..." << std::endl;
-    // Clear the index
     mButtonMap.buttonIndex.clear();
-    //std::cout << "DEBUG: Cleared buttonIndex" << std::endl;
 
-    if (!mConfig.getIni().has("ButtonMap"))
+    auto mapping = mConfig.loadButtonMapping(Config::ControllerLayout::SNES);
+
+    if (mapping.empty())
     {
-        //std::cout << "DEBUG: ButtonMap section NOT found, using default SNES map" << std::endl;
         mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
         mButtonCache.refreshCache(mButtonMap);
         return;
     }
 
-    //std::cout << "DEBUG: ButtonMap section found, loading mappings..." << std::endl;
-    const auto& buttonSection = mConfig.getIni().get("ButtonMap");
-    //std::cout << "DEBUG: ButtonSection size: " << buttonSection.size() << std::endl;
-
-    for (const auto& [key, value_str] : buttonSection)
+    for (const auto& [key, value] : mapping)
     {
-        //std::cout << "DEBUG: Processing " << key << " = " << value_str << std::endl;
-        int value = 0;
-        try {
-            value = std::stoi(value_str);
-            //std::cout << "DEBUG: Converted " << value_str << " to int: " << value << std::endl;
-        }
-        catch (...) {
-            std::cerr << "DEBUG: Failed to convert " << value_str << " to int" << std::endl;
-            continue;
-        }
-
         // Map INI keys to raylib button constants
-        bool mapped = false;
         if (key == "DPAD_UP") 
         {
             mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;

@@ -301,55 +301,75 @@ will be needed for N64 (v0.3.0), GameCube (v0.4.0), and beyond.
 
 ### Strategy: per-layout INI sections
 
-Each controller layout gets its own `[ButtonMap_*]` section in `config.ini`:
+Each controller layout gets its own `[<Layout>_ButtonMap]` section in `config.ini`:
 ```ini
-[ButtonMap]        ; SNES (default, backward-compatible)
-[ButtonMap_N64]    ; Nintendo 64
-[ButtonMap_GC]     ; GameCube
+[SNES_ButtonMap]   ; SNES (current, implemented)
+[N64_ButtonMap]    ; Nintendo 64 (planned)
+[GC_ButtonMap]     ; GameCube (planned)
 ```
 
-A `ControllerLayout` enum drives section selection:
+The `ControllerLayout` enum and `buttonSectionName()` helper drive section selection:
 ```cpp
-enum class ControllerLayout { SNES, N64, GameCube };
+enum class ControllerLayout { SNES };  // N64, GameCube added later
+
+static std::string buttonSectionName(ControllerLayout layout)
+{
+    switch (layout)
+    {
+        case ControllerLayout::SNES: return "SNES_ButtonMap";
+    }
+    return "SNES_ButtonMap";
+}
 ```
 
 ### What's already in place
 
+- **`ControllerLayout` enum** (`Config::ControllerLayout`) — currently has
+  `SNES` value. Extended with `N64`, `GameCube` when ready.
+- **`buttonSectionName(layout)`** — returns `"SNES_ButtonMap"` for SNES, maps
+  to the correct INI section automatically. Adding a new layout means adding
+  a case.
+- **`loadButtonMapping(layout)`** — centralized Config method that reads
+  button mappings from the INI section returned by `buttonSectionName()`.
+  Returns `unordered_map<string, int>` — caller maps key names to raylib
+  constants. This replaced `PadCast`'s direct `getIni()` access.
+- **`resetButtonMap(ControllerLayout)`** — accepts a layout parameter, populates
+  the correct INI section via `buttonSectionName()`. Currently defaults to SNES.
 - **`ButtonConfigKey` enum** (in `config.h`) — 12 type-safe button names used
   by `updateButtonConfig()`. For N64/GC, this enum can be extended or a
   per-layout enum created.
+- **`updateButtonConfig()`** — now uses `buttonSectionName()` instead of
+  hardcoded `"ButtonMap"` section name.
 - **`validateInt()` template** — adding a new INI key for a layout-specific
   button map is one line in `validateConfig()`.
 - **`setValue()` template** — layout-aware setters will delegate to it.
-- **Commented-out `loadButtonMapping(ControllerLayout)`** — a block comment
-  in `config.h` shows the planned structure: section-name helper, INI iteration,
-  fallback to defaults. Un-comment and connect when ready.
 - **Commented-out trigger indices** — `case 10` / `case 12` in
   `CachedButtons::refreshCache()` are placeholders for analog triggers.
 - **N64 joystick axis debug code** — commented out in `drawGamepadButtons()`.
 
 ### What still needs to change
 
-1. **`resetButtonMap()`** — currently hardcodes SNES indices. Needs a `layout`
-   parameter to populate the correct INI section.
+1. ~~**`resetButtonMap()`** — now accepts `ControllerLayout` param, uses~~
+   ~~`buttonSectionName()` to populate the correct section.~~ ✅ DONE
 2. **`SNESMapDefaults`** — should be one of several per-layout default structs
    (e.g. `N64MapDefaults`, `GCMapDefaults`).
-3. **`loadButtonsFromConfig()`** in `PadCast.cpp` — currently reads raw INI
-   via `getIni()`. Should migrate to a dedicated Config method.
+3. ~~**`loadButtonsFromConfig()`** — now calls `Config::loadButtonMapping()`~~
+   ~~instead of raw `getIni()` access.~~ ✅ DONE
 4. **`GamepadTextures`** — needs a per-layout texture set mechanism.
 5. **`CachedButtons`** — needs additional fields for analog axes and the extra
    buttons N64/GC controllers have.
 6. **`RemapButtonScreens()`** — the 12-step walkthrough is SNES-only. Needs
    to be parameterized by button count and labels.
 
-### Proposed implementation order (for v0.3.0)
+### Implementation order (v0.3.0 prep — v0.2.7)
 
-1. Add `ControllerLayout` enum and section-name helper to Config.
+1. ~~**Add `ControllerLayout` enum, `buttonSectionName()`, and `loadButtonMapping()`~~ ~~
+   ~~to Config.** SNES section renamed to `[SNES_ButtonMap]`. `PadCast::loadButtonsFromConfig()`~~
+   ~~now delegates to Config.~~ ✅ DONE
 2. Generalize `ButtonMap` / `CachedButtons` for variable button count.
-3. Write `loadButtonMapping(layout)` on Config, replacing `getIni()` access.
-4. Add N64 button textures and a `ControllerProfile` for texture selection.
-5. Implement joystick rendering in `drawGamepadButtons()`.
-6. Update `RemapButtonScreens()` to accept a button list.
+3. Add N64 button textures and a `ControllerProfile` for texture selection.
+4. Implement joystick rendering in `drawGamepadButtons()`.
+5. Update `RemapButtonScreens()` to accept a button list.
 
 ---
 
@@ -377,11 +397,9 @@ enum class ControllerLayout { SNES, N64, GameCube };
 
 ### Medium Priority
 
-4. **`resetButtonMap()` needs layout-awareness refactor** — currently hardcodes
-   SNES button indices in `config.cpp`. When adding N64/GameCube layouts, this
-   should accept a layout parameter and populate the appropriate INI section
-   (e.g. `ButtonMap_N64`, `ButtonMap_GC`). Default values should come from
-   per-layout structs, not repeated inline.
+4. ~~**`resetButtonMap()` needs layout-awareness refactor** — ~~
+   ~~Done: now accepts a `ControllerLayout` parameter and populates the~~
+   ~~section returned by `buttonSectionName(layout)`.~~ ✅ DONE
 
 ### Low Priority
 
@@ -399,6 +417,11 @@ enum class ControllerLayout { SNES, N64, GameCube };
 - ~~**Raw string button keys** — `updateButtonConfig()` now takes `ButtonConfigKey` enum.~~ ✅ DONE
 - ~~**Font static cache leak** — replaced static locals with file-scope cache
     and validity flag and `InvalidateFontCache()`, wired into Reload Config File.~~ ✅ DONE
+- ~~**Config layout-awareness groundwork** — added `ControllerLayout` enum
+    (`SNES`), `buttonSectionName()` helper, `loadButtonMapping()` on Config,
+    `resetButtonMap(ControllerLayout)` parameter. INI section renamed from
+    `[ButtonMap]` to `[SNES_ButtonMap]`. `PadCast::loadButtonsFromConfig()`
+    now delegates to Config instead of raw `getIni()` access.~~ ✅ DONE
 
 ---
 

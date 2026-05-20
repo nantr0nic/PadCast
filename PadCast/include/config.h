@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <string>
+#include <unordered_map>
 #include <iostream>
 
 class Config
@@ -98,6 +99,21 @@ private:
 	};
 
 public:
+	//$ ----- Controller layout enum ----- //
+	enum class ControllerLayout
+	{
+		SNES
+	};
+
+	static std::string buttonSectionName(ControllerLayout layout)
+	{
+		switch (layout)
+		{
+			case ControllerLayout::SNES: return "SNES_ButtonMap";
+		}
+		return "SNES_ButtonMap";
+	}
+
 	//$ ----- Button config key enum (future: layout-aware) ----- //
 	// When adding controller layouts, extend this enum or create per-layout
 	// mappings that translate these logical buttons to the correct INI keys.
@@ -275,7 +291,7 @@ public:
 		}
 
 		if (keyName)
-			setValue("ButtonMap", keyName, newButtonIndex);
+			setValue(buttonSectionName(ControllerLayout::SNES), keyName, newButtonIndex);
 	}
 	void updateUseCustomTint(int useCustom)
 	{
@@ -290,46 +306,14 @@ public:
 		setValue("Gamepad", "GAMEPAD_INDEX", gpIndex);
 	}
 
-	//$ ----- Button Map Loader (future: layout-aware) ----- //
-	//
-	// PadCast currently reads button mappings directly via getIni().
-	// Once controller layouts are added, this method on Config will
-	// centralize that logic and handle layout-specific INI sections.
-	//
-	// Future direction:
-	//
-	//   enum class ControllerLayout { SNES, N64, GameCube };
-	//
-	//   std::string buttonSectionName(ControllerLayout layout)
-	//   {
-	//       switch (layout)
-	//       {
-	//           case ControllerLayout::SNES:     return "ButtonMap";
-	//           case ControllerLayout::N64:      return "ButtonMap_N64";
-	//           case ControllerLayout::GameCube: return "ButtonMap_GC";
-	//       }
-	//       return "ButtonMap";
-	//   }
-	//
-	//   ButtonMapping loadButtonMapping(ControllerLayout layout) const
-	//   {
-	//       ButtonMapping mapping;
-	//       std::string section = buttonSectionName(layout);
-	//
-	//       if (!config_ini.has(section))
-	//           return mapping;  // empty — caller falls back to defaults
-	//
-	//       for (const auto& [key, valueStr] : config_ini.get(section))
-	//       {
-	//           try {
-	//               mapping[key] = std::stoi(valueStr);
-	//           } catch (...) { /* skip invalid entries */ }
-	//       }
-	//       return mapping;
-	//   }
+	//$ ----- Button Map Loader ----- //
+	// Reads button mappings for a given layout from the INI section
+	// returned by buttonSectionName(layout). Returns a map of INI key
+	// name → integer value. Caller maps key names to raylib constants.
+	std::unordered_map<std::string, int> loadButtonMapping(ControllerLayout layout) const;
 
 //$ ----- Reset -----
-	void resetButtonMap();
+	void resetButtonMap(ControllerLayout layout = ControllerLayout::SNES);
 };
 
 #endif

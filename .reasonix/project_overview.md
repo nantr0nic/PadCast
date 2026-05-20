@@ -315,3 +315,11 @@ builds which use the YAML manifest).
 - **Font cache leak fixed** — static locals in `DrawMenu()` replaced with
   file-scope cache + validity flag + `InvalidateFontCache()`.
 - **FrameTimer** — `benchmark.h` provides reusable ad-hoc benchmarking.
+- **Config layout-awareness** — Added `ControllerLayout` enum (`SNES`),
+  `buttonSectionName()` helper, `loadButtonMapping()` on Config (centralizes
+  INI reading). `resetButtonMap()` now accepts a `ControllerLayout` parameter.
+  INI section renamed from `[ButtonMap]` to `[SNES_ButtonMap]`.
+  `PadCast::loadButtonsFromConfig()` delegates to Config instead of raw
+  `getIni()` access. Adding a new controller layout means: add enum value,
+  add validation block, add defaults — the section name flows from
+  `buttonSectionName()`.
