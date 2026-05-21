@@ -78,7 +78,7 @@ namespace {
     	{ "Press L",             GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1, Config::ButtonConfigKey::L_BUTTON },
     	{ "Press R",             GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1, Config::ButtonConfigKey::R_BUTTON },
     	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
-    	{ "Press Z Trigger",     -1,                      5,  Config::ButtonConfigKey::Z_BUTTON },
+    	{ "Press Z Trigger",     -1,                      4,  Config::ButtonConfigKey::Z_BUTTON },
     };
     constexpr int kN64StepCount = sizeof(kN64RemapSteps) / sizeof(kN64RemapSteps[0]);
 

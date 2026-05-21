@@ -320,37 +320,38 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
             mTextures.pressedCRight.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    // N64 joystick — draw based on Axis 0 (X) and Axis 1 (Y)
+    // N64 joystick + Z trigger
     if (mCurrentLayout == Config::ControllerLayout::N64)
     {
-        float axisX = gamepad.GetAxisMovement(0);
-        float axisY = gamepad.GetAxisMovement(1);
+        // Joystick — Axis 0 (X) and Axis 1 (Y), deadzone + circular clamp.
+        // joystick.png is a full-size transparent overlay (like all other
+        // pressed images). It's drawn at the base position with an axis-based
+        // offset applied on top.
+        constexpr float kN64StickDeadzone = 0.1f;
+        constexpr float kN64StickRadius   = 25.0f;  // pixels at base resolution
 
-        // Dead zone — ignore tiny movements
-        if (std::abs(axisX) > 0.1f || std::abs(axisY) > 0.1f)
-        {
-            // Joystick well center (fraction of the controller image size)
-            // Adjust these values to match the N64 controller.png layout
-            constexpr float kN64StickCenterX = 0.28f;  // % from left
-            constexpr float kN64StickCenterY = 0.50f;  // % from top
-            constexpr float kN64StickRadius  = 60.0f;  // pixels at 960x540
+        float stickX = gamepad.GetAxisMovement(0);
+        float stickY = gamepad.GetAxisMovement(1);
 
-            float canvasW = static_cast<float>(mConfig.getImgCanvasWidth());
-            float canvasH = static_cast<float>(mConfig.getImgCanvasHeight());
-            float centerX = scaling.offsetX + (canvasW * kN64StickCenterX * scale);
-            float centerY = scaling.offsetY + (canvasH * kN64StickCenterY * scale);
-            float radius  = kN64StickRadius * scale;
+        // Deadzone
+        if (stickX > -kN64StickDeadzone && stickX < kN64StickDeadzone) stickX = 0.0f;
+        if (stickY > -kN64StickDeadzone && stickY < kN64StickDeadzone) stickY = 0.0f;
 
-            float stickX = centerX + (axisX * radius);
-            float stickY = centerY - (axisY * radius);  // Y axis is inverted
+        // Circular clamp
+        float mag = std::sqrt(stickX*stickX + stickY*stickY);
+        if (mag > 1.0f) { stickX /= mag; stickY /= mag; }
 
-            mTextures.pressedJoystick.Draw(
-                raylib::Vector2{ stickX, stickY },
-                0.0f, scale, texture_tint);
-        }
+        float radius = kN64StickRadius * scale;
 
-        // N64 Z trigger (Axis 5) — draw when pressed past threshold
-        float zAxis = gamepad.GetAxisMovement(5);
+        mTextures.pressedJoystick.Draw(
+            raylib::Vector2{
+                position.x + (stickX * radius),
+                position.y + (stickY * radius)   // N64 adapter: Y not inverted
+            },
+            0.0f, scale, texture_tint);
+
+        // Z trigger — Axis 4 (-1.0 = unpressed, 1.0 = pressed)
+        float zAxis = gamepad.GetAxisMovement(4);
         if (zAxis > 0.5f)
         {
             mTextures.pressedZ.Draw(position, 0.0f, scale, texture_tint);
