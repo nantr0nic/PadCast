@@ -35,8 +35,16 @@ struct GamepadTextures
 	raylib::Texture2D pressedSelect;
 	raylib::Texture2D pressedLBump;
 	raylib::Texture2D pressedRBump;
+	// N64-specific overlays
+	raylib::Texture2D pressedCUp;
+	raylib::Texture2D pressedCDown;
+	raylib::Texture2D pressedCLeft;
+	raylib::Texture2D pressedCRight;
+	raylib::Texture2D pressedZ;
+	raylib::Texture2D pressedJoystick;
 
 	explicit GamepadTextures(Config::ControllerLayout layout = Config::ControllerLayout::SNES);
+	void load(Config::ControllerLayout layout);
 };
 
 enum class BackgroundColor
@@ -92,6 +100,12 @@ struct CachedButtons
 	int rightTrigger{};
 	int selectButton{};   // MIDDLE_LEFT
 	int startButton{};    // MIDDLE_RIGHT
+	// N64-specific
+	int cUp{};
+	int cDown{};
+	int cLeft{};
+	int cRight{};
+	int zButton{};
 
 	CachedButtons() {}; // empty default
 
@@ -100,7 +114,8 @@ struct CachedButtons
 		refreshCache(buttonMap);
 	}
 
-	void refreshCache(const ButtonMap& buttonMap);
+	void refreshCache(const ButtonMap& buttonMap,
+	                   Config::ControllerLayout layout = Config::ControllerLayout::SNES);
 };
 
 class PadCast
@@ -123,6 +138,16 @@ public:
 	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
 	int getGamepadIndex() { return gamepadIndex; }
 	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+
+	// Controller layout
+	Config::ControllerLayout getCurrentLayout() const { return mCurrentLayout; }
+	void setCurrentLayout(Config::ControllerLayout layout)
+	{
+		mCurrentLayout = layout;
+		mConfig.updateLayout(layout == Config::ControllerLayout::N64 ? 1 : 0);
+		mTextures.load(layout);
+		loadButtonsFromConfig();
+	}
 
 	// Gamepad debug functions
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
@@ -158,6 +183,7 @@ private:
 	bool mGamepadWasConnected{ false };
 	int mStabilityCounter{ 0 };
 	int gamepadIndex{ 0 };
+	Config::ControllerLayout mCurrentLayout{ Config::ControllerLayout::SNES };
 
 	// Cache values for optimization
 	mutable int mCachedStabilityThreshold{ -1 };

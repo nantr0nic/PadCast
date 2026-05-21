@@ -37,6 +37,51 @@ namespace {
     
     RemapState gRemapState;
 
+    // Remap step data — per-layout button definitions for the remap walkthrough.
+    struct RemapStep
+    {
+    	const char* prompt;
+    	int raylibButton;  // -1 if analog (use axisIndex instead)
+    	int axisIndex;     // -1 if digital button
+    	Config::ButtonConfigKey configKey;
+    };
+    
+    // SNES: 12 digital buttons
+    const RemapStep kSnesRemapSteps[]{
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press X",             GAMEPAD_BUTTON_RIGHT_FACE_UP,   -1, Config::ButtonConfigKey::X_BUTTON },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press Y",             GAMEPAD_BUTTON_RIGHT_FACE_LEFT, -1, Config::ButtonConfigKey::Y_BUTTON },
+    	{ "Press LEFT Shoulder", GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press RIGHT Shoulder",GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Select",        GAMEPAD_BUTTON_MIDDLE_LEFT,     -1, Config::ButtonConfigKey::SELECT },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
+    };
+    constexpr int kSnesStepCount = sizeof(kSnesRemapSteps) / sizeof(kSnesRemapSteps[0]);
+    
+    // N64: 14 steps (13 digital + Z as Axis 5)
+    const RemapStep kN64RemapSteps[]{
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press C-Up",          15,                      -1, Config::ButtonConfigKey::C_UP },
+    	{ "Press C-Right",       13,                      -1, Config::ButtonConfigKey::C_RIGHT },
+    	{ "Press C-Down",        5,                       -1, Config::ButtonConfigKey::C_DOWN },
+    	{ "Press C-Left",        8,                       -1, Config::ButtonConfigKey::C_LEFT },
+    	{ "Press L",             GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press R",             GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
+    	{ "Press Z Trigger",     -1,                      5,  Config::ButtonConfigKey::Z_BUTTON },
+    };
+    constexpr int kN64StepCount = sizeof(kN64RemapSteps) / sizeof(kN64RemapSteps[0]);
+
 }
 
 MenuItem createMenuItem(const std::string& label, std::function<void()> action)
@@ -187,6 +232,13 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 		[&params]() { 
 			params.menu.active = Menu::RemapButtons; 
 			SetupRemapMenu(params); 
+		}
+		});
+	params.menu.items.push_back({
+		"Layout",
+		[&params]() { 
+			params.menu.active = Menu::Layout; 
+			SetupLayoutMenu(params); 
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -436,13 +488,50 @@ void SetupGamepadMenu(MenuContext::MenuParams& params)
 	params.menu.selectedIndex = 0;
 }
 
+void SetupLayoutMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+
+	auto currentLayout = params.padcast.getCurrentLayout();
+
+	// SNES
+	std::string snesLabel = "SNES";
+	if (currentLayout == Config::ControllerLayout::SNES)
+		snesLabel += " (current)";
+	params.menu.items.push_back({
+		snesLabel,
+		[&params]() {
+			params.padcast.setCurrentLayout(Config::ControllerLayout::SNES);
+			SetupLayoutMenu(params);
+		}
+	});
+
+	// N64 (will be added shortly)
+	std::string n64Label = "N64";
+	if (currentLayout == Config::ControllerLayout::N64)
+		n64Label += " (current)";
+	params.menu.items.push_back({
+		n64Label,
+		[&params]() {
+			params.padcast.setCurrentLayout(Config::ControllerLayout::N64);
+			SetupLayoutMenu(params);
+		}
+	});
+
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+
+	params.menu.selectedIndex = 0;
+}
+
 void HandleMenuInput(MenuContext::MenuParams& params)
 {
 	// ----- Menu open/close ----- //
-	// a right click, spacebar, or M will open/close the main menu
+	// a right click or M will open/close the main menu.
+	// Space is NOT used here — it's reserved for "skip button" during remap.
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)
-		|| IsKeyPressed(KEY_SPACE)
-		|| IsKeyPressed(KEY_M))
+	    || IsKeyPressed(KEY_M))
 	{
 		if (params.menu.active == Menu::None)
 		{
@@ -546,6 +635,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	if (!state.isRemapping)
 	{
 		state.init();
+		state.gamepad = raylib::Gamepad{ params.gamepadIndex };
 		return; // let main loop call us again next frame
 	}
 
@@ -567,75 +657,31 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	// Draw the background rectangle
 	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
 
-	const char* promptText = ""; // cuz raylib's DrawText() argument asks for a const char*
-	int currentRaylibButton = 0;
-	Config::ButtonConfigKey currentButtonConfig;
-
-	switch (state.buttonPromptIndex)
+	// Select the remap array for the current layout
+	auto layout = params.padcast.getCurrentLayout();
+	const RemapStep* steps = kSnesRemapSteps;
+	int stepCount = kSnesStepCount;
+	if (layout == Config::ControllerLayout::N64)
 	{
-		// case #'s match order of buttons in unordered_map buttonIndex
-	case 0:
-		promptText = "Press D-pad UP";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
-		break;
-	case 1:
-		promptText = "Press D-pad RIGHT";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_RIGHT;
-		break;
-	case 2:
-		promptText = "Press D-pad DOWN";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_DOWN;
-		break;
-	case 3:
-		promptText = "Press D-pad LEFT";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_LEFT;
-		break;
-	case 4:
-		promptText = "Press X";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
-		currentButtonConfig = Config::ButtonConfigKey::X_BUTTON;
-		break;
-	case 5:
-		promptText = "Press A";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::A_BUTTON;
-		break;
-	case 6:
-		promptText = "Press B";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
-		currentButtonConfig = Config::ButtonConfigKey::B_BUTTON;
-		break;
-	case 7:
-		promptText = "Press Y";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::Y_BUTTON;
-		break;
-	case 8:
-		promptText = "Press LEFT Shoulder";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
-		currentButtonConfig = Config::ButtonConfigKey::L_BUTTON;
-		break;
-	case 9:
-		promptText = "Press RIGHT Shoulder";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
-		currentButtonConfig = Config::ButtonConfigKey::R_BUTTON;
-		break;
-	case 10:
-		promptText = "Press Select";
-		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::SELECT;
-		break;
-	case 11:
-		promptText = "Press Start";
-		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::START;
-		break;
-	default:
-		// Finished remapping
+		steps = kN64RemapSteps;
+		stepCount = kN64StepCount;
+	}
+
+	const char* promptText = "";
+	int currentRaylibButton = 0;
+	int currentAxisIndex = -1;
+	Config::ButtonConfigKey currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
+
+	if (state.buttonPromptIndex < stepCount)
+	{
+		const auto& step = steps[state.buttonPromptIndex];
+		promptText = step.prompt;
+		currentRaylibButton = step.raylibButton;
+		currentAxisIndex = step.axisIndex;
+		currentButtonConfig = step.configKey;
+	}
+	else
+	{
 		state.cleanup();
 		return;
 	}
@@ -649,14 +695,52 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	if (state.waitingForInput)
 	{
-		int newButtonPress = state.gamepad.GetButtonPressed();
-		if (newButtonPress > 0)
+		bool inputDetected = false;
+		int newButtonPress = -1;
+
+		if (currentAxisIndex >= 0)
+		{
+			// Analog input (Z trigger on N64, Axis 5).
+			// N64 Z trigger rests at -1.0 and moves to 1.0 when pressed.
+			// Detect the press transition: axis crosses above 0.0.
+			float axisVal = state.gamepad.GetAxisMovement(currentAxisIndex);
+			if (axisVal > 0.0f)
+			{
+				inputDetected = true;
+				newButtonPress = 1; // dummy — axis doesn't produce a button index
+			}
+		}
+		else
+		{
+			// Check all possible digital button indices (GetButtonPressed is
+			// limited to standard indices 0-13; N64 uses indices up to 16).
+			for (int btn = 1; btn <= 32; ++btn)
+			{
+				if (state.gamepad.IsButtonPressed(btn))
+				{
+					newButtonPress = btn;
+					inputDetected = true;
+					break;
+				}
+			}
+		}
+
+		if (inputDetected)
 		{
 			if (state.buttonDebounce.CanAcceptInput())
 			{
 				// Accept the input
-				params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
-				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
+				if (currentAxisIndex < 0)
+				{
+					params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
+					params.config.updateButtonConfig(currentButtonConfig, newButtonPress, layout);
+				}
+				else
+				{
+					// For analog triggers, just record the mapping from the defaults
+					// (axis has no button index to remap)
+					params.config.updateButtonConfig(currentButtonConfig, 1, layout);
+				}
 				state.buttonPromptIndex++;
 				state.waitingForInput = true;
 			}
@@ -666,9 +750,9 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			}
 		}
 
-		// Draw "Wait..." message if user pressed too quickly
+		// Draw "Wait..." or "Spacebar to Skip" below the prompt
 		float timeSinceAttempt = GetTime() - state.lastAttemptTime;
-		if (timeSinceAttempt < 1.0f && state.lastAttemptTime > 0.0f)
+		if (timeSinceAttempt < 0.5f && state.lastAttemptTime > 0.0f)
 		{
 			const char* waitText = "Wait...";
 			int waitWidth = MeasureText(waitText, static_cast<int>(fontSize * 0.7f));
@@ -676,18 +760,35 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			int waitY = textY + static_cast<int>(fontSize * 1.2f);
 			DrawText(waitText, waitX, waitY, static_cast<int>(fontSize * 0.7f), RED);
 		}
+		else
+		{
+			const char* skipText = "Spacebar to Skip";
+			int skipWidth = MeasureText(skipText, static_cast<int>(fontSize * 0.7f));
+			int skipX = rectX + (rectWidth - skipWidth) / 2;
+			int skipY = textY + static_cast<int>(fontSize * 1.2f);
+			DrawText(skipText, skipX, skipY, static_cast<int>(fontSize * 0.7f), Fade(WHITE, 0.5f));
+		}
+
+		// Spacebar to skip the current button
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			state.buttonPromptIndex++;
+			state.waitingForInput = true;
+			state.buttonDebounce.Reset();
+		}
 
 		// Escape keymap if needed
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
 			state.cleanup();
 			params.menu.active = Menu::Main;
+			params.config.saveConfig();
 			SetupMainMenu(params);
 		}
 	}
 
 	// When finished, return to main menu
-	if (state.buttonPromptIndex >= 12)
+	if (state.buttonPromptIndex >= stepCount)
 	{
 		state.cleanup();
 		params.menu.active = Menu::Main;

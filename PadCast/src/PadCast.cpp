@@ -15,24 +15,69 @@
 
 #include <iostream>
 
-GamepadTextures::GamepadTextures(Config::ControllerLayout layout)
-: unpressed(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/controller.png"))
-, pressedA(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/A.png"))
-, pressedB(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/B.png"))
-, pressedX(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/X.png"))
-, pressedY(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/Y.png"))
-, pressedUp(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/up.png"))
-, pressedLeft(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/left.png"))
-, pressedDown(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/down.png"))
-, pressedRight(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/right.png"))
-, pressedStart(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/start.png"))
-, pressedSelect(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/select.png"))
-, pressedLBump(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/L-bumper.png"))
-, pressedRBump(PathManager::getResourcePath(Config::resourcesSubdir(layout) + "/images/pressed/R-bumper.png"))
+void GamepadTextures::load(Config::ControllerLayout layout)
 {
+	// Helper: unload a texture and load from the given path.
+	auto loadFrom = [](raylib::Texture2D& tex, const std::string& path)
+	{
+		tex.Unload();
+		tex = raylib::Texture2D{ PathManager::getResourcePath(path) };
+	};
+	// Helper: unload a texture and leave it as default (id=0).
+	auto clearTex = [](raylib::Texture2D& tex)
+	{
+		tex.Unload();
+		tex = raylib::Texture2D{};
+	};
+
+	auto base = Config::resourcesSubdir(layout) + "/images/";
+
+	// Shared across all layouts
+	loadFrom(unpressed, base + "controller.png");
+	loadFrom(pressedUp,    base + "pressed/up.png");
+	loadFrom(pressedDown,  base + "pressed/down.png");
+	loadFrom(pressedLeft,  base + "pressed/left.png");
+	loadFrom(pressedRight, base + "pressed/right.png");
+	loadFrom(pressedA,     base + "pressed/A.png");
+	loadFrom(pressedB,     base + "pressed/B.png");
+	loadFrom(pressedLBump, base + "pressed/L-bumper.png");
+	loadFrom(pressedRBump, base + "pressed/R-bumper.png");
+	loadFrom(pressedStart, base + "pressed/start.png");
+
+	if (layout == Config::ControllerLayout::SNES)
+	{
+		loadFrom(pressedX,      base + "pressed/X.png");
+		loadFrom(pressedY,      base + "pressed/Y.png");
+		loadFrom(pressedSelect, base + "pressed/select.png");
+		// Clear N64-only textures
+		clearTex(pressedCUp);
+		clearTex(pressedCDown);
+		clearTex(pressedCLeft);
+		clearTex(pressedCRight);
+		clearTex(pressedZ);
+		clearTex(pressedJoystick);
+	}
+	else // N64
+	{
+		loadFrom(pressedCUp,    base + "pressed/C-up.png");
+		loadFrom(pressedCDown,  base + "pressed/C-down.png");
+		loadFrom(pressedCLeft,  base + "pressed/C-left.png");
+		loadFrom(pressedCRight, base + "pressed/C-right.png");
+		loadFrom(pressedZ,      base + "pressed/Z.png");
+		loadFrom(pressedJoystick, base + "pressed/joystick.png");
+		// Clear SNES-only textures
+		clearTex(pressedX);
+		clearTex(pressedY);
+		clearTex(pressedSelect);
+	}
 }
 
-ScalingInfo::ScalingInfo(int currentWidth, int currentHeight, 
+GamepadTextures::GamepadTextures(Config::ControllerLayout layout)
+{
+	load(layout);
+}
+
+ScalingInfo::ScalingInfo(int currentWidth, int currentHeight,
                          int originalWidth, int originalHeight)
 {
     float scaleX = static_cast<float>(currentWidth) / originalWidth;
@@ -42,64 +87,54 @@ ScalingInfo::ScalingInfo(int currentWidth, int currentHeight,
     offsetY = (currentHeight - (originalHeight * scale)) / 2.0f;
 }
 
-void CachedButtons::refreshCache(const ButtonMap& buttonMap)
+void CachedButtons::refreshCache(const ButtonMap& buttonMap,
+                                 Config::ControllerLayout layout)
 {
-    //std::cout << "DEBUG: Starting refreshCache()" << std::endl;
-    // reset each
+    // Reset all fields
     dpadUp = dpadRight = dpadDown = dpadLeft = 0;
     xButton = aButton = bButton = yButton = 0;
     leftTrigger = rightTrigger = selectButton = startButton = 0;
+    cUp = cDown = cLeft = cRight = zButton = 0;
+
     for (const auto& [raylibButton, displayIndex] : buttonMap.buttonIndex)
     {
-        //std::cout << "DEBUG: refreshing " << raylibButton << " to " << displayIndex << std::endl;
-        switch (raylibButton)
+        if (layout == Config::ControllerLayout::N64)
         {
-        case 1: // D-pad UP display
-            dpadUp = displayIndex;
-            break;
-        case 2: // D-pad RIGHT display
-            dpadRight = displayIndex;
-            break;
-        case 3: // D-pad DOWN display
-            dpadDown = displayIndex;
-            break;
-        case 4: // D-pad LEFT display
-            dpadLeft = displayIndex;
-            break;
-        case 5: // X button display
-            xButton = displayIndex;
-            break;
-        case 6: // A button display
-            aButton = displayIndex;
-            break;
-        case 7: // B button display
-            bButton = displayIndex;
-            break;
-        case 8: // Y button display
-            yButton = displayIndex;
-            break;
-        case 9: // Left shoulder display
-            leftTrigger = displayIndex;
-            break;
-        /* For future non-SNES controller use:
-        case 10: // Left trigger display
-            leftTrigger2 = displayIndex;
-            break;
-            */
-        case 11: // Right shoulder display
-            rightTrigger = displayIndex;
-            break;
-        /* For future non-SNES controller use:
-        case 12: // Left trigger display
-            leftTrigger2 = displayIndex;
-            break;
-            */
-        case 13: // Select display
-            selectButton = displayIndex;
-            break;
-        case 15: // Start display
-            startButton = displayIndex;
-            break;
+            switch (raylibButton)
+            {
+            case 1:  dpadUp    = displayIndex; break;
+            case 2:  dpadRight = displayIndex; break;
+            case 3:  dpadDown  = displayIndex; break;
+            case 4:  dpadLeft  = displayIndex; break;
+            // A / B (user-verified N64 indices)
+            case 9:  aButton   = displayIndex; break;
+            case 11: bButton   = displayIndex; break;
+            // L / R / Start
+            case 13: leftTrigger  = displayIndex; break;
+            case 14: rightTrigger = displayIndex; break;
+            case 15: startButton  = displayIndex; break;
+            // C buttons — drawn directly by known raylib constants (15,5,8,13) in drawGamepadButtons
+            default: break;
+            }
+        }
+        else
+        {
+            switch (raylibButton)
+            {
+            case 1:  dpadUp       = displayIndex; break;
+            case 2:  dpadRight    = displayIndex; break;
+            case 3:  dpadDown     = displayIndex; break;
+            case 4:  dpadLeft     = displayIndex; break;
+            case 5:  xButton      = displayIndex; break;
+            case 6:  aButton      = displayIndex; break;
+            case 7:  bButton      = displayIndex; break;
+            case 8:  yButton      = displayIndex; break;
+            case 9:  leftTrigger  = displayIndex; break;
+            case 11: rightTrigger = displayIndex; break;
+            case 13: selectButton = displayIndex; break;
+            case 15: startButton  = displayIndex; break;
+            default: break;
+            }
         }
     }
 }
@@ -116,8 +151,12 @@ PadCast::PadCast(Config& mainConfig)
 
     gamepadIndex = mainConfig.getGPIndex();
 
+    // Apply saved layout from config (before button + texture load)
+    mCurrentLayout = Config::layoutFromInt(mConfig.getLayout());
+    mTextures.load(mCurrentLayout);
+
     loadButtonsFromConfig();
-    mButtonCache.refreshCache(mButtonMap);
+    mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
 }
 
 bool PadCast::updateGamepadConnection(bool currentlyAvailable)
@@ -144,7 +183,7 @@ bool PadCast::updateGamepadConnection(bool currentlyAvailable)
     return mGamepadWasConnected;
 }
 
-void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad, 
+void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
                                  const ScalingInfo& scaling)
 {
     const raylib::Vector2 position{ scaling.offsetX, scaling.offsetY };
@@ -265,6 +304,58 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
     {
         mTextures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
     }
+
+    // N64 C-buttons — hardcoded raylib constants because the
+    // C-button indices (15,5,8,13) conflict with standard button
+    // constants (Start, X, Y, Select) in the buttonIndex system.
+    if (mCurrentLayout == Config::ControllerLayout::N64)
+    {
+        if (gamepad.IsButtonDown(15))  // C-Up
+            mTextures.pressedCUp.Draw(position, 0.0f, scale, texture_tint);
+        if (gamepad.IsButtonDown(5))   // C-Down
+            mTextures.pressedCDown.Draw(position, 0.0f, scale, texture_tint);
+        if (gamepad.IsButtonDown(8))   // C-Left
+            mTextures.pressedCLeft.Draw(position, 0.0f, scale, texture_tint);
+        if (gamepad.IsButtonDown(13))  // C-Right
+            mTextures.pressedCRight.Draw(position, 0.0f, scale, texture_tint);
+    }
+
+    // N64 joystick — draw based on Axis 0 (X) and Axis 1 (Y)
+    if (mCurrentLayout == Config::ControllerLayout::N64)
+    {
+        float axisX = gamepad.GetAxisMovement(0);
+        float axisY = gamepad.GetAxisMovement(1);
+
+        // Dead zone — ignore tiny movements
+        if (std::abs(axisX) > 0.1f || std::abs(axisY) > 0.1f)
+        {
+            // Joystick well center (fraction of the controller image size)
+            // Adjust these values to match the N64 controller.png layout
+            constexpr float kN64StickCenterX = 0.28f;  // % from left
+            constexpr float kN64StickCenterY = 0.50f;  // % from top
+            constexpr float kN64StickRadius  = 60.0f;  // pixels at 960x540
+
+            float canvasW = static_cast<float>(mConfig.getImgCanvasWidth());
+            float canvasH = static_cast<float>(mConfig.getImgCanvasHeight());
+            float centerX = scaling.offsetX + (canvasW * kN64StickCenterX * scale);
+            float centerY = scaling.offsetY + (canvasH * kN64StickCenterY * scale);
+            float radius  = kN64StickRadius * scale;
+
+            float stickX = centerX + (axisX * radius);
+            float stickY = centerY - (axisY * radius);  // Y axis is inverted
+
+            mTextures.pressedJoystick.Draw(
+                raylib::Vector2{ stickX, stickY },
+                0.0f, scale, texture_tint);
+        }
+
+        // N64 Z trigger (Axis 5) — draw when pressed past threshold
+        float zAxis = gamepad.GetAxisMovement(5);
+        if (zAxis > 0.5f)
+        {
+            mTextures.pressedZ.Draw(position, 0.0f, scale, texture_tint);
+        }
+    }
 }
 
 void PadCast::drawNoGamepadMessage(const ScalingInfo& scaling)
@@ -286,7 +377,7 @@ void PadCast::drawNoGamepadMessage(const ScalingInfo& scaling)
 void PadCast::findGamepadIndex()
 {
     // For debugging...
-    // I'm unsure if this needs to be more than 3 (zero-index), 
+    // I'm unsure if this needs to be more than 3 (zero-index),
     // it seems GLFW doesn't go past 4 devices...
     // So if it is registering keyboard and mouse and a bluetooth device, it will
     // only detect 1 of 2 plugged in controllers (by default?)
@@ -331,15 +422,15 @@ void PadCast::debugGamepadInfo(const raylib::Gamepad &gamepad)
     bool available = raylib::Gamepad::IsAvailable(i);
     std::cout << "Gamepad " << i << ": Available = " << available << std::endl;
 
-    if (available) 
+    if (available)
     {
         raylib::Gamepad testPad(i);
         std::cout << "  Name: " << testPad.GetName() << std::endl;
 
         // Button test -- press a button on the controller and see if its #0-4
-        for (int btn = 0; btn < 16; ++btn) 
+        for (int btn = 0; btn < 16; ++btn)
         {
-            if (testPad.IsButtonDown(btn)) 
+            if (testPad.IsButtonDown(btn))
             {
             std::cout << "  Button " << btn << " pressed on gamepad " << i << std::endl;
             }
@@ -385,64 +476,62 @@ void PadCast::loadButtonsFromConfig()
 {
     mButtonMap.buttonIndex.clear();
 
-    auto mapping = mConfig.loadButtonMapping(Config::ControllerLayout::SNES);
+    auto mapping = mConfig.loadButtonMapping(mCurrentLayout);
 
     if (mapping.empty())
     {
         mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
-        mButtonCache.refreshCache(mButtonMap);
+        mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
         return;
     }
 
     for (const auto& [key, value] : mapping)
     {
-        // Map INI keys to raylib button constants
-        if (key == "DPAD_UP") 
+        // Map INI keys to raylib button constants.
+        // For N64, use the user-verified button indices instead of named constants.
+        if (mCurrentLayout == Config::ControllerLayout::N64)
         {
-            mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
+            if (key == "DPAD_UP")        { mButtonMap.buttonIndex[1] = value; }
+            else if (key == "DPAD_RIGHT"){ mButtonMap.buttonIndex[2] = value; }
+            else if (key == "DPAD_DOWN") { mButtonMap.buttonIndex[3] = value; }
+            else if (key == "DPAD_LEFT") { mButtonMap.buttonIndex[4] = value; }
+            else if (key == "A_BUTTON")  { mButtonMap.buttonIndex[9] = value; }
+            else if (key == "B_BUTTON")  { mButtonMap.buttonIndex[11] = value; }
+            else if (key == "L_BUTTON")  { mButtonMap.buttonIndex[13] = value; }
+            else if (key == "R_BUTTON")  { mButtonMap.buttonIndex[14] = value; }
+            else if (key == "START" && value > 0) { mButtonMap.buttonIndex[15] = value; }
+            // C-buttons — drawn directly in drawGamepadButtons, skip buttonIndex
+            else if (key == "C_UP")      { /* handled directly */ }
+            else if (key == "C_RIGHT")   { /* handled directly */ }
+            else if (key == "C_DOWN")    { /* handled directly */ }
+            else if (key == "C_LEFT")    { /* handled directly */ }
+            else if (key == "Z_BUTTON")  { /* axis — no button index */ }
         }
-        else if (key == "DPAD_RIGHT") 
+        else
         {
+            if (key == "DPAD_UP")
+                mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_UP] = value;
+            else if (key == "DPAD_RIGHT")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_RIGHT] = value;
-        }
-        else if (key == "DPAD_DOWN") 
-        {
+            else if (key == "DPAD_DOWN")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_DOWN] = value;
-        }
-        else if (key == "DPAD_LEFT") 
-        {
+            else if (key == "DPAD_LEFT")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_FACE_LEFT] = value;
-        }
-        else if (key == "X_BUTTON") 
-        {
+            else if (key == "X_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_UP] = value;
-        }
-        else if (key == "A_BUTTON") 
-        {
+            else if (key == "A_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_RIGHT] = value;
-        }
-        else if (key == "B_BUTTON") 
-        {
+            else if (key == "B_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_DOWN] = value;
-        }
-        else if (key == "Y_BUTTON") 
-        {
+            else if (key == "Y_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_FACE_LEFT] = value;
-        }
-        else if (key == "L_BUTTON") 
-        {
+            else if (key == "L_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_LEFT_TRIGGER_1] = value;
-        }
-        else if (key == "R_BUTTON") 
-        {
+            else if (key == "R_BUTTON")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_RIGHT_TRIGGER_1] = value;
-        }
-        else if (key == "SELECT") 
-        {
+            else if (key == "SELECT")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_LEFT] = value;
-        }
-        else if (key == "START") 
-        {
+            else if (key == "START")
                 mButtonMap.buttonIndex[GAMEPAD_BUTTON_MIDDLE_RIGHT] = value;
         }
     }
@@ -457,6 +546,6 @@ void PadCast::loadButtonsFromConfig()
     }
 
     // Refresh the cache after loading
-    mButtonCache.refreshCache(mButtonMap);
+    mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
     // std::cout << "DEBUG: Finished loading button mappings" << std::endl;
 }

@@ -31,7 +31,8 @@ enum class Menu
 	BGColor,
 	Tint,
 	RemapButtons,
-	Gamepad
+	Gamepad,
+	Layout
 };
 
 struct MenuItem
@@ -91,6 +92,7 @@ void SetupTintMenu(MenuContext::MenuParams& params);
 void SetupRemapMenu(MenuContext::MenuParams& params);
 
 void SetupGamepadMenu(MenuContext::MenuParams& params);
+void SetupLayoutMenu(MenuContext::MenuParams& params);
 
 void HandleMenuInput(MenuContext::MenuParams& params);
 

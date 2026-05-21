@@ -70,6 +70,7 @@ private:
 		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		static constexpr int GAMEPAD_INDEX{ 0 };
+		static constexpr int LAYOUT{ 0 };  // 0=SNES, 1=N64
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -98,11 +99,35 @@ private:
 		static constexpr int START{ 15 };
 	};
 
+	struct N64MapDefaults
+	{
+		// D-Pad
+		static constexpr int DPAD_UP{ 1 };
+		static constexpr int DPAD_RIGHT{ 2 };
+		static constexpr int DPAD_DOWN{ 3 };
+		static constexpr int DPAD_LEFT{ 4 };
+		// C buttons (user-verified indices)
+		static constexpr int C_UP{ 15 };
+		static constexpr int C_RIGHT{ 13 };
+		static constexpr int C_DOWN{ 5 };
+		static constexpr int C_LEFT{ 8 };
+		// Face buttons
+		static constexpr int A_BUTTON{ 9 };
+		static constexpr int B_BUTTON{ 11 };
+		// Shoulder / trigger
+		static constexpr int L_BUTTON{ 13 };
+		static constexpr int R_BUTTON{ 14 };
+		static constexpr int Z_BUTTON{ 15 };  // Axis 4 (-1..1) — handled separately in draw
+		// System buttons
+		static constexpr int START{ 0 };  // 0 = unmapped (N64 Start not detected by this adapter)
+	};
+
 public:
 	//$ ----- Controller layout enum ----- //
 	enum class ControllerLayout
 	{
-		SNES
+		SNES,
+		N64
 	};
 
 	static std::string buttonSectionName(ControllerLayout layout)
@@ -110,8 +135,20 @@ public:
 		switch (layout)
 		{
 			case ControllerLayout::SNES: return "SNES_ButtonMap";
+			case ControllerLayout::N64:  return "N64_ButtonMap";
 		}
 		return "SNES_ButtonMap";
+	}
+
+	static ControllerLayout layoutFromInt(int val)
+	{
+		switch (val)
+		{
+			case 0:  return ControllerLayout::SNES;
+			case 1:  return ControllerLayout::N64;
+			// future: case 2: return ControllerLayout::GameCube;
+			default: return ControllerLayout::SNES;
+		}
 	}
 
 	static std::string resourcesSubdir(ControllerLayout layout)
@@ -119,6 +156,7 @@ public:
 		switch (layout)
 		{
 			case ControllerLayout::SNES: return "SNES";
+			case ControllerLayout::N64:  return "N64";
 		}
 		return "SNES";
 	}
@@ -140,6 +178,13 @@ public:
 		R_BUTTON,
 		SELECT,
 		START,
+
+		// N64-specific
+		C_UP,
+		C_RIGHT,
+		C_DOWN,
+		C_LEFT,
+		Z_BUTTON,
 	};
 
 	Config() { loadConfig(); }
@@ -280,7 +325,8 @@ public:
 	{
 		setValue("Window", "USE_CUSTOM_BG", useCustom);
 	}
-	void updateButtonConfig(ButtonConfigKey button, int newButtonIndex)
+	void updateButtonConfig(ButtonConfigKey button, int newButtonIndex,
+	                         ControllerLayout layout = ControllerLayout::SNES)
 	{
 		const char* keyName = nullptr;
 		switch (button)
@@ -297,10 +343,15 @@ public:
 			case ButtonConfigKey::R_BUTTON:   keyName = "R_BUTTON"; break;
 			case ButtonConfigKey::SELECT:     keyName = "SELECT"; break;
 			case ButtonConfigKey::START:      keyName = "START"; break;
+			case ButtonConfigKey::C_UP:       keyName = "C_UP"; break;
+			case ButtonConfigKey::C_RIGHT:    keyName = "C_RIGHT"; break;
+			case ButtonConfigKey::C_DOWN:     keyName = "C_DOWN"; break;
+			case ButtonConfigKey::C_LEFT:     keyName = "C_LEFT"; break;
+			case ButtonConfigKey::Z_BUTTON:   keyName = "Z_BUTTON"; break;
 		}
 
 		if (keyName)
-			setValue(buttonSectionName(ControllerLayout::SNES), keyName, newButtonIndex);
+			setValue(buttonSectionName(layout), keyName, newButtonIndex);
 	}
 	void updateUseCustomTint(int useCustom)
 	{
@@ -313,6 +364,14 @@ public:
 	void updateGamepadIndex(int gpIndex)
 	{
 		setValue("Gamepad", "GAMEPAD_INDEX", gpIndex);
+	}
+	void updateLayout(int layoutVal)
+	{
+		setValue("Gamepad", "LAYOUT", layoutVal);
+	}
+	int getLayout() const
+	{
+		return getValue("Gamepad", "LAYOUT");
 	}
 
 	//$ ----- Button Map Loader ----- //

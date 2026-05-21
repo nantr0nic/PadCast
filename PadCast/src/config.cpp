@@ -66,6 +66,7 @@ void Config::validateConfig()
 	//$ ----- Gamepad section ----- //
 	validateInt("Gamepad", "STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD, [](int val) { return val > 0; });
 	validateInt("Gamepad", "GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX,       [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Gamepad", "LAYOUT",              DefaultValues::LAYOUT,              [](int val) { return val >= 0 && val <= 1; });
 
 	//$ ----- Font section ----- //
 	validateInt("Font", "MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE,     [](int val) { return val > 0; });
@@ -85,6 +86,22 @@ void Config::validateConfig()
 	validateInt("SNES_ButtonMap", "R_BUTTON",   SNESMapDefaults::R_BUTTON,   [](int val) { return val > 0; });
 	validateInt("SNES_ButtonMap", "SELECT",     SNESMapDefaults::SELECT,     [](int val) { return val > 0; });
 	validateInt("SNES_ButtonMap", "START",      SNESMapDefaults::START,      [](int val) { return val > 0; });
+
+	//$ ----- N64_ButtonMap section ----- //
+	validateInt("N64_ButtonMap", "DPAD_UP",    N64MapDefaults::DPAD_UP,    [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_RIGHT", N64MapDefaults::DPAD_RIGHT, [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_DOWN",  N64MapDefaults::DPAD_DOWN,  [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_LEFT",  N64MapDefaults::DPAD_LEFT,  [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "A_BUTTON",   N64MapDefaults::A_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "B_BUTTON",   N64MapDefaults::B_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "L_BUTTON",   N64MapDefaults::L_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "R_BUTTON",   N64MapDefaults::R_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "Z_BUTTON",   N64MapDefaults::Z_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "START",      N64MapDefaults::START,      [](int val) { return val >= 0; });
+	validateInt("N64_ButtonMap", "C_UP",       N64MapDefaults::C_UP,       [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_RIGHT",    N64MapDefaults::C_RIGHT,    [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_DOWN",     N64MapDefaults::C_DOWN,     [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_LEFT",     N64MapDefaults::C_LEFT,     [](int val) { return val > 0; });
 
 	//$ ----- Debug section ----- //
 	validateInt("Debug", "MODE", DefaultValues::DEBUG_MODE, [](int val) { return val == 0 || val == 1; });
@@ -120,6 +137,7 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 
 		{"Gamepad:STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD},
 		{"Gamepad:GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX},
+		{"Gamepad:LAYOUT",              DefaultValues::LAYOUT},
 
 		{"Font:MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE},
 		{"Font:DEFAULT_FONT_SIZE", DefaultValues::DEFAULT_FONT_SIZE},
@@ -137,6 +155,22 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 		{"SNES_ButtonMap:R_BUTTON",   SNESMapDefaults::R_BUTTON},
 		{"SNES_ButtonMap:SELECT",     SNESMapDefaults::SELECT},
 		{"SNES_ButtonMap:START",      SNESMapDefaults::START},
+
+		// N64_ButtonMap defaults
+		{"N64_ButtonMap:DPAD_UP",    N64MapDefaults::DPAD_UP},
+		{"N64_ButtonMap:DPAD_RIGHT", N64MapDefaults::DPAD_RIGHT},
+		{"N64_ButtonMap:DPAD_DOWN",  N64MapDefaults::DPAD_DOWN},
+		{"N64_ButtonMap:DPAD_LEFT",  N64MapDefaults::DPAD_LEFT},
+		{"N64_ButtonMap:A_BUTTON",   N64MapDefaults::A_BUTTON},
+		{"N64_ButtonMap:B_BUTTON",   N64MapDefaults::B_BUTTON},
+		{"N64_ButtonMap:L_BUTTON",   N64MapDefaults::L_BUTTON},
+		{"N64_ButtonMap:R_BUTTON",   N64MapDefaults::R_BUTTON},
+		{"N64_ButtonMap:Z_BUTTON",   N64MapDefaults::Z_BUTTON},
+		{"N64_ButtonMap:START",      N64MapDefaults::START},
+		{"N64_ButtonMap:C_UP",       N64MapDefaults::C_UP},
+		{"N64_ButtonMap:C_RIGHT",    N64MapDefaults::C_RIGHT},
+		{"N64_ButtonMap:C_DOWN",     N64MapDefaults::C_DOWN},
+		{"N64_ButtonMap:C_LEFT",     N64MapDefaults::C_LEFT},
 
 		{"Debug:MODE", DefaultValues::DEBUG_MODE},
 	};
@@ -156,20 +190,43 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 void Config::resetButtonMap(ControllerLayout layout)
 {
 	std::string section = buttonSectionName(layout);
-	config_ini[section].set({
-		{"DPAD_UP",    "1"},
-		{"DPAD_RIGHT", "2"},
-		{"DPAD_DOWN",  "3"},
-		{"DPAD_LEFT",  "4"},
-		{"X_BUTTON",   "5"},
-		{"A_BUTTON",   "6"},
-		{"B_BUTTON",   "7"},
-		{"Y_BUTTON",   "8"},
-		{"L_BUTTON",   "9"},
-		{"R_BUTTON",   "11"},
-		{"SELECT",     "13"},
-		{"START",      "15"}
-	});
+
+	if (layout == ControllerLayout::N64)
+	{
+		config_ini[section].set({
+			{"DPAD_UP",    std::to_string(N64MapDefaults::DPAD_UP)},
+			{"DPAD_RIGHT", std::to_string(N64MapDefaults::DPAD_RIGHT)},
+			{"DPAD_DOWN",  std::to_string(N64MapDefaults::DPAD_DOWN)},
+			{"DPAD_LEFT",  std::to_string(N64MapDefaults::DPAD_LEFT)},
+			{"A_BUTTON",   std::to_string(N64MapDefaults::A_BUTTON)},
+			{"B_BUTTON",   std::to_string(N64MapDefaults::B_BUTTON)},
+			{"L_BUTTON",   std::to_string(N64MapDefaults::L_BUTTON)},
+			{"R_BUTTON",   std::to_string(N64MapDefaults::R_BUTTON)},
+			{"Z_BUTTON",   std::to_string(N64MapDefaults::Z_BUTTON)},
+			{"START",      std::to_string(N64MapDefaults::START)},
+			{"C_UP",       std::to_string(N64MapDefaults::C_UP)},
+			{"C_RIGHT",    std::to_string(N64MapDefaults::C_RIGHT)},
+			{"C_DOWN",     std::to_string(N64MapDefaults::C_DOWN)},
+			{"C_LEFT",     std::to_string(N64MapDefaults::C_LEFT)},
+		});
+	}
+	else
+	{
+		config_ini[section].set({
+			{"DPAD_UP",    std::to_string(SNESMapDefaults::DPAD_UP)},
+			{"DPAD_RIGHT", std::to_string(SNESMapDefaults::DPAD_RIGHT)},
+			{"DPAD_DOWN",  std::to_string(SNESMapDefaults::DPAD_DOWN)},
+			{"DPAD_LEFT",  std::to_string(SNESMapDefaults::DPAD_LEFT)},
+			{"X_BUTTON",   std::to_string(SNESMapDefaults::X_BUTTON)},
+			{"A_BUTTON",   std::to_string(SNESMapDefaults::A_BUTTON)},
+			{"B_BUTTON",   std::to_string(SNESMapDefaults::B_BUTTON)},
+			{"Y_BUTTON",   std::to_string(SNESMapDefaults::Y_BUTTON)},
+			{"L_BUTTON",   std::to_string(SNESMapDefaults::L_BUTTON)},
+			{"R_BUTTON",   std::to_string(SNESMapDefaults::R_BUTTON)},
+			{"SELECT",     std::to_string(SNESMapDefaults::SELECT)},
+			{"START",      std::to_string(SNESMapDefaults::START)},
+		});
+	}
 	mNeedsSave = true;
 	saveConfig();
 }
