@@ -61,7 +61,8 @@ void Config::validateConfig()
 	validateInt("Image", "IMAGE_TINT_RED",      DefaultValues::IMAGE_TINT_RED,      [](int val) { return val >= 0 && val <= 255; });
 	validateInt("Image", "IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN,    [](int val) { return val >= 0 && val <= 255; });
 	validateInt("Image", "IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE,     [](int val) { return val >= 0 && val <= 255; });
-	validateInt("Image", "IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE,  [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Image", "IMAGE_TINT_PALETTE",   DefaultValues::IMAGE_TINT_PALETTE,   [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Image", "DRAW_JOYSTICK_IDLE",   DefaultValues::DRAW_JOYSTICK_IDLE,   [](int val) { return val == 0 || val == 1; });
 
 	//$ ----- Gamepad section ----- //
 	validateInt("Gamepad", "STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD, [](int val) { return val > 0; });
@@ -134,6 +135,7 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 		{"Image:IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN},
 		{"Image:IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE},
 		{"Image:IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE},
+		{"Image:DRAW_JOYSTICK_IDLE",  DefaultValues::DRAW_JOYSTICK_IDLE},
 
 		{"Gamepad:STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD},
 		{"Gamepad:GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX},

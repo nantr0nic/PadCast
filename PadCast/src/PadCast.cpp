@@ -341,14 +341,18 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
         float mag = std::sqrt(stickX*stickX + stickY*stickY);
         if (mag > 1.0f) { stickX /= mag; stickY /= mag; }
 
-        float radius = kN64StickRadius * scale;
-
-        mTextures.pressedJoystick.Draw(
-            raylib::Vector2{
-                position.x + (stickX * radius),
-                position.y + (stickY * radius)   // N64 adapter: Y not inverted
-            },
-            0.0f, scale, texture_tint);
+        // "Draw when moving" — skip if stick is idle and idle-draw is off
+        if (mag == 0.0f && mConfig.getDrawJoystickIdle() == 0) {
+            // don't draw
+        } else {
+            float radius = kN64StickRadius * scale;
+            mTextures.pressedJoystick.Draw(
+                raylib::Vector2{
+                    position.x + (stickX * radius),
+                    position.y + (stickY * radius)   // N64 adapter: Y not inverted
+                },
+                0.0f, scale, texture_tint);
+        }
 
         // Z trigger — Axis 4 (-1.0 = unpressed, 1.0 = pressed)
         float zAxis = gamepad.GetAxisMovement(4);

@@ -32,7 +32,8 @@ enum class Menu
 	Tint,
 	RemapButtons,
 	Gamepad,
-	Layout
+	Layout,
+	DrawJoystick
 };
 
 struct MenuItem
@@ -93,6 +94,7 @@ void SetupRemapMenu(MenuContext::MenuParams& params);
 
 void SetupGamepadMenu(MenuContext::MenuParams& params);
 void SetupLayoutMenu(MenuContext::MenuParams& params);
+void SetupDrawJoystickMenu(MenuContext::MenuParams& params);
 
 void HandleMenuInput(MenuContext::MenuParams& params);
 

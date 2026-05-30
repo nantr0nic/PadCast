@@ -67,6 +67,7 @@ private:
 		static constexpr int IMAGE_TINT_GREEN{ 255 };
 		static constexpr int IMAGE_TINT_BLUE{ 255 };
 		static constexpr int IMAGE_TINT_PALETTE{ 0 };
+		static constexpr int DRAW_JOYSTICK_IDLE{ 1 };  // 1=always, 0=only when moving
 		// Gamepad defaults
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		static constexpr int GAMEPAD_INDEX{ 0 };
@@ -356,6 +357,14 @@ public:
 	void updateUseCustomTint(int useCustom)
 	{
 		setValue("Image", "USE_CUSTOM_TINT", useCustom);
+	}
+	void updateDrawJoystickIdle(int val)
+	{
+		setValue("Image", "DRAW_JOYSTICK_IDLE", val);
+	}
+	int getDrawJoystickIdle() const
+	{
+		return getValue("Image", "DRAW_JOYSTICK_IDLE");
 	}
 	void updateImageTintPalette(int paletteIndex)
 	{

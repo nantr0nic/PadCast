@@ -241,6 +241,49 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 			SetupLayoutMenu(params); 
 		}
 		});
+	// Draw Joystick — only for layouts with a joystick
+	if (params.padcast.getCurrentLayout() == Config::ControllerLayout::N64)
+	{
+		params.menu.items.push_back({
+			"Draw Joystick",
+			[&params]() {
+				params.menu.active = Menu::DrawJoystick;
+				SetupDrawJoystickMenu(params);
+			}
+		});
+	}
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupDrawJoystickMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+
+	bool idleOn = (params.config.getDrawJoystickIdle() == 1);
+
+	std::string idleLabel = "Draw idle";
+	if (idleOn) idleLabel += " (current)";
+	params.menu.items.push_back({
+		idleLabel,
+		[&params]() {
+			params.config.updateDrawJoystickIdle(1);
+			SetupDrawJoystickMenu(params);
+		}
+	});
+
+	std::string movingLabel = "Draw when moving";
+	if (!idleOn) movingLabel += " (current)";
+	params.menu.items.push_back({
+		movingLabel,
+		[&params]() {
+			params.config.updateDrawJoystickIdle(0);
+			SetupDrawJoystickMenu(params);
+		}
+	});
+
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
@@ -514,7 +557,8 @@ void SetupLayoutMenu(MenuContext::MenuParams& params)
 		n64Label,
 		[&params]() {
 			params.padcast.setCurrentLayout(Config::ControllerLayout::N64);
-			SetupLayoutMenu(params);
+			params.menu.active = Menu::DrawJoystick;
+			SetupDrawJoystickMenu(params);
 		}
 	});
 
