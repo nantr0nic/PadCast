@@ -6,7 +6,7 @@
 #include <string>
 
 namespace {
-    
+
     // Remap state — extracted from static locals in RemapButtonScreens().
     // Lifetime is program duration (same as the old function-local statics).
     struct RemapState
@@ -17,7 +17,7 @@ namespace {
     	raylib::Gamepad gamepad{ 0 };
     	DebounceTimer buttonDebounce{ 0.5f };
     	float lastAttemptTime = 0.0f;
-    
+
     	void init()
     	{
     		isRemapping = true;
@@ -26,7 +26,7 @@ namespace {
     		buttonDebounce.Reset();
     		lastAttemptTime = 0.0f;
     	}
-    
+
     	void cleanup()
     	{
     		isRemapping = false;
@@ -34,7 +34,7 @@ namespace {
     		buttonPromptIndex = 0;
     	}
     };
-    
+
     RemapState gRemapState;
 
     // Remap step data — per-layout button definitions for the remap walkthrough.
@@ -45,7 +45,7 @@ namespace {
     	int axisIndex;     // -1 if digital button
     	Config::ButtonConfigKey configKey;
     };
-    
+
     // SNES: 12 digital buttons
     const RemapStep kSnesRemapSteps[]{
     	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
@@ -62,7 +62,7 @@ namespace {
     	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
     };
     constexpr int kSnesStepCount = sizeof(kSnesRemapSteps) / sizeof(kSnesRemapSteps[0]);
-    
+
     // N64: 14 steps (13 digital + Z as Axis 5)
     const RemapStep kN64RemapSteps[]{
     	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
@@ -114,23 +114,23 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Video",
-		[&params]() { 
-			params.menu.active = Menu::Video; 
-			SetupVideoMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Video;
+			SetupVideoMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Visuals",
-		[&params]() { 
-			params.menu.active = Menu::Visuals; 
-			SetupVisualsMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Visuals;
+			SetupVisualsMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Controller",
-		[&params]() { 
-			params.menu.active = Menu::Controller; 
-			SetupControllerMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Controller;
+			SetupControllerMenu(params);
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -153,21 +153,21 @@ void SetupVideoMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Resolution",
-		[&params]() { 
-			params.menu.active = Menu::Resolution; 
-			SetupResolutionMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Resolution;
+			SetupResolutionMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Target FPS",
-		[&params]() { 
-			params.menu.active = Menu::FPS; 
-			SetupFPSMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::FPS;
+			SetupFPSMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		vsync_string,
-		[&params]() { 
+		[&params]() {
 			bool vsync = params.config.getVSYNC();
 			if (vsync)
 			{
@@ -180,7 +180,7 @@ void SetupVideoMenu(MenuContext::MenuParams& params)
 			{
 				int currentMonitor = GetCurrentMonitor();
 				int refreshRate = GetMonitorRefreshRate(currentMonitor);
-				SetWindowState(FLAG_VSYNC_HINT);  
+				SetWindowState(FLAG_VSYNC_HINT);
 				params.window.SetTargetFPS(refreshRate);
 				params.config.updateUseVSYNC(1);
 				SetupVideoMenu(params);
@@ -199,16 +199,16 @@ void SetupVisualsMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Background Color",
-		[&params]() { 
-			params.menu.active = Menu::BGColor; 
-			SetupBGColorMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::BGColor;
+			SetupBGColorMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Image Tint",
-		[&params]() { 
-			params.menu.active = Menu::Tint; 
-			SetupTintMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Tint;
+			SetupTintMenu(params);
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -222,23 +222,23 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Select Gamepad",
-		[&params]() { 
-			params.menu.active = Menu::Gamepad; 
-			SetupGamepadMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Gamepad;
+			SetupGamepadMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Remap Buttons",
-		[&params]() { 
-			params.menu.active = Menu::RemapButtons; 
-			SetupRemapMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::RemapButtons;
+			SetupRemapMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Layout",
-		[&params]() { 
-			params.menu.active = Menu::Layout; 
-			SetupLayoutMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Layout;
+			SetupLayoutMenu(params);
 		}
 		});
 	// Draw Joystick — only for layouts with a joystick
@@ -387,42 +387,42 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Black",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"White",
-		[&params]() { 
-			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
+		[&params]() {
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::White));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Red",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Green",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
-			params.config.updateUseCustomBG(0); 
+			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Blue",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
-			params.config.updateUseCustomBG(0); 
+			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Custom Color",
-		[&params]() { 
+		[&params]() {
 			params.config.updateUseCustomBG(1);
 		}
 		});
@@ -436,21 +436,21 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 void SetupTintMenu(MenuContext::MenuParams& params)
 {
 	params.menu.items.clear();
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"White",
 		[&params]() {
 			params.config.updateImageTintPalette(0);
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Red",
 		[&params]() {
 			params.config.updateImageTintPalette(1);
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Green",
 		[&params]() {
 			params.config.updateImageTintPalette(2);
@@ -464,7 +464,7 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Custom Tint",
 		[&params]() {
 			params.config.updateUseCustomTint(1);
@@ -481,15 +481,15 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Start Remap",
-		[&params]() { 
-			params.menu.active = Menu::RemapButtons; 
+		[&params]() {
+			params.menu.active = Menu::RemapButtons;
 		}
 		});
 	params.menu.items.push_back({
 		"Reset to Default",
-		[&params]() { 
-			params.padcast.resetButtonsToDefault(); 
-			params.config.resetButtonMap(); 
+		[&params]() {
+			params.padcast.resetButtonsToDefault();
+			params.config.resetButtonMap();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -509,7 +509,7 @@ void SetupGamepadMenu(MenuContext::MenuParams& params)
 			std::string menuListing = std::to_string(i) + " > " + params.padcast.getGamepadName(i);
 			params.menu.items.push_back({
 				menuListing,
-				[&params, i]() { 
+				[&params, i]() {
 					params.padcast.setGamepadIndex(i);
 					params.gamepadIndex = i;
 				}
@@ -540,7 +540,7 @@ void SetupLayoutMenu(MenuContext::MenuParams& params)
 	// SNES
 	std::string snesLabel = "SNES";
 	if (currentLayout == Config::ControllerLayout::SNES)
-		snesLabel += " (current)";
+		snesLabel += " (*)";
 	params.menu.items.push_back({
 		snesLabel,
 		[&params]() {
@@ -552,13 +552,12 @@ void SetupLayoutMenu(MenuContext::MenuParams& params)
 	// N64 (will be added shortly)
 	std::string n64Label = "N64";
 	if (currentLayout == Config::ControllerLayout::N64)
-		n64Label += " (current)";
+		n64Label += " (*)";
 	params.menu.items.push_back({
 		n64Label,
 		[&params]() {
 			params.padcast.setCurrentLayout(Config::ControllerLayout::N64);
-			params.menu.active = Menu::DrawJoystick;
-			SetupDrawJoystickMenu(params);
+			SetupLayoutMenu(params);
 		}
 	});
 
