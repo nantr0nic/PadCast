@@ -68,6 +68,8 @@ void Config::validateConfig()
 	validateInt("Gamepad", "STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD, [](int val) { return val > 0; });
 	validateInt("Gamepad", "GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX,       [](int val) { return val >= 0 && val <= 3; });
 	validateInt("Gamepad", "LAYOUT",              DefaultValues::LAYOUT,              [](int val) { return val >= 0 && val <= 1; });
+	validateInt("Gamepad", "STICK_X_AXIS",        DefaultValues::STICK_X_AXIS,        [](int val) { return val >= 0 && val <= 5; });
+	validateInt("Gamepad", "STICK_Y_AXIS",        DefaultValues::STICK_Y_AXIS,        [](int val) { return val >= 0 && val <= 5; });
 
 	//$ ----- Font section ----- //
 	validateInt("Font", "MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE,     [](int val) { return val > 0; });
@@ -140,6 +142,8 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 		{"Gamepad:STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD},
 		{"Gamepad:GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX},
 		{"Gamepad:LAYOUT",              DefaultValues::LAYOUT},
+		{"Gamepad:STICK_X_AXIS",        DefaultValues::STICK_X_AXIS},
+		{"Gamepad:STICK_Y_AXIS",        DefaultValues::STICK_Y_AXIS},
 
 		{"Font:MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE},
 		{"Font:DEFAULT_FONT_SIZE", DefaultValues::DEFAULT_FONT_SIZE},

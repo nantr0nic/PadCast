@@ -33,7 +33,8 @@ enum class Menu
 	RemapButtons,
 	Gamepad,
 	Layout,
-	DrawJoystick
+	DrawJoystick,
+	RemapStick
 };
 
 struct MenuItem
@@ -102,5 +103,6 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 	int baseX, int baseY);
 
 void RemapButtonScreens(MenuContext::MenuParams& params);
+void RemapJoystickScreens(MenuContext::MenuParams& params);
 
 #endif

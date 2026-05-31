@@ -72,6 +72,8 @@ private:
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		static constexpr int GAMEPAD_INDEX{ 0 };
 		static constexpr int LAYOUT{ 0 };  // 0=SNES, 1=N64
+		static constexpr int STICK_X_AXIS{ 0 };
+		static constexpr int STICK_Y_AXIS{ 1 };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -382,6 +384,10 @@ public:
 	{
 		return getValue("Gamepad", "LAYOUT");
 	}
+	int getStickXAxis() const { return getValue("Gamepad", "STICK_X_AXIS"); }
+	int getStickYAxis() const { return getValue("Gamepad", "STICK_Y_AXIS"); }
+	void updateStickXAxis(int val) { setValue("Gamepad", "STICK_X_AXIS", val); }
+	void updateStickYAxis(int val) { setValue("Gamepad", "STICK_Y_AXIS", val); }
 
 	//$ ----- Button Map Loader ----- //
 	// Reads button mappings for a given layout from the INI section

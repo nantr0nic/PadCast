@@ -41,44 +41,45 @@ namespace {
     struct RemapStep
     {
     	const char* prompt;
-    	int raylibButton;  // -1 if analog (use axisIndex instead)
-    	int axisIndex;     // -1 if digital button
+    	int raylibButton;  // -1 if analog
+    	int axisIndex;     // -1 if digital, -2 = stick scan, >=0 = specific axis
+    	int stickDir;      // -1 = not a stick step; 0=Up,1=Right,2=Down,3=Left
     	Config::ButtonConfigKey configKey;
     };
 
     // SNES: 12 digital buttons
     const RemapStep kSnesRemapSteps[]{
-    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
-    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1, Config::ButtonConfigKey::DPAD_RIGHT },
-    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1, Config::ButtonConfigKey::DPAD_DOWN },
-    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1, Config::ButtonConfigKey::DPAD_LEFT },
-    	{ "Press X",             GAMEPAD_BUTTON_RIGHT_FACE_UP,   -1, Config::ButtonConfigKey::X_BUTTON },
-    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1, Config::ButtonConfigKey::A_BUTTON },
-    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1, Config::ButtonConfigKey::B_BUTTON },
-    	{ "Press Y",             GAMEPAD_BUTTON_RIGHT_FACE_LEFT, -1, Config::ButtonConfigKey::Y_BUTTON },
-    	{ "Press LEFT Shoulder", GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1, Config::ButtonConfigKey::L_BUTTON },
-    	{ "Press RIGHT Shoulder",GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1, Config::ButtonConfigKey::R_BUTTON },
-    	{ "Press Select",        GAMEPAD_BUTTON_MIDDLE_LEFT,     -1, Config::ButtonConfigKey::SELECT },
-    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1,-1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1,-1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1,-1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1,-1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press X",             GAMEPAD_BUTTON_RIGHT_FACE_UP,   -1,-1, Config::ButtonConfigKey::X_BUTTON },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1,-1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press Y",             GAMEPAD_BUTTON_RIGHT_FACE_LEFT, -1,-1, Config::ButtonConfigKey::Y_BUTTON },
+    	{ "Press LEFT Shoulder", GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1,-1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press RIGHT Shoulder",GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1,-1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Select",        GAMEPAD_BUTTON_MIDDLE_LEFT,     -1,-1, Config::ButtonConfigKey::SELECT },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1,-1, Config::ButtonConfigKey::START },
     };
     constexpr int kSnesStepCount = sizeof(kSnesRemapSteps) / sizeof(kSnesRemapSteps[0]);
 
-    // N64: 14 steps (13 digital + Z as Axis 5)
+    // N64: 18 steps (13 digital + Z trigger + 4 joystick directions)
     const RemapStep kN64RemapSteps[]{
-    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1, Config::ButtonConfigKey::DPAD_UP },
-    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1, Config::ButtonConfigKey::DPAD_RIGHT },
-    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1, Config::ButtonConfigKey::DPAD_DOWN },
-    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1, Config::ButtonConfigKey::DPAD_LEFT },
-    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1, Config::ButtonConfigKey::A_BUTTON },
-    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1, Config::ButtonConfigKey::B_BUTTON },
-    	{ "Press C-Up",          15,                      -1, Config::ButtonConfigKey::C_UP },
-    	{ "Press C-Right",       13,                      -1, Config::ButtonConfigKey::C_RIGHT },
-    	{ "Press C-Down",        5,                       -1, Config::ButtonConfigKey::C_DOWN },
-    	{ "Press C-Left",        8,                       -1, Config::ButtonConfigKey::C_LEFT },
-    	{ "Press L",             GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1, Config::ButtonConfigKey::L_BUTTON },
-    	{ "Press R",             GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1, Config::ButtonConfigKey::R_BUTTON },
-    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1, Config::ButtonConfigKey::START },
-    	{ "Press Z Trigger",     -1,                      4,  Config::ButtonConfigKey::Z_BUTTON },
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1,-1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1,-1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1,-1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1,-1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1,-1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press C-Up",          15,                      -1,-1, Config::ButtonConfigKey::C_UP },
+    	{ "Press C-Right",       13,                      -1,-1, Config::ButtonConfigKey::C_RIGHT },
+    	{ "Press C-Down",        5,                       -1,-1, Config::ButtonConfigKey::C_DOWN },
+    	{ "Press C-Left",        8,                       -1,-1, Config::ButtonConfigKey::C_LEFT },
+    	{ "Press L",             GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1,-1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press R",             GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1,-1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1,-1, Config::ButtonConfigKey::START },
+    	{ "Press Z Trigger",     -1,                      4, -1, Config::ButtonConfigKey::Z_BUTTON },
     };
     constexpr int kN64StepCount = sizeof(kN64RemapSteps) / sizeof(kN64RemapSteps[0]);
 
@@ -241,7 +242,7 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 			SetupLayoutMenu(params);
 		}
 		});
-	// Draw Joystick — only for layouts with a joystick
+	// Draw Joystick / Remap Joystick — only for layouts with a joystick
 	if (params.padcast.getCurrentLayout() == Config::ControllerLayout::N64)
 	{
 		params.menu.items.push_back({
@@ -249,6 +250,12 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 			[&params]() {
 				params.menu.active = Menu::DrawJoystick;
 				SetupDrawJoystickMenu(params);
+			}
+		});
+		params.menu.items.push_back({
+			"Remap Joystick",
+			[&params]() {
+				params.menu.active = Menu::RemapStick;
 			}
 		});
 	}
@@ -671,6 +678,158 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 
 // Font cache removed — config reads inlined
 
+void RemapJoystickScreens(MenuContext::MenuParams& params)
+{
+	// Simplified 4-step stick remap: Up, Right, Down, Left.
+	// Each step uses dominant-axis scan across all available axes.
+	// Debounce is longer (1 second) and the stick must return to
+	// center before the next step can be detected.
+
+	struct StickStep { const char* prompt; int stickDir; };
+	static const StickStep kStickSteps[]{
+		{ "Move stick UP",    0 },
+		{ "Move stick RIGHT", 1 },
+		{ "Move stick DOWN",  2 },
+		{ "Move stick LEFT",  3 },
+	};
+	constexpr int kStickStepCount = sizeof(kStickSteps) / sizeof(kStickSteps[0]);
+
+	static int stickStepIdx = 0;
+	static bool stickActive = false;
+	static bool waitingCenter = false;
+	static DebounceTimer stickDebounce(1.0f);
+	static float axisBaseline[6]{};
+
+	auto doFinish = [&]()
+	{
+		stickStepIdx = 0;
+		stickActive = false;
+		waitingCenter = false;
+		stickDebounce.Reset();
+		params.menu.active = Menu::Main;
+		params.config.saveConfig();
+		SetupMainMenu(params);
+	};
+
+	// One-frame init on entry
+	if (!stickActive)
+	{
+		stickActive = true;
+		stickStepIdx = 0;
+		waitingCenter = true;
+		stickDebounce.Reset();
+		for (int a = 0; a < 6; ++a)
+		{
+			axisBaseline[a] = params.padcast.getGamepad().GetAxisMovement(a);
+		}
+		return;
+	}
+
+	if (stickStepIdx >= kStickStepCount)
+	{
+		doFinish();
+		return;
+	}
+
+	// Scaling and drawing setup
+	float rectScale = params.scaling.effectiveScale(0.8f);
+	int rectWidth  = static_cast<int>(420 * rectScale);
+	int rectHeight = static_cast<int>(200 * rectScale);
+	int rectX = static_cast<int>(
+		(params.window.GetWidth() - rectWidth) / 2 + params.scaling.offsetX);
+	int rectY = static_cast<int>(
+		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY);
+
+	int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
+
+	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
+
+	const auto& step = kStickSteps[stickStepIdx];
+	const char* promptText = step.prompt;
+
+	// Center prompt text
+	int textWidth = MeasureText(promptText, fontSize);
+	int textY = rectY + (rectHeight - fontSize) / 2;
+	int textX = rectX + (rectWidth - textWidth) / 2;
+	DrawText(promptText, textX, textY, fontSize, WHITE);
+
+	// Draw "Spacebar to Skip" below prompt
+	const char* skipText = "Spacebar to Skip";
+	int skipWidth = MeasureText(skipText, static_cast<int>(fontSize * 0.7f));
+	DrawText(skipText,
+	         rectX + (rectWidth - skipWidth) / 2,
+	         textY + fontSize,
+	         static_cast<int>(fontSize * 0.7f), Fade(WHITE, 0.5f));
+
+	// Escape to cancel
+	if (IsKeyPressed(KEY_ESCAPE))
+	{
+		doFinish();
+		return;
+	}
+
+	// Space to skip
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		stickStepIdx++;
+		waitingCenter = true;
+		stickDebounce.Reset();
+		return;
+	}
+
+	// Stick detection
+	float axisVals[6]{};
+	float bestVal = 0.0f;
+	int bestAxis = -1;
+	// (allCentered removed — noise on any axis would block detection permanently)
+
+	for (int a = 0; a < 6; ++a)
+	{
+		axisVals[a] = params.padcast.getGamepad().GetAxisMovement(a);
+		float delta = std::abs(axisVals[a] - axisBaseline[a]);
+		if (delta > bestVal)
+		{
+			bestVal  = delta;
+			bestAxis = a;
+		}
+	}
+
+	// If stick was off-center and has now returned, reset waitingCenter
+	if (waitingCenter && bestVal < 0.20f)
+		waitingCenter = false;
+
+
+
+	if (!waitingCenter && bestAxis >= 0 && bestVal > 0.4f)
+	{
+		float val = axisVals[bestAxis] - axisBaseline[bestAxis];
+		int   dir = step.stickDir;
+
+		// Accept if the direction matches what we expect (sign check)
+		bool isPos = (val > 0.0f);
+		bool match = false;
+		if (dir == 0 && !isPos) match = true;  // Up    (negative Y)
+		if (dir == 1 && isPos)  match = true;  // Right (positive X)
+		if (dir == 2 && isPos)  match = true;  // Down  (positive Y)
+		if (dir == 3 && !isPos) match = true;  // Left  (negative X)
+
+		if (match && stickDebounce.CanAcceptInput())
+		{
+			// Store the axis for this direction
+			if (dir == 0 || dir == 2)
+				params.config.updateStickYAxis(bestAxis);
+			else
+				params.config.updateStickXAxis(bestAxis);
+
+			stickStepIdx++;
+			waitingCenter = true;
+			stickDebounce.Reset();
+		}
+	}
+}
+
 void RemapButtonScreens(MenuContext::MenuParams& params)
 {
 	auto& state = gRemapState;
@@ -713,6 +872,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	const char* promptText = "";
 	int currentRaylibButton = 0;
 	int currentAxisIndex = -1;
+	int currentStickDir = -1;
 	Config::ButtonConfigKey currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
 
 	if (state.buttonPromptIndex < stepCount)
@@ -721,6 +881,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		promptText = step.prompt;
 		currentRaylibButton = step.raylibButton;
 		currentAxisIndex = step.axisIndex;
+		currentStickDir = step.stickDir;
 		currentButtonConfig = step.configKey;
 	}
 	else
@@ -741,7 +902,49 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		bool inputDetected = false;
 		int newButtonPress = -1;
 
-		if (currentAxisIndex >= 0)
+		if (currentStickDir >= 0)
+		{
+			// Joystick direction scan — find the dominant axis
+			int bestAxis = -1;
+			float bestVal = 0.5f;  // deadzone threshold
+			for (int a = 0; a < 6; ++a)
+			{
+				float val = state.gamepad.GetAxisMovement(a);
+				if (std::abs(val) > bestVal)
+				{
+					bestAxis = a;
+					bestVal = std::abs(val);
+				}
+			}
+			if (bestAxis >= 0)
+			{
+				float val = state.gamepad.GetAxisMovement(bestAxis);
+				// Determine which cardinal direction based on sign and step
+				bool match = false;
+				// Up (stickDir==0) → positive on Y axis
+				// Right (1) → positive on X axis
+				// Down (2) → negative on Y axis
+				// Left (3) → negative on X axis
+				bool isPositive = (val > 0.0f);
+				if (currentStickDir == 0 && isPositive) match = true;  // Up
+				if (currentStickDir == 1 && isPositive) match = true;  // Right
+				if (currentStickDir == 2 && !isPositive) match = true; // Down
+				if (currentStickDir == 3 && !isPositive) match = true; // Left
+
+				if (match)
+				{
+					// Store which axis drives this direction
+					if (currentStickDir == 0 || currentStickDir == 2)
+						params.config.updateStickYAxis(bestAxis);
+					else
+						params.config.updateStickXAxis(bestAxis);
+
+					inputDetected = true;
+					newButtonPress = bestAxis; // dummy — not a button
+				}
+			}
+		}
+		else if (currentAxisIndex >= 0)
 		{
 			// Analog input (Z trigger on N64, Axis 5).
 			// N64 Z trigger rests at -1.0 and moves to 1.0 when pressed.

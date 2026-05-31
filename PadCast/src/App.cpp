@@ -123,6 +123,10 @@ void App::run()
 		{
 			RemapButtonScreens(mMenuParams);
 		}
+		else if (mMenu.active == Menu::RemapStick)
+		{
+			RemapJoystickScreens(mMenuParams);
+		}
 		else if (mMenu.active != Menu::None)
 		{
 			DrawMenu(mMenu, mScaling, mConfig, 50, 50);

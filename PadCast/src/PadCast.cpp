@@ -330,8 +330,8 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
         constexpr float kN64StickDeadzone = 0.1f;
         constexpr float kN64StickRadius   = 25.0f;  // pixels at base resolution
 
-        float stickX = gamepad.GetAxisMovement(0);
-        float stickY = gamepad.GetAxisMovement(1);
+        float stickX = gamepad.GetAxisMovement(mConfig.getStickXAxis());
+        float stickY = gamepad.GetAxisMovement(mConfig.getStickYAxis());
 
         // Deadzone
         if (stickX > -kN64StickDeadzone && stickX < kN64StickDeadzone) stickX = 0.0f;
