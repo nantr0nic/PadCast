@@ -171,7 +171,7 @@ public:
 	void setButtonMap(int raylibButton, int newIndex)
 	{
 		mButtonMap.remapButton(raylibButton, newIndex);
-		mButtonCache.refreshCache(mButtonMap);
+		mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
 	}
 
 private:

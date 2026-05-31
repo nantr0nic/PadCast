@@ -826,6 +826,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			state.cleanup();
 			params.menu.active = Menu::Main;
 			params.config.saveConfig();
+			params.padcast.loadButtonsFromConfig();  // rebuild cache from saved config
 			SetupMainMenu(params);
 		}
 	}
@@ -836,6 +837,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 		state.cleanup();
 		params.menu.active = Menu::Main;
 		params.config.saveConfig();
+		params.padcast.loadButtonsFromConfig();  // rebuild cache from saved config
 		SetupMainMenu(params);
 		return;
 	}
