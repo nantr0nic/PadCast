@@ -921,15 +921,11 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 				float val = state.gamepad.GetAxisMovement(bestAxis);
 				// Determine which cardinal direction based on sign and step
 				bool match = false;
-				// Up (stickDir==0) → positive on Y axis
-				// Right (1) → positive on X axis
-				// Down (2) → negative on Y axis
-				// Left (3) → negative on X axis
 				bool isPositive = (val > 0.0f);
-				if (currentStickDir == 0 && isPositive) match = true;  // Up
-				if (currentStickDir == 1 && isPositive) match = true;  // Right
-				if (currentStickDir == 2 && !isPositive) match = true; // Down
-				if (currentStickDir == 3 && !isPositive) match = true; // Left
+				if (currentStickDir == 0 && !isPositive) match = true;  // Up    (negative Y)
+				if (currentStickDir == 1 && isPositive)  match = true;  // Right (positive X)
+				if (currentStickDir == 2 && isPositive)  match = true;  // Down  (positive Y)
+				if (currentStickDir == 3 && !isPositive) match = true;  // Left  (negative X)
 
 				if (match)
 				{
