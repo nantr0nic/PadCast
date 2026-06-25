@@ -221,9 +221,17 @@ STICK_Y_AXIS=1       ; Which analog axis drives up/down joystick movement
 
 [Image]
 DRAW_JOYSTICK_IDLE=1 ; 1=always show joystick, 0=only show while moving
+
+[Gamepad]
+STICK_DEADZONE=0.1   ; Joystick deadzone (0.0–0.5). Default 0.1 is usually fine.
 ```
 > The stick axis values are auto-discovered by the "Remap Joystick" menu option. You only need to
 set these manually if your controller uses non-standard axis indices.
+>
+> **Why adjust the deadzone?** If your joystick overlay jitters or drifts while the stick is at rest,
+increase the deadzone (try 0.15 or 0.2). If small, precise movements aren't registering, lower it
+(try 0.05). The deadzone filters out tiny axis fluctuations so the joystick only moves when you
+intentionally push it.
 
 #### ButtonMap and Debug
 The in-program button remap *should* be sufficient, but for some reason if it is not (please let me know!) you

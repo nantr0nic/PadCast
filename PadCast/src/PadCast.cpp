@@ -329,15 +329,15 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
         // joystick.png is a full-size transparent overlay (like all other
         // pressed images). It's drawn at the base position with an axis-based
         // offset applied on top.
-        constexpr float kN64StickDeadzone = 0.1f;
-        constexpr float kN64StickRadius   = 25.0f;  // pixels at base resolution
+        float deadzone = mConfig.getStickDeadzone();
+        constexpr float kN64StickRadius = 25.0f;  // pixels at base resolution
 
         float stickX = gamepad.GetAxisMovement(mConfig.getStickXAxis());
         float stickY = gamepad.GetAxisMovement(mConfig.getStickYAxis());
 
         // Deadzone
-        if (stickX > -kN64StickDeadzone && stickX < kN64StickDeadzone) stickX = 0.0f;
-        if (stickY > -kN64StickDeadzone && stickY < kN64StickDeadzone) stickY = 0.0f;
+        if (stickX > -deadzone && stickX < deadzone) stickX = 0.0f;
+        if (stickY > -deadzone && stickY < deadzone) stickY = 0.0f;
 
         // Circular clamp
         float mag = std::sqrt(stickX*stickX + stickY*stickY);

@@ -35,7 +35,34 @@ namespace {
     	}
     };
 
-    RemapState gRemapState;
+RemapState gRemapState;
+
+struct JoystickRemapState
+{
+	int stepIdx = 0;
+	bool active = false;
+	bool waitingCenter = false;
+	DebounceTimer debounce{ 1.0f };
+	float axisBaseline[6]{};
+
+	void init()
+	{
+		active = true;
+		stepIdx = 0;
+		waitingCenter = true;
+		debounce.Reset();
+	}
+
+	void cleanup()
+	{
+		stepIdx = 0;
+		active = false;
+		waitingCenter = false;
+		debounce.Reset();
+	}
+};
+
+JoystickRemapState gJoystickRemapState;
 
     // Remap step data — per-layout button definitions for the remap walkthrough.
     struct RemapStep
@@ -597,7 +624,7 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 	}
 
 	// ----- Menu navigation ----- //
-	if (params.menu.active != Menu::None)
+	if (params.menu.active != Menu::None && !params.menu.items.empty())
 	{
 		// Keyboard navigation (arrow keys or W/S)
 		if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
@@ -694,38 +721,28 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 	};
 	constexpr int kStickStepCount = sizeof(kStickSteps) / sizeof(kStickSteps[0]);
 
-	static int stickStepIdx = 0;
-	static bool stickActive = false;
-	static bool waitingCenter = false;
-	static DebounceTimer stickDebounce(1.0f);
-	static float axisBaseline[6]{};
+	auto& js = gJoystickRemapState;
 
 	auto doFinish = [&]()
 	{
-		stickStepIdx = 0;
-		stickActive = false;
-		waitingCenter = false;
-		stickDebounce.Reset();
+		js.cleanup();
 		params.menu.active = Menu::Main;
 		params.config.saveConfig();
 		SetupMainMenu(params);
 	};
 
 	// One-frame init on entry
-	if (!stickActive)
+	if (!js.active)
 	{
-		stickActive = true;
-		stickStepIdx = 0;
-		waitingCenter = true;
-		stickDebounce.Reset();
+		js.init();
 		for (int a = 0; a < 6; ++a)
 		{
-			axisBaseline[a] = params.padcast.getGamepad().GetAxisMovement(a);
+			js.axisBaseline[a] = params.padcast.getGamepad().GetAxisMovement(a);
 		}
 		return;
 	}
 
-	if (stickStepIdx >= kStickStepCount)
+	if (js.stepIdx >= kStickStepCount)
 	{
 		doFinish();
 		return;
@@ -746,7 +763,7 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 
 	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
 
-	const auto& step = kStickSteps[stickStepIdx];
+	const auto& step = kStickSteps[js.stepIdx];
 	const char* promptText = step.prompt;
 
 	// Center prompt text
@@ -773,9 +790,9 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 	// Space to skip
 	if (IsKeyPressed(KEY_SPACE))
 	{
-		stickStepIdx++;
-		waitingCenter = true;
-		stickDebounce.Reset();
+		js.stepIdx++;
+		js.waitingCenter = true;
+		js.debounce.Reset();
 		return;
 	}
 
@@ -788,7 +805,7 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 	for (int a = 0; a < 6; ++a)
 	{
 		axisVals[a] = params.padcast.getGamepad().GetAxisMovement(a);
-		float delta = std::abs(axisVals[a] - axisBaseline[a]);
+		float delta = std::abs(axisVals[a] - js.axisBaseline[a]);
 		if (delta > bestVal)
 		{
 			bestVal  = delta;
@@ -797,14 +814,14 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 	}
 
 	// If stick was off-center and has now returned, reset waitingCenter
-	if (waitingCenter && bestVal < 0.20f)
-		waitingCenter = false;
+	if (js.waitingCenter && bestVal < 0.20f)
+		js.waitingCenter = false;
 
 
 
-	if (!waitingCenter && bestAxis >= 0 && bestVal > 0.4f)
+	if (!js.waitingCenter && bestAxis >= 0 && bestVal > 0.4f)
 	{
-		float val = axisVals[bestAxis] - axisBaseline[bestAxis];
+		float val = axisVals[bestAxis] - js.axisBaseline[bestAxis];
 		int   dir = step.stickDir;
 
 		// Accept if the direction matches what we expect (sign check)
@@ -815,7 +832,7 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 		if (dir == 2 && isPos)  match = true;  // Down  (positive Y)
 		if (dir == 3 && !isPos) match = true;  // Left  (negative X)
 
-		if (match && stickDebounce.CanAcceptInput())
+		if (match && js.debounce.CanAcceptInput())
 		{
 			// Store the axis for this direction
 			if (dir == 0 || dir == 2)
@@ -823,9 +840,9 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 			else
 				params.config.updateStickXAxis(bestAxis);
 
-			stickStepIdx++;
-			waitingCenter = true;
-			stickDebounce.Reset();
+			js.stepIdx++;
+			js.waitingCenter = true;
+			js.debounce.Reset();
 		}
 	}
 }
