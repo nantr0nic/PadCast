@@ -1,4 +1,4 @@
-PadCast v0.2.7
+PadCast v0.3.0
 
 A lightweight gamepad visualization tool that shows controller activity.
 Geared towards streamers.

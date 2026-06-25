@@ -144,7 +144,7 @@ endif()
 set(CPACK_GENERATOR "RPM;TGZ")
 
 set(CPACK_PACKAGE_NAME "padcast")
-set(CPACK_PACKAGE_VERSION "0.2.6")
+set(CPACK_PACKAGE_VERSION "0.3.0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "PadCast - Gamepad visualization tool for streamers")
 set(CPACK_PACKAGE_DESCRIPTION "PadCast is a lightweight gamepad visualization tool designed for streamers.
  It shows a real-time display of gamepad button presses, making it easy for viewers to see 
