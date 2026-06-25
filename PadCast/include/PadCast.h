@@ -35,8 +35,16 @@ struct GamepadTextures
 	raylib::Texture2D pressedSelect;
 	raylib::Texture2D pressedLBump;
 	raylib::Texture2D pressedRBump;
+	// N64-specific overlays
+	raylib::Texture2D pressedCUp;
+	raylib::Texture2D pressedCDown;
+	raylib::Texture2D pressedCLeft;
+	raylib::Texture2D pressedCRight;
+	raylib::Texture2D pressedZ;
+	raylib::Texture2D pressedJoystick;
 
-	GamepadTextures();
+	explicit GamepadTextures(Config::ControllerLayout layout = Config::ControllerLayout::SNES);
+	void load(Config::ControllerLayout layout);
 };
 
 enum class BackgroundColor
@@ -66,6 +74,21 @@ struct ButtonMap
 		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
 	};
 
+	std::unordered_map<int, int> defaultN64Index {
+		{GAMEPAD_BUTTON_LEFT_FACE_UP, 1},     // D-pad UP
+		{GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2},  // D-pad RIGHT
+		{GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},   // D-pad DOWN
+		{GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},   // D-pad LEFT
+		{GAMEPAD_BUTTON_RIGHT_FACE_UP, 15},   // C UP
+		{GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, 13},// C RIGHT
+		{GAMEPAD_BUTTON_RIGHT_FACE_DOWN, 8},  // C DOWN
+		{GAMEPAD_BUTTON_RIGHT_FACE_LEFT, 5},  // C LEFT
+		{GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},   // L button
+		{GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11}, // R button
+		{GAMEPAD_BUTTON_MIDDLE_LEFT, 7},      // A button
+		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 6}      // B button
+	};
+
 	ButtonMap()
 	{
 		// std::println("DEBUG: ButtonMap constructor - buttonIndex starts empty");
@@ -92,6 +115,12 @@ struct CachedButtons
 	int rightTrigger{};
 	int selectButton{};   // MIDDLE_LEFT
 	int startButton{};    // MIDDLE_RIGHT
+	// N64-specific
+	int cUp{};
+	int cDown{};
+	int cLeft{};
+	int cRight{};
+	int zButton{};
 
 	CachedButtons() {}; // empty default
 
@@ -100,7 +129,8 @@ struct CachedButtons
 		refreshCache(buttonMap);
 	}
 
-	void refreshCache(const ButtonMap& buttonMap);
+	void refreshCache(const ButtonMap& buttonMap,
+	                   Config::ControllerLayout layout = Config::ControllerLayout::SNES);
 };
 
 class PadCast
@@ -123,6 +153,17 @@ public:
 	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
 	int getGamepadIndex() { return gamepadIndex; }
 	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+	raylib::Gamepad getGamepad() const { return raylib::Gamepad{ gamepadIndex }; }
+
+	// Controller layout
+	Config::ControllerLayout getCurrentLayout() const { return mCurrentLayout; }
+	void setCurrentLayout(Config::ControllerLayout layout)
+	{
+		mCurrentLayout = layout;
+		mConfig.updateLayout(layout == Config::ControllerLayout::N64 ? 1 : 0);
+		mTextures.load(layout);
+		loadButtonsFromConfig();
+	}
 
 	// Gamepad debug functions
 	void drawDebugButtonIndex(const raylib::Gamepad& gamepad, const ScalingInfo& scaling);
@@ -146,7 +187,7 @@ public:
 	void setButtonMap(int raylibButton, int newIndex)
 	{
 		mButtonMap.remapButton(raylibButton, newIndex);
-		mButtonCache.refreshCache(mButtonMap);
+		mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
 	}
 
 private:
@@ -158,6 +199,7 @@ private:
 	bool mGamepadWasConnected{ false };
 	int mStabilityCounter{ 0 };
 	int gamepadIndex{ 0 };
+	Config::ControllerLayout mCurrentLayout{ Config::ControllerLayout::SNES };
 
 	// Cache values for optimization
 	mutable int mCachedStabilityThreshold{ -1 };

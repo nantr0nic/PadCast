@@ -61,30 +61,51 @@ void Config::validateConfig()
 	validateInt("Image", "IMAGE_TINT_RED",      DefaultValues::IMAGE_TINT_RED,      [](int val) { return val >= 0 && val <= 255; });
 	validateInt("Image", "IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN,    [](int val) { return val >= 0 && val <= 255; });
 	validateInt("Image", "IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE,     [](int val) { return val >= 0 && val <= 255; });
-	validateInt("Image", "IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE,  [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Image", "IMAGE_TINT_PALETTE",   DefaultValues::IMAGE_TINT_PALETTE,   [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Image", "DRAW_JOYSTICK_IDLE",   DefaultValues::DRAW_JOYSTICK_IDLE,   [](int val) { return val == 0 || val == 1; });
 
 	//$ ----- Gamepad section ----- //
 	validateInt("Gamepad", "STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD, [](int val) { return val > 0; });
 	validateInt("Gamepad", "GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX,       [](int val) { return val >= 0 && val <= 3; });
+	validateInt("Gamepad", "LAYOUT",              DefaultValues::LAYOUT,              [](int val) { return val >= 0 && val <= 1; });
+	validateInt("Gamepad", "STICK_X_AXIS",        DefaultValues::STICK_X_AXIS,        [](int val) { return val >= 0 && val <= 5; });
+	validateInt("Gamepad", "STICK_Y_AXIS",        DefaultValues::STICK_Y_AXIS,        [](int val) { return val >= 0 && val <= 5; });
+	validateFloat("Gamepad", "STICK_DEADZONE",    DefaultValues::STICK_DEADZONE,      [](float val) { return val > 0.0f && val <= 1.0f; });
 
 	//$ ----- Font section ----- //
 	validateInt("Font", "MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE,     [](int val) { return val > 0; });
 	validateInt("Font", "DEFAULT_FONT_SIZE",  DefaultValues::DEFAULT_FONT_SIZE,  [](int val) { return val > 0; });
 	validateInt("Font", "TEXT_OFFSET",        DefaultValues::TEXT_OFFSET,        [](int val) { return val >= 0; });
 
-	//$ ----- ButtonMap section ----- //
-	validateInt("ButtonMap", "DPAD_UP",    SNESMapDefaults::DPAD_UP,    [](int val) { return val > 0; });
-	validateInt("ButtonMap", "DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT, [](int val) { return val > 0; });
-	validateInt("ButtonMap", "DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN,  [](int val) { return val > 0; });
-	validateInt("ButtonMap", "DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT,  [](int val) { return val > 0; });
-	validateInt("ButtonMap", "X_BUTTON",   SNESMapDefaults::X_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "A_BUTTON",   SNESMapDefaults::A_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "B_BUTTON",   SNESMapDefaults::B_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "Y_BUTTON",   SNESMapDefaults::Y_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "L_BUTTON",   SNESMapDefaults::L_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "R_BUTTON",   SNESMapDefaults::R_BUTTON,   [](int val) { return val > 0; });
-	validateInt("ButtonMap", "SELECT",     SNESMapDefaults::SELECT,     [](int val) { return val > 0; });
-	validateInt("ButtonMap", "START",      SNESMapDefaults::START,      [](int val) { return val > 0; });
+	//$ ----- SNES_ButtonMap section ----- //
+	validateInt("SNES_ButtonMap", "DPAD_UP",    SNESMapDefaults::DPAD_UP,    [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT, [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN,  [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT,  [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "X_BUTTON",   SNESMapDefaults::X_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "A_BUTTON",   SNESMapDefaults::A_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "B_BUTTON",   SNESMapDefaults::B_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "Y_BUTTON",   SNESMapDefaults::Y_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "L_BUTTON",   SNESMapDefaults::L_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "R_BUTTON",   SNESMapDefaults::R_BUTTON,   [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "SELECT",     SNESMapDefaults::SELECT,     [](int val) { return val > 0; });
+	validateInt("SNES_ButtonMap", "START",      SNESMapDefaults::START,      [](int val) { return val > 0; });
+
+	//$ ----- N64_ButtonMap section ----- //
+	validateInt("N64_ButtonMap", "DPAD_UP",    N64MapDefaults::DPAD_UP,    [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_RIGHT", N64MapDefaults::DPAD_RIGHT, [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_DOWN",  N64MapDefaults::DPAD_DOWN,  [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "DPAD_LEFT",  N64MapDefaults::DPAD_LEFT,  [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "A_BUTTON",   N64MapDefaults::A_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "B_BUTTON",   N64MapDefaults::B_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "L_BUTTON",   N64MapDefaults::L_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "R_BUTTON",   N64MapDefaults::R_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "Z_BUTTON",   N64MapDefaults::Z_BUTTON,   [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "START",      N64MapDefaults::START,      [](int val) { return val >= 0; });
+	validateInt("N64_ButtonMap", "C_UP",       N64MapDefaults::C_UP,       [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_RIGHT",    N64MapDefaults::C_RIGHT,    [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_DOWN",     N64MapDefaults::C_DOWN,     [](int val) { return val > 0; });
+	validateInt("N64_ButtonMap", "C_LEFT",     N64MapDefaults::C_LEFT,     [](int val) { return val > 0; });
 
 	//$ ----- Debug section ----- //
 	validateInt("Debug", "MODE", DefaultValues::DEBUG_MODE, [](int val) { return val == 0 || val == 1; });
@@ -117,26 +138,46 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 		{"Image:IMAGE_TINT_GREEN",    DefaultValues::IMAGE_TINT_GREEN},
 		{"Image:IMAGE_TINT_BLUE",     DefaultValues::IMAGE_TINT_BLUE},
 		{"Image:IMAGE_TINT_PALETTE",  DefaultValues::IMAGE_TINT_PALETTE},
+		{"Image:DRAW_JOYSTICK_IDLE",  DefaultValues::DRAW_JOYSTICK_IDLE},
 
 		{"Gamepad:STABILITY_THRESHOLD", DefaultValues::STABILITY_THRESHOLD},
 		{"Gamepad:GAMEPAD_INDEX",       DefaultValues::GAMEPAD_INDEX},
+		{"Gamepad:LAYOUT",              DefaultValues::LAYOUT},
+		{"Gamepad:STICK_X_AXIS",        DefaultValues::STICK_X_AXIS},
+		{"Gamepad:STICK_Y_AXIS",        DefaultValues::STICK_Y_AXIS},
 
 		{"Font:MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE},
 		{"Font:DEFAULT_FONT_SIZE", DefaultValues::DEFAULT_FONT_SIZE},
 		{"Font:TEXT_OFFSET",       DefaultValues::TEXT_OFFSET},
 
-		{"ButtonMap:DPAD_UP",    SNESMapDefaults::DPAD_UP},
-		{"ButtonMap:DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT},
-		{"ButtonMap:DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN},
-		{"ButtonMap:DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT},
-		{"ButtonMap:X_BUTTON",   SNESMapDefaults::X_BUTTON},
-		{"ButtonMap:A_BUTTON",   SNESMapDefaults::A_BUTTON},
-		{"ButtonMap:B_BUTTON",   SNESMapDefaults::B_BUTTON},
-		{"ButtonMap:Y_BUTTON",   SNESMapDefaults::Y_BUTTON},
-		{"ButtonMap:L_BUTTON",   SNESMapDefaults::L_BUTTON},
-		{"ButtonMap:R_BUTTON",   SNESMapDefaults::R_BUTTON},
-		{"ButtonMap:SELECT",     SNESMapDefaults::SELECT},
-		{"ButtonMap:START",      SNESMapDefaults::START},
+		{"SNES_ButtonMap:DPAD_UP",    SNESMapDefaults::DPAD_UP},
+		{"SNES_ButtonMap:DPAD_RIGHT", SNESMapDefaults::DPAD_RIGHT},
+		{"SNES_ButtonMap:DPAD_DOWN",  SNESMapDefaults::DPAD_DOWN},
+		{"SNES_ButtonMap:DPAD_LEFT",  SNESMapDefaults::DPAD_LEFT},
+		{"SNES_ButtonMap:X_BUTTON",   SNESMapDefaults::X_BUTTON},
+		{"SNES_ButtonMap:A_BUTTON",   SNESMapDefaults::A_BUTTON},
+		{"SNES_ButtonMap:B_BUTTON",   SNESMapDefaults::B_BUTTON},
+		{"SNES_ButtonMap:Y_BUTTON",   SNESMapDefaults::Y_BUTTON},
+		{"SNES_ButtonMap:L_BUTTON",   SNESMapDefaults::L_BUTTON},
+		{"SNES_ButtonMap:R_BUTTON",   SNESMapDefaults::R_BUTTON},
+		{"SNES_ButtonMap:SELECT",     SNESMapDefaults::SELECT},
+		{"SNES_ButtonMap:START",      SNESMapDefaults::START},
+
+		// N64_ButtonMap defaults
+		{"N64_ButtonMap:DPAD_UP",    N64MapDefaults::DPAD_UP},
+		{"N64_ButtonMap:DPAD_RIGHT", N64MapDefaults::DPAD_RIGHT},
+		{"N64_ButtonMap:DPAD_DOWN",  N64MapDefaults::DPAD_DOWN},
+		{"N64_ButtonMap:DPAD_LEFT",  N64MapDefaults::DPAD_LEFT},
+		{"N64_ButtonMap:A_BUTTON",   N64MapDefaults::A_BUTTON},
+		{"N64_ButtonMap:B_BUTTON",   N64MapDefaults::B_BUTTON},
+		{"N64_ButtonMap:L_BUTTON",   N64MapDefaults::L_BUTTON},
+		{"N64_ButtonMap:R_BUTTON",   N64MapDefaults::R_BUTTON},
+		{"N64_ButtonMap:Z_BUTTON",   N64MapDefaults::Z_BUTTON},
+		{"N64_ButtonMap:START",      N64MapDefaults::START},
+		{"N64_ButtonMap:C_UP",       N64MapDefaults::C_UP},
+		{"N64_ButtonMap:C_RIGHT",    N64MapDefaults::C_RIGHT},
+		{"N64_ButtonMap:C_DOWN",     N64MapDefaults::C_DOWN},
+		{"N64_ButtonMap:C_LEFT",     N64MapDefaults::C_LEFT},
 
 		{"Debug:MODE", DefaultValues::DEBUG_MODE},
 	};
@@ -153,22 +194,70 @@ int Config::getDefault(const std::string& section, const std::string& key) const
 	return 0;
 }
 
-void Config::resetButtonMap()
+void Config::resetButtonMap(ControllerLayout layout)
 {
-	config_ini["ButtonMap"].set({
-		{"DPAD_UP",    "1"},
-		{"DPAD_RIGHT", "2"},
-		{"DPAD_DOWN",  "3"},
-		{"DPAD_LEFT",  "4"},
-		{"X_BUTTON",   "5"},
-		{"A_BUTTON",   "6"},
-		{"B_BUTTON",   "7"},
-		{"Y_BUTTON",   "8"},
-		{"L_BUTTON",   "9"},
-		{"R_BUTTON",   "11"},
-		{"SELECT",     "13"},
-		{"START",      "15"}
-	});
+	std::string section = buttonSectionName(layout);
+
+	if (layout == ControllerLayout::N64)
+	{
+		config_ini[section].set({
+			{"DPAD_UP",    std::to_string(N64MapDefaults::DPAD_UP)},
+			{"DPAD_RIGHT", std::to_string(N64MapDefaults::DPAD_RIGHT)},
+			{"DPAD_DOWN",  std::to_string(N64MapDefaults::DPAD_DOWN)},
+			{"DPAD_LEFT",  std::to_string(N64MapDefaults::DPAD_LEFT)},
+			{"A_BUTTON",   std::to_string(N64MapDefaults::A_BUTTON)},
+			{"B_BUTTON",   std::to_string(N64MapDefaults::B_BUTTON)},
+			{"L_BUTTON",   std::to_string(N64MapDefaults::L_BUTTON)},
+			{"R_BUTTON",   std::to_string(N64MapDefaults::R_BUTTON)},
+			{"Z_BUTTON",   std::to_string(N64MapDefaults::Z_BUTTON)},
+			{"START",      std::to_string(N64MapDefaults::START)},
+			{"C_UP",       std::to_string(N64MapDefaults::C_UP)},
+			{"C_RIGHT",    std::to_string(N64MapDefaults::C_RIGHT)},
+			{"C_DOWN",     std::to_string(N64MapDefaults::C_DOWN)},
+			{"C_LEFT",     std::to_string(N64MapDefaults::C_LEFT)},
+		});
+	}
+	else
+	{
+		config_ini[section].set({
+			{"DPAD_UP",    std::to_string(SNESMapDefaults::DPAD_UP)},
+			{"DPAD_RIGHT", std::to_string(SNESMapDefaults::DPAD_RIGHT)},
+			{"DPAD_DOWN",  std::to_string(SNESMapDefaults::DPAD_DOWN)},
+			{"DPAD_LEFT",  std::to_string(SNESMapDefaults::DPAD_LEFT)},
+			{"X_BUTTON",   std::to_string(SNESMapDefaults::X_BUTTON)},
+			{"A_BUTTON",   std::to_string(SNESMapDefaults::A_BUTTON)},
+			{"B_BUTTON",   std::to_string(SNESMapDefaults::B_BUTTON)},
+			{"Y_BUTTON",   std::to_string(SNESMapDefaults::Y_BUTTON)},
+			{"L_BUTTON",   std::to_string(SNESMapDefaults::L_BUTTON)},
+			{"R_BUTTON",   std::to_string(SNESMapDefaults::R_BUTTON)},
+			{"SELECT",     std::to_string(SNESMapDefaults::SELECT)},
+			{"START",      std::to_string(SNESMapDefaults::START)},
+		});
+	}
 	mNeedsSave = true;
 	saveConfig();
+}
+
+std::unordered_map<std::string, int> Config::loadButtonMapping(ControllerLayout layout) const
+{
+	std::unordered_map<std::string, int> mapping;
+	std::string section = buttonSectionName(layout);
+
+	if (!config_ini.has(section))
+	{
+		return mapping;  // empty — caller falls back to defaults
+	}
+
+	for (const auto& [key, valueStr] : config_ini.get(section))
+	{
+		try
+		{
+			mapping[key] = std::stoi(valueStr);
+		}
+		catch (...)
+		{
+			// skip invalid entries
+		}
+	}
+	return mapping;
 }

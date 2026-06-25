@@ -1,5 +1,6 @@
 # PadCast archive
 .archive/
+.reference/
 
 # Prerequisites
 *.d
@@ -172,3 +173,4 @@ logs/
 # Cache
 .cache/
 .cache-*/
+__cmake_systeminformation/CMakeLists.txt

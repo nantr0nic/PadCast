@@ -3,7 +3,7 @@
 > A lightweight gamepad visualization tool for streamers. Displays a real-time
 > overlay of controller button presses on screen.
 >
-> **Current version:** v0.2.6 | **License:** BSD 3-Clause
+> **Current version:** v0.3.0 | **License:** BSD 3-Clause
 
 ---
 
@@ -273,13 +273,9 @@ builds which use the YAML manifest).
 
 ## Current State & Roadmap
 
-- **v0.2.6** — current release (refactoring: App class, RemapState, removed caches)
+- **v0.3.0** - current release (N64 Controller Support)
+- **v0.2.6** — previous release (refactoring: App class, RemapState, removed caches)
 - **v0.2.5** — previous release ("Under the Hood" update)
-- **Next planned:** v0.3.0 (N64 Controller Support)
-- Remote branch `feature/refactor-gamepad` exists with unmerged work
-- Currently on the `develop` branch
-- The `ButtonMap` and `CachedButtons` structures have commented-out sections
-  for future trigger/joystick support (N64, GameCube)
 
 ---
 
@@ -315,3 +311,11 @@ builds which use the YAML manifest).
 - **Font cache leak fixed** — static locals in `DrawMenu()` replaced with
   file-scope cache + validity flag + `InvalidateFontCache()`.
 - **FrameTimer** — `benchmark.h` provides reusable ad-hoc benchmarking.
+- **Config layout-awareness** — Added `ControllerLayout` enum (`SNES`),
+  `buttonSectionName()` helper, `loadButtonMapping()` on Config (centralizes
+  INI reading). `resetButtonMap()` now accepts a `ControllerLayout` parameter.
+  INI section renamed from `[ButtonMap]` to `[SNES_ButtonMap]`.
+  `PadCast::loadButtonsFromConfig()` delegates to Config instead of raw
+  `getIni()` access. Adding a new controller layout means: add enum value,
+  add validation block, add defaults — the section name flows from
+  `buttonSectionName()`.

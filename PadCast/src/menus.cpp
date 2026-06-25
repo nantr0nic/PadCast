@@ -6,36 +6,111 @@
 #include <string>
 
 namespace {
-    
+
     // Remap state — extracted from static locals in RemapButtonScreens().
     // Lifetime is program duration (same as the old function-local statics).
     struct RemapState
     {
-    	bool isRemapping = false;
-    	bool waitingForInput = false;
-    	int buttonPromptIndex = 0;
-    	raylib::Gamepad gamepad{ 0 };
-    	DebounceTimer buttonDebounce{ 0.5f };
-    	float lastAttemptTime = 0.0f;
-    
-    	void init()
-    	{
-    		isRemapping = true;
-    		waitingForInput = true;
-    		buttonPromptIndex = 0;
-    		buttonDebounce.Reset();
-    		lastAttemptTime = 0.0f;
-    	}
-    
-    	void cleanup()
-    	{
-    		isRemapping = false;
-    		waitingForInput = false;
-    		buttonPromptIndex = 0;
-    	}
+        bool isRemapping = false;
+        bool waitingForInput = false;
+        int buttonPromptIndex = 0;
+        raylib::Gamepad gamepad{ 0 };
+        DebounceTimer buttonDebounce{ 0.5f };
+        float lastAttemptTime = 0.0f;
+
+        void init()
+        {
+            isRemapping = true;
+            waitingForInput = true;
+            buttonPromptIndex = 0;
+            buttonDebounce.Reset();
+            lastAttemptTime = 0.0f;
+        }
+
+        void cleanup()
+        {
+            isRemapping = false;
+            waitingForInput = false;
+            buttonPromptIndex = 0;
+        }
     };
-    
-    RemapState gRemapState;
+
+RemapState gRemapState;
+
+struct JoystickRemapState
+{
+	int stepIdx = 0;
+	bool active = false;
+	bool waitingCenter = false;
+	DebounceTimer debounce{ 1.0f };
+	float axisBaseline[6]{};
+	int originalStickXAxis = -1;
+	int originalStickYAxis = -1;
+
+	void init()
+	{
+		active = true;
+		stepIdx = 0;
+		waitingCenter = true;
+		debounce.Reset();
+	}
+
+	void cleanup()
+	{
+		stepIdx = 0;
+		active = false;
+		waitingCenter = false;
+		debounce.Reset();
+	}
+};
+
+JoystickRemapState gJoystickRemapState;
+
+    // Remap step data — per-layout button definitions for the remap walkthrough.
+    struct RemapStep
+    {
+    	const char* prompt;
+    	int raylibButton;  // -1 if analog
+    	int axisIndex;     // -1 if digital, -2 = stick scan, >=0 = specific axis
+    	int stickDir;      // -1 = not a stick step; 0=Up,1=Right,2=Down,3=Left
+    	Config::ButtonConfigKey configKey;
+    };
+
+    // SNES: 12 digital buttons
+    const RemapStep kSnesRemapSteps[]{
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1,-1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1,-1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1,-1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1,-1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press X",             GAMEPAD_BUTTON_RIGHT_FACE_UP,   -1,-1, Config::ButtonConfigKey::X_BUTTON },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1,-1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press Y",             GAMEPAD_BUTTON_RIGHT_FACE_LEFT, -1,-1, Config::ButtonConfigKey::Y_BUTTON },
+    	{ "Press LEFT Shoulder", GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1,-1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press RIGHT Shoulder",GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1,-1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Select",        GAMEPAD_BUTTON_MIDDLE_LEFT,     -1,-1, Config::ButtonConfigKey::SELECT },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1,-1, Config::ButtonConfigKey::START },
+    };
+    constexpr int kSnesStepCount = sizeof(kSnesRemapSteps) / sizeof(kSnesRemapSteps[0]);
+
+    // N64: 18 steps (13 digital + Z trigger + 4 joystick directions)
+    const RemapStep kN64RemapSteps[]{
+    	{ "Press D-pad UP",      GAMEPAD_BUTTON_LEFT_FACE_UP,    -1,-1, Config::ButtonConfigKey::DPAD_UP },
+    	{ "Press D-pad RIGHT",   GAMEPAD_BUTTON_LEFT_FACE_RIGHT, -1,-1, Config::ButtonConfigKey::DPAD_RIGHT },
+    	{ "Press D-pad DOWN",    GAMEPAD_BUTTON_LEFT_FACE_DOWN,  -1,-1, Config::ButtonConfigKey::DPAD_DOWN },
+    	{ "Press D-pad LEFT",    GAMEPAD_BUTTON_LEFT_FACE_LEFT,  -1,-1, Config::ButtonConfigKey::DPAD_LEFT },
+    	{ "Press A",             GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,-1,-1, Config::ButtonConfigKey::A_BUTTON },
+    	{ "Press B",             GAMEPAD_BUTTON_RIGHT_FACE_DOWN, -1,-1, Config::ButtonConfigKey::B_BUTTON },
+    	{ "Press C-Up",          20,                      -1,-1, Config::ButtonConfigKey::C_UP },
+    	{ "Press C-Right",       21,                      -1,-1, Config::ButtonConfigKey::C_RIGHT },
+    	{ "Press C-Down",        22,                       -1,-1, Config::ButtonConfigKey::C_DOWN },
+    	{ "Press C-Left",        23,                       -1,-1, Config::ButtonConfigKey::C_LEFT },
+    	{ "Press L",             GAMEPAD_BUTTON_LEFT_TRIGGER_1,  -1,-1, Config::ButtonConfigKey::L_BUTTON },
+    	{ "Press R",             GAMEPAD_BUTTON_RIGHT_TRIGGER_1, -1,-1, Config::ButtonConfigKey::R_BUTTON },
+    	{ "Press Start",         GAMEPAD_BUTTON_MIDDLE_RIGHT,    -1,-1, Config::ButtonConfigKey::START },
+    	{ "Press Z Trigger",     -1,                      4, -1, Config::ButtonConfigKey::Z_BUTTON },
+    };
+    constexpr int kN64StepCount = sizeof(kN64RemapSteps) / sizeof(kN64RemapSteps[0]);
 
 }
 
@@ -69,23 +144,23 @@ void SetupMainMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Video",
-		[&params]() { 
-			params.menu.active = Menu::Video; 
-			SetupVideoMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Video;
+			SetupVideoMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Visuals",
-		[&params]() { 
-			params.menu.active = Menu::Visuals; 
-			SetupVisualsMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Visuals;
+			SetupVisualsMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Controller",
-		[&params]() { 
-			params.menu.active = Menu::Controller; 
-			SetupControllerMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Controller;
+			SetupControllerMenu(params);
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -108,21 +183,21 @@ void SetupVideoMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Resolution",
-		[&params]() { 
-			params.menu.active = Menu::Resolution; 
-			SetupResolutionMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Resolution;
+			SetupResolutionMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Target FPS",
-		[&params]() { 
-			params.menu.active = Menu::FPS; 
-			SetupFPSMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::FPS;
+			SetupFPSMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		vsync_string,
-		[&params]() { 
+		[&params]() {
 			bool vsync = params.config.getVSYNC();
 			if (vsync)
 			{
@@ -135,7 +210,7 @@ void SetupVideoMenu(MenuContext::MenuParams& params)
 			{
 				int currentMonitor = GetCurrentMonitor();
 				int refreshRate = GetMonitorRefreshRate(currentMonitor);
-				SetWindowState(FLAG_VSYNC_HINT);  
+				SetWindowState(FLAG_VSYNC_HINT);
 				params.window.SetTargetFPS(refreshRate);
 				params.config.updateUseVSYNC(1);
 				SetupVideoMenu(params);
@@ -154,16 +229,16 @@ void SetupVisualsMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Background Color",
-		[&params]() { 
-			params.menu.active = Menu::BGColor; 
-			SetupBGColorMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::BGColor;
+			SetupBGColorMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Image Tint",
-		[&params]() { 
-			params.menu.active = Menu::Tint; 
-			SetupTintMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Tint;
+			SetupTintMenu(params);
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -177,18 +252,74 @@ void SetupControllerMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Select Gamepad",
-		[&params]() { 
-			params.menu.active = Menu::Gamepad; 
-			SetupGamepadMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::Gamepad;
+			SetupGamepadMenu(params);
 		}
 		});
 	params.menu.items.push_back({
 		"Remap Buttons",
-		[&params]() { 
-			params.menu.active = Menu::RemapButtons; 
-			SetupRemapMenu(params); 
+		[&params]() {
+			params.menu.active = Menu::RemapButtons;
+			SetupRemapMenu(params);
 		}
 		});
+	params.menu.items.push_back({
+		"Layout",
+		[&params]() {
+			params.menu.active = Menu::Layout;
+			SetupLayoutMenu(params);
+		}
+		});
+	// Draw Joystick / Remap Joystick — only for layouts with a joystick
+	if (params.padcast.getCurrentLayout() == Config::ControllerLayout::N64)
+	{
+		params.menu.items.push_back({
+			"Draw Joystick",
+			[&params]() {
+				params.menu.active = Menu::DrawJoystick;
+				SetupDrawJoystickMenu(params);
+			}
+		});
+		params.menu.items.push_back({
+			"Remap Joystick",
+			[&params]() {
+				params.menu.active = Menu::RemapStick;
+			}
+		});
+	}
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+	params.menu.selectedIndex = 0;
+}
+
+void SetupDrawJoystickMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+
+	bool idleOn = (params.config.getDrawJoystickIdle() == 1);
+
+	std::string idleLabel = "Draw idle";
+	if (idleOn) idleLabel += " (current)";
+	params.menu.items.push_back({
+		idleLabel,
+		[&params]() {
+			params.config.updateDrawJoystickIdle(1);
+			SetupDrawJoystickMenu(params);
+		}
+	});
+
+	std::string movingLabel = "Draw when moving";
+	if (!idleOn) movingLabel += " (current)";
+	params.menu.items.push_back({
+		movingLabel,
+		[&params]() {
+			params.config.updateDrawJoystickIdle(0);
+			SetupDrawJoystickMenu(params);
+		}
+	});
+
 	params.menu.items.push_back(createSpacer());
 	params.menu.items.push_back(createBackMenuItem(params));
 	params.menu.items.push_back(createCloseMenuItem(params.menu));
@@ -292,42 +423,42 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Black",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Black));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"White",
-		[&params]() { 
-			params.config.updateBGColor(static_cast<int>(BackgroundColor::White)); 
+		[&params]() {
+			params.config.updateBGColor(static_cast<int>(BackgroundColor::White));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Red",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Red));
 			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Green",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Green));
-			params.config.updateUseCustomBG(0); 
+			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Blue",
-		[&params]() { 
+		[&params]() {
 			params.config.updateBGColor(static_cast<int>(BackgroundColor::Blue));
-			params.config.updateUseCustomBG(0); 
+			params.config.updateUseCustomBG(0);
 		}
 		});
 	params.menu.items.push_back({
 		"Custom Color",
-		[&params]() { 
+		[&params]() {
 			params.config.updateUseCustomBG(1);
 		}
 		});
@@ -341,21 +472,21 @@ void SetupBGColorMenu(MenuContext::MenuParams& params)
 void SetupTintMenu(MenuContext::MenuParams& params)
 {
 	params.menu.items.clear();
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"White",
 		[&params]() {
 			params.config.updateImageTintPalette(0);
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Red",
 		[&params]() {
 			params.config.updateImageTintPalette(1);
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Green",
 		[&params]() {
 			params.config.updateImageTintPalette(2);
@@ -369,7 +500,7 @@ void SetupTintMenu(MenuContext::MenuParams& params)
 			params.config.updateUseCustomTint(0);
 		}
 		});
-	params.menu.items.push_back({ 
+	params.menu.items.push_back({
 		"Custom Tint",
 		[&params]() {
 			params.config.updateUseCustomTint(1);
@@ -386,15 +517,15 @@ void SetupRemapMenu(MenuContext::MenuParams& params)
 	params.menu.items.clear();
 	params.menu.items.push_back({
 		"Start Remap",
-		[&params]() { 
-			params.menu.active = Menu::RemapButtons; 
+		[&params]() {
+			params.menu.active = Menu::RemapButtons;
 		}
 		});
 	params.menu.items.push_back({
 		"Reset to Default",
-		[&params]() { 
-			params.padcast.resetButtonsToDefault(); 
-			params.config.resetButtonMap(); 
+		[&params]() {
+			params.padcast.resetButtonsToDefault();
+			params.config.resetButtonMap();
 		}
 		});
 	params.menu.items.push_back(createSpacer());
@@ -414,7 +545,7 @@ void SetupGamepadMenu(MenuContext::MenuParams& params)
 			std::string menuListing = std::to_string(i) + " > " + params.padcast.getGamepadName(i);
 			params.menu.items.push_back({
 				menuListing,
-				[&params, i]() { 
+				[&params, i]() {
 					params.padcast.setGamepadIndex(i);
 					params.gamepadIndex = i;
 				}
@@ -436,13 +567,50 @@ void SetupGamepadMenu(MenuContext::MenuParams& params)
 	params.menu.selectedIndex = 0;
 }
 
+void SetupLayoutMenu(MenuContext::MenuParams& params)
+{
+	params.menu.items.clear();
+
+	auto currentLayout = params.padcast.getCurrentLayout();
+
+	// SNES
+	std::string snesLabel = "SNES";
+	if (currentLayout == Config::ControllerLayout::SNES)
+		snesLabel += " (*)";
+	params.menu.items.push_back({
+		snesLabel,
+		[&params]() {
+			params.padcast.setCurrentLayout(Config::ControllerLayout::SNES);
+			SetupLayoutMenu(params);
+		}
+	});
+
+	// N64 (will be added shortly)
+	std::string n64Label = "N64";
+	if (currentLayout == Config::ControllerLayout::N64)
+		n64Label += " (*)";
+	params.menu.items.push_back({
+		n64Label,
+		[&params]() {
+			params.padcast.setCurrentLayout(Config::ControllerLayout::N64);
+			SetupLayoutMenu(params);
+		}
+	});
+
+	params.menu.items.push_back(createSpacer());
+	params.menu.items.push_back(createBackMenuItem(params));
+	params.menu.items.push_back(createCloseMenuItem(params.menu));
+
+	params.menu.selectedIndex = 0;
+}
+
 void HandleMenuInput(MenuContext::MenuParams& params)
 {
 	// ----- Menu open/close ----- //
-	// a right click, spacebar, or M will open/close the main menu
+	// a right click or M will open/close the main menu.
+	// Space is NOT used here — it's reserved for "skip button" during remap.
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)
-		|| IsKeyPressed(KEY_SPACE)
-		|| IsKeyPressed(KEY_M))
+	    || IsKeyPressed(KEY_M))
 	{
 		if (params.menu.active == Menu::None)
 		{
@@ -452,13 +620,22 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		}
 		else
 		{
+			// Clean up remap states when menu is force-closed
+			if (params.menu.active == Menu::RemapButtons)
+				gRemapState.cleanup();
+			else if (params.menu.active == Menu::RemapStick)
+			{
+				params.config.updateStickXAxis(gJoystickRemapState.originalStickXAxis);
+				params.config.updateStickYAxis(gJoystickRemapState.originalStickYAxis);
+				gJoystickRemapState.cleanup();
+			}
 			params.menu.active = Menu::None;
 		}
 		return;
 	}
 
 	// ----- Menu navigation ----- //
-	if (params.menu.active != Menu::None)
+	if (params.menu.active != Menu::None && !params.menu.items.empty())
 	{
 		// Keyboard navigation (arrow keys or W/S)
 		if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
@@ -539,6 +716,161 @@ void DrawMenu(const MenuContext& menu, const ScalingInfo& scaling, const Config&
 
 // Font cache removed — config reads inlined
 
+void RemapJoystickScreens(MenuContext::MenuParams& params)
+{
+	// Simplified 4-step stick remap: Up, Right, Down, Left.
+	// Each step uses dominant-axis scan across all available axes.
+	// Debounce is longer (1 second) and the stick must return to
+	// center before the next step can be detected.
+
+	struct StickStep { const char* prompt; int stickDir; };
+	static const StickStep kStickSteps[]{
+		{ "Move stick UP",    0 },
+		{ "Move stick RIGHT", 1 },
+		{ "Move stick DOWN",  2 },
+		{ "Move stick LEFT",  3 },
+	};
+	constexpr int kStickStepCount = sizeof(kStickSteps) / sizeof(kStickSteps[0]);
+
+	auto& js = gJoystickRemapState;
+
+	auto goBack = [&]()
+	{
+		js.cleanup();
+		params.menu.active = Menu::Main;
+		SetupMainMenu(params);
+	};
+
+	// One-frame init on entry — save originals so we can restore on cancel
+	if (!js.active)
+	{
+		js.init();
+		js.originalStickXAxis = params.config.getStickXAxis();
+		js.originalStickYAxis = params.config.getStickYAxis();
+		for (int a = 0; a < 6; ++a)
+		{
+			js.axisBaseline[a] = params.padcast.getGamepad().GetAxisMovement(a);
+		}
+		return;
+	}
+
+	if (js.stepIdx >= kStickStepCount)
+	{
+		params.config.saveConfig();
+		goBack();
+		return;
+	}
+
+	// Scaling and drawing setup
+	float rectScale = params.scaling.effectiveScale(0.8f);
+	int rectWidth  = static_cast<int>(420 * rectScale);
+	int rectHeight = static_cast<int>(200 * rectScale);
+	int rectX = static_cast<int>(
+		(params.window.GetWidth() - rectWidth) / 2 + params.scaling.offsetX);
+	int rectY = static_cast<int>(
+		(params.window.GetHeight() - rectHeight) / 2 + params.scaling.offsetY);
+
+	int defaultFontSize = params.config.getValue("Font", "DEFAULT_FONT_SIZE");
+	int minFontSize = params.config.getValue("Font", "MIN_FONT_SIZE");
+	int fontSize = std::max(static_cast<int>(defaultFontSize * rectScale), minFontSize);
+
+	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
+
+	const auto& step = kStickSteps[js.stepIdx];
+	const char* promptText = step.prompt;
+
+	// Center prompt text
+	int textWidth = MeasureText(promptText, fontSize);
+	int textY = rectY + (rectHeight - fontSize) / 2;
+	int textX = rectX + (rectWidth - textWidth) / 2;
+	DrawText(promptText, textX, textY, fontSize, WHITE);
+
+	// Draw "Spacebar to Skip" below prompt
+	const char* skipText = "Spacebar to Skip";
+	int skipWidth = MeasureText(skipText, static_cast<int>(fontSize * 0.7f));
+	DrawText(skipText,
+	         rectX + (rectWidth - skipWidth) / 2,
+	         textY + fontSize,
+	         static_cast<int>(fontSize * 0.7f), Fade(WHITE, 0.5f));
+
+	// Escape to cancel — restore original axis values
+	if (IsKeyPressed(KEY_ESCAPE))
+	{
+		params.config.updateStickXAxis(js.originalStickXAxis);
+		params.config.updateStickYAxis(js.originalStickYAxis);
+		goBack();
+		return;
+	}
+
+	// Space to skip
+	if (IsKeyPressed(KEY_SPACE))
+	{
+		js.stepIdx++;
+		js.waitingCenter = true;
+		js.debounce.Reset();
+		return;
+	}
+
+	// Stick detection — track dominant and second-largest for diagonal rejection
+	float axisVals[6]{};
+	float bestVal = 0.0f;
+	int bestAxis = -1;
+	float secondVal = 0.0f;
+
+	for (int a = 0; a < 6; ++a)
+	{
+		axisVals[a] = params.padcast.getGamepad().GetAxisMovement(a);
+		float delta = std::abs(axisVals[a] - js.axisBaseline[a]);
+		if (delta > bestVal)
+		{
+			secondVal = bestVal;
+			bestVal  = delta;
+			bestAxis = a;
+		}
+		else if (delta > secondVal)
+		{
+			secondVal = delta;
+		}
+	}
+
+	// If stick was off-center and has now returned, reset waitingCenter
+	if (js.waitingCenter && bestVal < 0.20f)
+		js.waitingCenter = false;
+
+
+
+	if (!js.waitingCenter && bestAxis >= 0 && bestVal > 0.4f)
+	{
+		float val = axisVals[bestAxis] - js.axisBaseline[bestAxis];
+		int   dir = step.stickDir;
+
+		// Accept if the direction matches what we expect (sign check)
+		bool isPos = (val > 0.0f);
+		bool match = false;
+		if (dir == 0 && !isPos) match = true;  // Up    (negative Y)
+		if (dir == 1 && isPos)  match = true;  // Right (positive X)
+		if (dir == 2 && isPos)  match = true;  // Down  (positive Y)
+		if (dir == 3 && !isPos) match = true;  // Left  (negative X)
+
+		// Reject diagonals — dominant axis must be clearly stronger
+		if (match && bestVal < secondVal * 1.25f)
+			match = false;
+
+		if (match && js.debounce.CanAcceptInput())
+		{
+			// Store the axis for this direction
+			if (dir == 0 || dir == 2)
+				params.config.updateStickYAxis(bestAxis);
+			else
+				params.config.updateStickXAxis(bestAxis);
+
+			js.stepIdx++;
+			js.waitingCenter = true;
+			js.debounce.Reset();
+		}
+	}
+}
+
 void RemapButtonScreens(MenuContext::MenuParams& params)
 {
 	auto& state = gRemapState;
@@ -546,6 +878,7 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	if (!state.isRemapping)
 	{
 		state.init();
+		state.gamepad = raylib::Gamepad{ params.gamepadIndex };
 		return; // let main loop call us again next frame
 	}
 
@@ -567,75 +900,33 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 	// Draw the background rectangle
 	DrawRectangle(rectX, rectY, rectWidth, rectHeight, Fade(BLACK, 0.8f));
 
-	const char* promptText = ""; // cuz raylib's DrawText() argument asks for a const char*
-	int currentRaylibButton = 0;
-	Config::ButtonConfigKey currentButtonConfig;
-
-	switch (state.buttonPromptIndex)
+	// Select the remap array for the current layout
+	auto layout = params.padcast.getCurrentLayout();
+	const RemapStep* steps = kSnesRemapSteps;
+	int stepCount = kSnesStepCount;
+	if (layout == Config::ControllerLayout::N64)
 	{
-		// case #'s match order of buttons in unordered_map buttonIndex
-	case 0:
-		promptText = "Press D-pad UP";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_UP;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
-		break;
-	case 1:
-		promptText = "Press D-pad RIGHT";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_RIGHT;
-		break;
-	case 2:
-		promptText = "Press D-pad DOWN";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_DOWN;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_DOWN;
-		break;
-	case 3:
-		promptText = "Press D-pad LEFT";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_FACE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::DPAD_LEFT;
-		break;
-	case 4:
-		promptText = "Press X";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_UP;
-		currentButtonConfig = Config::ButtonConfigKey::X_BUTTON;
-		break;
-	case 5:
-		promptText = "Press A";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::A_BUTTON;
-		break;
-	case 6:
-		promptText = "Press B";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_DOWN;
-		currentButtonConfig = Config::ButtonConfigKey::B_BUTTON;
-		break;
-	case 7:
-		promptText = "Press Y";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_FACE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::Y_BUTTON;
-		break;
-	case 8:
-		promptText = "Press LEFT Shoulder";
-		currentRaylibButton = GAMEPAD_BUTTON_LEFT_TRIGGER_1;
-		currentButtonConfig = Config::ButtonConfigKey::L_BUTTON;
-		break;
-	case 9:
-		promptText = "Press RIGHT Shoulder";
-		currentRaylibButton = GAMEPAD_BUTTON_RIGHT_TRIGGER_1;
-		currentButtonConfig = Config::ButtonConfigKey::R_BUTTON;
-		break;
-	case 10:
-		promptText = "Press Select";
-		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_LEFT;
-		currentButtonConfig = Config::ButtonConfigKey::SELECT;
-		break;
-	case 11:
-		promptText = "Press Start";
-		currentRaylibButton = GAMEPAD_BUTTON_MIDDLE_RIGHT;
-		currentButtonConfig = Config::ButtonConfigKey::START;
-		break;
-	default:
-		// Finished remapping
+		steps = kN64RemapSteps;
+		stepCount = kN64StepCount;
+	}
+
+	const char* promptText = "";
+	int currentRaylibButton = 0;
+	int currentAxisIndex = -1;
+	int currentStickDir = -1;
+	Config::ButtonConfigKey currentButtonConfig = Config::ButtonConfigKey::DPAD_UP;
+
+	if (state.buttonPromptIndex < stepCount)
+	{
+		const auto& step = steps[state.buttonPromptIndex];
+		promptText = step.prompt;
+		currentRaylibButton = step.raylibButton;
+		currentAxisIndex = step.axisIndex;
+		currentStickDir = step.stickDir;
+		currentButtonConfig = step.configKey;
+	}
+	else
+	{
 		state.cleanup();
 		return;
 	}
@@ -649,14 +940,90 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 
 	if (state.waitingForInput)
 	{
-		int newButtonPress = state.gamepad.GetButtonPressed();
-		if (newButtonPress > 0)
+		bool inputDetected = false;
+		int newButtonPress = -1;
+
+		if (currentStickDir >= 0)
+		{
+			// Joystick direction scan — find the dominant axis
+			int bestAxis = -1;
+			float bestVal = 0.5f;  // deadzone threshold
+			for (int a = 0; a < 6; ++a)
+			{
+				float val = state.gamepad.GetAxisMovement(a);
+				if (std::abs(val) > bestVal)
+				{
+					bestAxis = a;
+					bestVal = std::abs(val);
+				}
+			}
+			if (bestAxis >= 0)
+			{
+				float val = state.gamepad.GetAxisMovement(bestAxis);
+				// Determine which cardinal direction based on sign and step
+				bool match = false;
+				bool isPositive = (val > 0.0f);
+				if (currentStickDir == 0 && !isPositive) match = true;  // Up    (negative Y)
+				if (currentStickDir == 1 && isPositive)  match = true;  // Right (positive X)
+				if (currentStickDir == 2 && isPositive)  match = true;  // Down  (positive Y)
+				if (currentStickDir == 3 && !isPositive) match = true;  // Left  (negative X)
+
+				if (match)
+				{
+					// Store which axis drives this direction
+					if (currentStickDir == 0 || currentStickDir == 2)
+						params.config.updateStickYAxis(bestAxis);
+					else
+						params.config.updateStickXAxis(bestAxis);
+
+					inputDetected = true;
+					newButtonPress = bestAxis; // dummy — not a button
+				}
+			}
+		}
+		else if (currentAxisIndex >= 0)
+		{
+			// Analog input (Z trigger on N64, Axis 5).
+			// N64 Z trigger rests at -1.0 and moves to 1.0 when pressed.
+			// Detect the press transition: axis crosses above 0.0.
+			float axisVal = state.gamepad.GetAxisMovement(currentAxisIndex);
+			if (axisVal > 0.0f)
+			{
+				inputDetected = true;
+				newButtonPress = 1; // dummy — axis doesn't produce a button index
+			}
+		}
+		else
+		{
+			// Check all possible digital button indices (GetButtonPressed is
+			// limited to standard indices 0-13; N64 uses indices up to 16).
+			for (int btn = 1; btn <= 32; ++btn)
+			{
+				if (state.gamepad.IsButtonPressed(btn))
+				{
+					newButtonPress = btn;
+					inputDetected = true;
+					break;
+				}
+			}
+		}
+
+		if (inputDetected)
 		{
 			if (state.buttonDebounce.CanAcceptInput())
 			{
 				// Accept the input
-				params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
-				params.config.updateButtonConfig(currentButtonConfig, newButtonPress);
+				if (currentAxisIndex < 0)
+				{
+					params.padcast.setButtonMap(currentRaylibButton, newButtonPress);
+					params.config.updateButtonConfig(currentButtonConfig, newButtonPress, layout);
+				}
+				else
+				{
+					// For analog triggers, just record the mapping from the defaults
+					// (axis has no button index to remap)
+					params.config.updateButtonConfig(currentButtonConfig, 1, layout);
+				}
 				state.buttonPromptIndex++;
 				state.waitingForInput = true;
 			}
@@ -666,9 +1033,9 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			}
 		}
 
-		// Draw "Wait..." message if user pressed too quickly
+		// Draw "Wait..." or "Spacebar to Skip" below the prompt
 		float timeSinceAttempt = GetTime() - state.lastAttemptTime;
-		if (timeSinceAttempt < 1.0f && state.lastAttemptTime > 0.0f)
+		if (timeSinceAttempt < 0.5f && state.lastAttemptTime > 0.0f)
 		{
 			const char* waitText = "Wait...";
 			int waitWidth = MeasureText(waitText, static_cast<int>(fontSize * 0.7f));
@@ -676,22 +1043,41 @@ void RemapButtonScreens(MenuContext::MenuParams& params)
 			int waitY = textY + static_cast<int>(fontSize * 1.2f);
 			DrawText(waitText, waitX, waitY, static_cast<int>(fontSize * 0.7f), RED);
 		}
+		else
+		{
+			const char* skipText = "Spacebar to Skip";
+			int skipWidth = MeasureText(skipText, static_cast<int>(fontSize * 0.7f));
+			int skipX = rectX + (rectWidth - skipWidth) / 2;
+			int skipY = textY + static_cast<int>(fontSize * 1.2f);
+			DrawText(skipText, skipX, skipY, static_cast<int>(fontSize * 0.7f), Fade(WHITE, 0.5f));
+		}
+
+		// Spacebar to skip the current button
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			state.buttonPromptIndex++;
+			state.waitingForInput = true;
+			state.buttonDebounce.Reset();
+		}
 
 		// Escape keymap if needed
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
 			state.cleanup();
 			params.menu.active = Menu::Main;
+			params.config.saveConfig();
+			params.padcast.loadButtonsFromConfig();  // rebuild cache from saved config
 			SetupMainMenu(params);
 		}
 	}
 
 	// When finished, return to main menu
-	if (state.buttonPromptIndex >= 12)
+	if (state.buttonPromptIndex >= stepCount)
 	{
 		state.cleanup();
 		params.menu.active = Menu::Main;
 		params.config.saveConfig();
+		params.padcast.loadButtonsFromConfig();  // rebuild cache from saved config
 		SetupMainMenu(params);
 		return;
 	}

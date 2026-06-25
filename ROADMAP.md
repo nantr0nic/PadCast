@@ -24,16 +24,21 @@ This is a patch release focused entirely on internal improvements to enhance per
 
 ---
 
-### **`v0.2.6`** - Current (refactoring: App class, RemapState, removed caches)
+### **`v0.2.6`** - Refactoring (App class, RemapState, removed caches)
+
+This patch release refactors the internal codebase to improve performance and maintainability.
 
 ---
 
-### **`v0.3.0`** - N64 Controller Support
+### **`v0.3.0`** - Current (N64 controller support)
 
-This minor release introduces the first new controller type.
+This release adds support for the N64 controller, including layout switching, button remapping, and visual overlays.
 
-- [ ] Refactor code and begin setting up new controller support.
-- [ ] Add support for N64 controller visualization.
+- [X] Add controller layout system (SNES/N64) with menu switching.
+- [X] Per-layout button maps ([SNES_ButtonMap]/[N64_ButtonMap]) with layout-aware remapping.
+- [X] N64 controller image + pressed overlays (C-buttons, Z-trigger, joystick).
+- [X] Joystick rendering with configurable deadzone and idle/moving draw modes.
+- [X] Layout persistence across restarts.
 
 ---
 
@@ -65,7 +70,7 @@ The final major feature addition before the 1.0.0 release, enhancing the applica
 
 ---
 
-### **`v1.0.0`** - First Stable Release 🚀
+### **`v1.0.0`** - 1.0!
 
 The official major release. This version signifies that the application is feature-complete according to the initial roadmap and is considered stable.
 
