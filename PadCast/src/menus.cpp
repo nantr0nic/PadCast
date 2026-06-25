@@ -11,28 +11,28 @@ namespace {
     // Lifetime is program duration (same as the old function-local statics).
     struct RemapState
     {
-    	bool isRemapping = false;
-    	bool waitingForInput = false;
-    	int buttonPromptIndex = 0;
-    	raylib::Gamepad gamepad{ 0 };
-    	DebounceTimer buttonDebounce{ 0.5f };
-    	float lastAttemptTime = 0.0f;
+        bool isRemapping = false;
+        bool waitingForInput = false;
+        int buttonPromptIndex = 0;
+        raylib::Gamepad gamepad{ 0 };
+        DebounceTimer buttonDebounce{ 0.5f };
+        float lastAttemptTime = 0.0f;
 
-    	void init()
-    	{
-    		isRemapping = true;
-    		waitingForInput = true;
-    		buttonPromptIndex = 0;
-    		buttonDebounce.Reset();
-    		lastAttemptTime = 0.0f;
-    	}
+        void init()
+        {
+            isRemapping = true;
+            waitingForInput = true;
+            buttonPromptIndex = 0;
+            buttonDebounce.Reset();
+            lastAttemptTime = 0.0f;
+        }
 
-    	void cleanup()
-    	{
-    		isRemapping = false;
-    		waitingForInput = false;
-    		buttonPromptIndex = 0;
-    	}
+        void cleanup()
+        {
+            isRemapping = false;
+            waitingForInput = false;
+            buttonPromptIndex = 0;
+        }
     };
 
 RemapState gRemapState;

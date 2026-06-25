@@ -38,6 +38,26 @@ private:
 		}
 	}
 
+	// Template helper: validates a float config key, resetting to default if missing or invalid.
+	// Sets mNeedsSave to true when a reset occurs.
+	template<typename Validator>
+	void validateFloat(const std::string& section, const std::string& key, float defaultValue, Validator&& isValid)
+	{
+		if (!hasValue(section, key))
+		{
+			config_ini[section][key] = std::to_string(defaultValue);
+			mNeedsSave = true;
+			return;
+		}
+
+		float currentVal = getFloatValue(section, key);
+		if (!isValid(currentVal))
+		{
+			config_ini[section][key] = std::to_string(defaultValue);
+			mNeedsSave = true;
+		}
+	}
+
 	// Template helper: sets a config value and marks the config as needing save.
 	template<typename T>
 	void setValue(const std::string& section, const std::string& key, T value)
@@ -113,17 +133,17 @@ private:
 		// C buttons (user-verified indices)
 		static constexpr int C_UP{ 15 };
 		static constexpr int C_RIGHT{ 13 };
-		static constexpr int C_DOWN{ 5 };
-		static constexpr int C_LEFT{ 8 };
+		static constexpr int C_DOWN{ 8 };
+		static constexpr int C_LEFT{ 5 };
 		// Face buttons
-		static constexpr int A_BUTTON{ 9 };
-		static constexpr int B_BUTTON{ 11 };
+		static constexpr int A_BUTTON{ 7 };
+		static constexpr int B_BUTTON{ 6 };
 		// Shoulder / trigger
-		static constexpr int L_BUTTON{ 13 };
-		static constexpr int R_BUTTON{ 14 };
+		static constexpr int L_BUTTON{ 9 };
+		static constexpr int R_BUTTON{ 11 };
 		static constexpr int Z_BUTTON{ 15 };  // Axis 4 (-1..1) — handled separately in draw
 		// System buttons
-		static constexpr int START{ 0 };  // 0 = unmapped (N64 Start not detected by this adapter)
+		static constexpr int START{ 14 };  
 	};
 
 public:
@@ -264,6 +284,10 @@ public:
 			return std::stof(config_ini.get(section).get(key));
 		}
 		catch (const std::invalid_argument&)
+		{
+			return 0.0f;
+		}
+		catch (const std::out_of_range&)
 		{
 			return 0.0f;
 		}

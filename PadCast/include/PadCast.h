@@ -74,6 +74,21 @@ struct ButtonMap
 		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 15}    // Start
 	};
 
+	std::unordered_map<int, int> defaultN64Index {
+		{GAMEPAD_BUTTON_LEFT_FACE_UP, 1},     // D-pad UP
+		{GAMEPAD_BUTTON_LEFT_FACE_RIGHT, 2},  // D-pad RIGHT
+		{GAMEPAD_BUTTON_LEFT_FACE_DOWN, 3},   // D-pad DOWN
+		{GAMEPAD_BUTTON_LEFT_FACE_LEFT, 4},   // D-pad LEFT
+		{GAMEPAD_BUTTON_RIGHT_FACE_UP, 15},   // C UP
+		{GAMEPAD_BUTTON_RIGHT_FACE_RIGHT, 13},// C RIGHT
+		{GAMEPAD_BUTTON_RIGHT_FACE_DOWN, 8},  // C DOWN
+		{GAMEPAD_BUTTON_RIGHT_FACE_LEFT, 5},  // C LEFT
+		{GAMEPAD_BUTTON_LEFT_TRIGGER_1, 9},   // L button
+		{GAMEPAD_BUTTON_RIGHT_TRIGGER_1, 11}, // R button
+		{GAMEPAD_BUTTON_MIDDLE_LEFT, 7},      // A button
+		{GAMEPAD_BUTTON_MIDDLE_RIGHT, 6}      // B button
+	};
+
 	ButtonMap()
 	{
 		// std::println("DEBUG: ButtonMap constructor - buttonIndex starts empty");
