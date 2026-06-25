@@ -44,6 +44,8 @@ struct JoystickRemapState
 	bool waitingCenter = false;
 	DebounceTimer debounce{ 1.0f };
 	float axisBaseline[6]{};
+	int originalStickXAxis = -1;
+	int originalStickYAxis = -1;
 
 	void init()
 	{
@@ -618,6 +620,15 @@ void HandleMenuInput(MenuContext::MenuParams& params)
 		}
 		else
 		{
+			// Clean up remap states when menu is force-closed
+			if (params.menu.active == Menu::RemapButtons)
+				gRemapState.cleanup();
+			else if (params.menu.active == Menu::RemapStick)
+			{
+				params.config.updateStickXAxis(gJoystickRemapState.originalStickXAxis);
+				params.config.updateStickYAxis(gJoystickRemapState.originalStickYAxis);
+				gJoystickRemapState.cleanup();
+			}
 			params.menu.active = Menu::None;
 		}
 		return;
@@ -723,18 +734,19 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 
 	auto& js = gJoystickRemapState;
 
-	auto doFinish = [&]()
+	auto goBack = [&]()
 	{
 		js.cleanup();
 		params.menu.active = Menu::Main;
-		params.config.saveConfig();
 		SetupMainMenu(params);
 	};
 
-	// One-frame init on entry
+	// One-frame init on entry — save originals so we can restore on cancel
 	if (!js.active)
 	{
 		js.init();
+		js.originalStickXAxis = params.config.getStickXAxis();
+		js.originalStickYAxis = params.config.getStickYAxis();
 		for (int a = 0; a < 6; ++a)
 		{
 			js.axisBaseline[a] = params.padcast.getGamepad().GetAxisMovement(a);
@@ -744,7 +756,8 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 
 	if (js.stepIdx >= kStickStepCount)
 	{
-		doFinish();
+		params.config.saveConfig();
+		goBack();
 		return;
 	}
 
@@ -780,10 +793,12 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 	         textY + fontSize,
 	         static_cast<int>(fontSize * 0.7f), Fade(WHITE, 0.5f));
 
-	// Escape to cancel
+	// Escape to cancel — restore original axis values
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
-		doFinish();
+		params.config.updateStickXAxis(js.originalStickXAxis);
+		params.config.updateStickYAxis(js.originalStickYAxis);
+		goBack();
 		return;
 	}
 
@@ -796,11 +811,11 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 		return;
 	}
 
-	// Stick detection
+	// Stick detection — track dominant and second-largest for diagonal rejection
 	float axisVals[6]{};
 	float bestVal = 0.0f;
 	int bestAxis = -1;
-	// (allCentered removed — noise on any axis would block detection permanently)
+	float secondVal = 0.0f;
 
 	for (int a = 0; a < 6; ++a)
 	{
@@ -808,8 +823,13 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 		float delta = std::abs(axisVals[a] - js.axisBaseline[a]);
 		if (delta > bestVal)
 		{
+			secondVal = bestVal;
 			bestVal  = delta;
 			bestAxis = a;
+		}
+		else if (delta > secondVal)
+		{
+			secondVal = delta;
 		}
 	}
 
@@ -831,6 +851,10 @@ void RemapJoystickScreens(MenuContext::MenuParams& params)
 		if (dir == 1 && isPos)  match = true;  // Right (positive X)
 		if (dir == 2 && isPos)  match = true;  // Down  (positive Y)
 		if (dir == 3 && !isPos) match = true;  // Left  (negative X)
+
+		// Reject diagonals — dominant axis must be clearly stronger
+		if (match && bestVal < secondVal * 1.25f)
+			match = false;
 
 		if (match && js.debounce.CanAcceptInput())
 		{

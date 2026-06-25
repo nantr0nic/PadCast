@@ -132,7 +132,7 @@ map is saved to the appropriate layout section in config.ini (e.g., `[SNES_Butto
 button overlays. The layout choice is saved and restored on startup.
 - Draw Joystick (N64 only)
 > Toggle between "Draw idle" (joystick shown at rest position) and "Draw when moving" (only shown while
-the stick is being pushed). This setting is saved persistantly.
+the stick is being pushed). This setting is saved persistently.
 - Remap Joystick (N64 only)
 > Walks you through remapping the four cardinal joystick directions (Up, Right, Down, Left). The program
 auto-discovers which analog axes your controller uses and saves them to config.ini.
