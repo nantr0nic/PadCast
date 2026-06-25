@@ -138,6 +138,7 @@ public:
 	std::string getGamepadName(int i) { raylib::Gamepad gamepad(i); return gamepad.GetName(); }
 	int getGamepadIndex() { return gamepadIndex; }
 	void setGamepadIndex(int i) { gamepadIndex = i;  mConfig.updateGamepadIndex(i); }
+	raylib::Gamepad getGamepad() const { return raylib::Gamepad{ gamepadIndex }; }
 
 	// Controller layout
 	Config::ControllerLayout getCurrentLayout() const { return mCurrentLayout; }
@@ -171,7 +172,7 @@ public:
 	void setButtonMap(int raylibButton, int newIndex)
 	{
 		mButtonMap.remapButton(raylibButton, newIndex);
-		mButtonCache.refreshCache(mButtonMap);
+		mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
 	}
 
 private:

@@ -72,6 +72,9 @@ private:
 		static constexpr int STABILITY_THRESHOLD{ 5 };
 		static constexpr int GAMEPAD_INDEX{ 0 };
 		static constexpr int LAYOUT{ 0 };  // 0=SNES, 1=N64
+		static constexpr int STICK_X_AXIS{ 0 };
+		static constexpr int STICK_Y_AXIS{ 1 };
+		static constexpr float STICK_DEADZONE{ 0.1f };
 		// Font defaults
 		static constexpr int MIN_FONT_SIZE{ 10 };
 		static constexpr int DEFAULT_FONT_SIZE{ 35 };
@@ -250,6 +253,22 @@ public:
 		}
 	}
 
+	float getFloatValue(const std::string& section, const std::string& key) const
+	{
+		if (!hasValue(section, key))
+		{
+			return 0.0f;
+		}
+		try
+		{
+			return std::stof(config_ini.get(section).get(key));
+		}
+		catch (const std::invalid_argument&)
+		{
+			return 0.0f;
+		}
+	}
+
 	int getInitWinWidth() const
 	{
 		return getValue("Window", "INITIAL_WINDOW_WIDTH");
@@ -382,6 +401,17 @@ public:
 	{
 		return getValue("Gamepad", "LAYOUT");
 	}
+	int getStickXAxis() const { return getValue("Gamepad", "STICK_X_AXIS"); }
+	int getStickYAxis() const { return getValue("Gamepad", "STICK_Y_AXIS"); }
+	void updateStickXAxis(int val) { setValue("Gamepad", "STICK_X_AXIS", val); }
+	void updateStickYAxis(int val) { setValue("Gamepad", "STICK_Y_AXIS", val); }
+	float getStickDeadzone() const
+	{
+		float val = getFloatValue("Gamepad", "STICK_DEADZONE");
+		if (val <= 0.0f) val = DefaultValues::STICK_DEADZONE;
+		return val;
+	}
+	void updateStickDeadzone(float val) { setValue("Gamepad", "STICK_DEADZONE", val); }
 
 	//$ ----- Button Map Loader ----- //
 	// Reads button mappings for a given layout from the INI section

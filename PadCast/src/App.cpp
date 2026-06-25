@@ -79,13 +79,11 @@ void App::run()
 			mLastWinWidth = currentWidth;
 			mLastWinHeight = currentHeight;
 			mWinDimensionsChanged = true;
+			mScaling = ScalingInfo(currentWidth, currentHeight, mCanvasWidth, mCanvasHeight);
 		}
 
 		mWindow.BeginDrawing();
 		mWindow.ClearBackground(mPadcast.getBGColor());
-
-		// Update scaling each frame
-		mScaling = ScalingInfo(currentWidth, currentHeight, mCanvasWidth, mCanvasHeight);
 
 		// Handles accessing menu and menu navigation
 		HandleMenuInput(mMenuParams);
@@ -122,6 +120,10 @@ void App::run()
 		if (mMenu.active == Menu::RemapButtons)
 		{
 			RemapButtonScreens(mMenuParams);
+		}
+		else if (mMenu.active == Menu::RemapStick)
+		{
+			RemapJoystickScreens(mMenuParams);
 		}
 		else if (mMenu.active != Menu::None)
 		{

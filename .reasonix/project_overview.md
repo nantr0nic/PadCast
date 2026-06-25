@@ -3,7 +3,7 @@
 > A lightweight gamepad visualization tool for streamers. Displays a real-time
 > overlay of controller button presses on screen.
 >
-> **Current version:** v0.2.6 | **License:** BSD 3-Clause
+> **Current version:** v0.3.0 | **License:** BSD 3-Clause
 
 ---
 

@@ -113,7 +113,11 @@ void CachedButtons::refreshCache(const ButtonMap& buttonMap,
             case 13: leftTrigger  = displayIndex; break;
             case 14: rightTrigger = displayIndex; break;
             case 15: startButton  = displayIndex; break;
-            // C buttons — drawn directly by known raylib constants (15,5,8,13) in drawGamepadButtons
+            // C buttons
+            case 20: cUp = displayIndex; break;
+            case 21: cRight = displayIndex; break;
+            case 22: cDown = displayIndex; break;
+            case 23: cLeft = displayIndex; break;
             default: break;
             }
         }
@@ -305,18 +309,16 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
         mTextures.pressedStart.Draw(position, 0.0f, scale, texture_tint);
     }
 
-    // N64 C-buttons — hardcoded raylib constants because the
-    // C-button indices (15,5,8,13) conflict with standard button
-    // constants (Start, X, Y, Select) in the buttonIndex system.
+    // C-buttons
     if (mCurrentLayout == Config::ControllerLayout::N64)
     {
-        if (gamepad.IsButtonDown(15))  // C-Up
+        if (gamepad.IsButtonDown(mButtonCache.cUp))
             mTextures.pressedCUp.Draw(position, 0.0f, scale, texture_tint);
-        if (gamepad.IsButtonDown(5))   // C-Down
+        if (gamepad.IsButtonDown(mButtonCache.cDown))
             mTextures.pressedCDown.Draw(position, 0.0f, scale, texture_tint);
-        if (gamepad.IsButtonDown(8))   // C-Left
+        if (gamepad.IsButtonDown(mButtonCache.cLeft))
             mTextures.pressedCLeft.Draw(position, 0.0f, scale, texture_tint);
-        if (gamepad.IsButtonDown(13))  // C-Right
+        if (gamepad.IsButtonDown(mButtonCache.cRight))
             mTextures.pressedCRight.Draw(position, 0.0f, scale, texture_tint);
     }
 
@@ -327,15 +329,15 @@ void PadCast::drawGamepadButtons(const raylib::Gamepad& gamepad,
         // joystick.png is a full-size transparent overlay (like all other
         // pressed images). It's drawn at the base position with an axis-based
         // offset applied on top.
-        constexpr float kN64StickDeadzone = 0.1f;
-        constexpr float kN64StickRadius   = 25.0f;  // pixels at base resolution
+        float deadzone = mConfig.getStickDeadzone();
+        constexpr float kN64StickRadius = 25.0f;  // pixels at base resolution
 
-        float stickX = gamepad.GetAxisMovement(0);
-        float stickY = gamepad.GetAxisMovement(1);
+        float stickX = gamepad.GetAxisMovement(mConfig.getStickXAxis());
+        float stickY = gamepad.GetAxisMovement(mConfig.getStickYAxis());
 
         // Deadzone
-        if (stickX > -kN64StickDeadzone && stickX < kN64StickDeadzone) stickX = 0.0f;
-        if (stickY > -kN64StickDeadzone && stickY < kN64StickDeadzone) stickY = 0.0f;
+        if (stickX > -deadzone && stickX < deadzone) stickX = 0.0f;
+        if (stickY > -deadzone && stickY < deadzone) stickY = 0.0f;
 
         // Circular clamp
         float mag = std::sqrt(stickX*stickX + stickY*stickY);
@@ -505,11 +507,11 @@ void PadCast::loadButtonsFromConfig()
             else if (key == "L_BUTTON")  { mButtonMap.buttonIndex[13] = value; }
             else if (key == "R_BUTTON")  { mButtonMap.buttonIndex[14] = value; }
             else if (key == "START" && value > 0) { mButtonMap.buttonIndex[15] = value; }
-            // C-buttons — drawn directly in drawGamepadButtons, skip buttonIndex
-            else if (key == "C_UP")      { /* handled directly */ }
-            else if (key == "C_RIGHT")   { /* handled directly */ }
-            else if (key == "C_DOWN")    { /* handled directly */ }
-            else if (key == "C_LEFT")    { /* handled directly */ }
+            // C-buttons -- assign mapped hardware index to unique internal IDs
+            else if (key == "C_UP") { mButtonMap.buttonIndex[20] = value; }
+            else if (key == "C_RIGHT") { mButtonMap.buttonIndex[21] = value; }
+            else if (key == "C_DOWN") { mButtonMap.buttonIndex[22] = value; }
+            else if (key == "C_LEFT") { mButtonMap.buttonIndex[23] = value; }
             else if (key == "Z_BUTTON")  { /* axis — no button index */ }
         }
         else

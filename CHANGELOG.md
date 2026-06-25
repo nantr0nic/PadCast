@@ -5,6 +5,35 @@ All notable changes to PadCast will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.3.0 - 2026-05-20
+### Added
+- N64 controller support: C-buttons, Z-trigger, joystick rendering.
+- Controller layout system (SNES/N64) with menu switching and persistence.
+- Per-layout button maps (`[SNES_ButtonMap]`/`[N64_ButtonMap]`) with layout-aware remapping.
+- Configurable joystick deadzone (`STICK_DEADZONE` under `[Gamepad]`).
+- "Draw Joystick" menu option: idle or only-when-moving modes.
+- Spacebar to skip button during remap.
+- `FrameTimer` utility (`benchmark.h`) for ad-hoc benchmarking.
+
+### Changed
+- `App` class extracted from `main.cpp` (now 8 lines).
+- `RemapState` struct replaces static locals in `RemapButtonScreens()`.
+- `HandleMenuInput`: Space no longer toggles menu (reserved for remap skip).
+- `mScaling` only recalculated on window resize (not every frame).
+- Menu navigation guarded against empty item vectors.
+
+### Removed
+- Hand-rolled caches for BG color, tint, and font size (benchmarked at ~3μs noise).
+- `ResetRemapState()` — was dead code.
+- 14 mutable cache member variables from `PadCast.h`.
+
+### Fixed
+- `setButtonMap()` now passes layout to `refreshCache()`, preventing C-button/Start overlap after remap.
+- Gamepad index respected in remap axis detection.
+- Font static cache leak.
+
+---
+
 ## v0.2.6 - 2026-05-17
 ### Added
 - App class (`App.h`/`App.cpp`) — encapsulates setup, main loop, and teardown; main.cpp reduced to 8 lines.
