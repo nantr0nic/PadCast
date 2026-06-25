@@ -70,6 +70,7 @@ void Config::validateConfig()
 	validateInt("Gamepad", "LAYOUT",              DefaultValues::LAYOUT,              [](int val) { return val >= 0 && val <= 1; });
 	validateInt("Gamepad", "STICK_X_AXIS",        DefaultValues::STICK_X_AXIS,        [](int val) { return val >= 0 && val <= 5; });
 	validateInt("Gamepad", "STICK_Y_AXIS",        DefaultValues::STICK_Y_AXIS,        [](int val) { return val >= 0 && val <= 5; });
+	validateFloat("Gamepad", "STICK_DEADZONE",    DefaultValues::STICK_DEADZONE,      [](float val) { return val > 0.0f && val <= 1.0f; });
 
 	//$ ----- Font section ----- //
 	validateInt("Font", "MIN_FONT_SIZE",     DefaultValues::MIN_FONT_SIZE,     [](int val) { return val > 0; });

@@ -273,13 +273,9 @@ builds which use the YAML manifest).
 
 ## Current State & Roadmap
 
-- **v0.2.6** — current release (refactoring: App class, RemapState, removed caches)
+- **v0.3.0** - current release (N64 Controller Support)
+- **v0.2.6** — previous release (refactoring: App class, RemapState, removed caches)
 - **v0.2.5** — previous release ("Under the Hood" update)
-- **Next planned:** v0.3.0 (N64 Controller Support)
-- Remote branch `feature/refactor-gamepad` exists with unmerged work
-- Currently on the `develop` branch
-- The `ButtonMap` and `CachedButtons` structures have commented-out sections
-  for future trigger/joystick support (N64, GameCube)
 
 ---
 

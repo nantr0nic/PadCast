@@ -303,20 +303,21 @@ will be needed for N64 (v0.3.0), GameCube (v0.4.0), and beyond.
 
 Each controller layout gets its own `[<Layout>_ButtonMap]` section in `config.ini`:
 ```ini
-[SNES_ButtonMap]   ; SNES (current, implemented)
-[N64_ButtonMap]    ; Nintendo 64 (planned)
+[SNES_ButtonMap]   ; SNES (implemented)
+[N64_ButtonMap]    ; Nintendo 64 (implemented)
 [GC_ButtonMap]     ; GameCube (planned)
 ```
 
 The `ControllerLayout` enum and `buttonSectionName()` helper drive section selection:
 ```cpp
-enum class ControllerLayout { SNES };  // N64, GameCube added later
+enum class ControllerLayout { SNES, N64 };  // GameCube added later
 
 static std::string buttonSectionName(ControllerLayout layout)
 {
     switch (layout)
     {
         case ControllerLayout::SNES: return "SNES_ButtonMap";
+        case ControllerLayout::N64:  return "N64_ButtonMap";
     }
     return "SNES_ButtonMap";
 }
@@ -325,10 +326,10 @@ static std::string buttonSectionName(ControllerLayout layout)
 ### What's already in place
 
 - **`ControllerLayout` enum** (`Config::ControllerLayout`) — currently has
-  `SNES` value. Extended with `N64`, `GameCube` when ready.
-- **`buttonSectionName(layout)`** — returns `"SNES_ButtonMap"` for SNES, maps
-  to the correct INI section automatically. Adding a new layout means adding
-  a case.
+  `SNES` and `N64` values. Extended with `GameCube` when ready.
+- **`buttonSectionName(layout)`** — returns the appropriate INI section name
+  for SNES or N64, maps to the correct section automatically. Adding a new layout
+  means adding a case and a corresponding `[Layout_ButtonMap]` section.
 - **`loadButtonMapping(layout)`** — centralized Config method that reads
   button mappings from the INI section returned by `buttonSectionName()`.
   Returns `unordered_map<string, int>` — caller maps key names to raylib

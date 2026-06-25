@@ -487,7 +487,15 @@ void PadCast::loadButtonsFromConfig()
 
     if (mapping.empty())
     {
-        mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
+        // Select layout-specific defaults
+        if (mCurrentLayout == Config::ControllerLayout::N64)
+        {
+            mButtonMap.buttonIndex = mButtonMap.defaultN64Index;
+        }
+        else
+        {
+            mButtonMap.buttonIndex = mButtonMap.defaultSNESIndex;
+        }
         mButtonCache.refreshCache(mButtonMap, mCurrentLayout);
         return;
     }
